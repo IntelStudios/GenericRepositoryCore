@@ -26,7 +26,7 @@ namespace GenericRepository.Test.Models
         public DateTime CreatedDate { get; set; }
 
         [GRInsertOnly]
-        [GRRepositoryProperty(PropertyName = "TableName", Apply = GRAutoValueApply.BeforeInsert)]
+        [GRRepositoryProperty(PropertyName = "UserID", Apply = GRAutoValueApply.BeforeInsert)]
         public int CreatedBy { get; set; }
         public bool IsActive { get; set; }
     }

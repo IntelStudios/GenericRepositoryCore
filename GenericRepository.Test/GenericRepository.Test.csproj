@@ -85,24 +85,16 @@
     <Compile Include="Repositories\TestEntityAutoPropertiesRepository.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Admin\XeeloRepository\XeeloRepository.csproj">
-      <Project>{74681692-B704-4DF8-8093-C02D926625E6}</Project>
-      <Name>XeeloRepository</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\DataExchange\DataExchange.Common\DataExchange.Common.csproj">
-      <Project>{77380866-94C7-4F2E-8B4A-F6A8D5962460}</Project>
-      <Name>DataExchange.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\GenericRepository\GenericRepository.csproj">
-      <Project>{48E053FE-E591-4617-8C59-EB2EE8288AB2}</Project>
-      <Name>GenericRepository</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="Ionic.Zip.xml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GenericRepository\GenericRepository.csproj">
+      <Project>{48e053fe-e591-4617-8c59-eb2ee8288ab2}</Project>
+      <Name>GenericRepository</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

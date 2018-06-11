@@ -27,7 +27,7 @@ namespace GenericRepository.Test
                 Assert.Fail("Tests require defined connection string in environment variable '{0}'.", conStringEnvVariableName);
             }
 
-            string dbName = dbBaseName + "-" + DateTime.Now.ToString("yyyy-dd-MM-HH-mm-ss-ffff");
+            string dbName = dbBaseName + "-" + DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss-ffff");
 
             using (SqlConnection connection = new SqlConnection(ConnectionString))
             {

@@ -67,7 +67,7 @@ namespace GenericRepository.Test
                 updatable2.GRExecute();
                 Assert.Fail("Duplicated entity was inserted - {0}.");
             }
-            catch (Exception exc)
+            catch
             {
             }
         }

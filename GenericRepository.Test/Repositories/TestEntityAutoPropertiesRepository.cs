@@ -39,7 +39,7 @@ namespace GenericRepository.Test.Repositories
 
         public async Task UpdateAsync(TestEntityJoining entity)
         {
-            GRUpdate<TestEntityJoining>(entity).GRExecuteAsync().GetAwaiter().GetResult();
+            await GRUpdate<TestEntityJoining>(entity).GRExecuteAsync();
         }
 
         public async Task<List<TestEntityJoining>> CrossWhere()

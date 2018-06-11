@@ -51,6 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Attributes\GRAIPrimaryKeyAttribute.cs" />
     <Compile Include="Attributes\GRAutoValueAttributes.cs" />
     <Compile Include="Attributes\GRColumnNameAttribute.cs" />
@@ -97,7 +98,6 @@
     <Compile Include="Models\GRContextQueueItem.cs" />
     <Compile Include="Models\GRUpdatable.cs" />
     <Compile Include="Models\GRStatements.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\GRRepository.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -106,6 +106,7 @@
   <ItemGroup>
     <Content Include="Ionic.Zip.xml" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

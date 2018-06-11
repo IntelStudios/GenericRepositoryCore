@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>IntelligentStudios.GenericRepository</id>
+    <version>0.1.0.0</version>
+    <authors>Intelligent Studios</authors>
+    <owners>Intelligent Studios</owners>
+    <description>Generic object-relational mapping (ORM) framework for MSSQL Server.</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright 2018</copyright>
+    <tags>GenericRepository</tags>
+    <dependencies>
+      <dependency id="Newtonsoft.Json" version="9.0.1" />
+      <dependency id="Unofficial.Ionic.Zip" version="1.9.1.8" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="..\build\GenericRepository\GenericRepository.dll" target="lib\net45">
+    </file>
+  </files>
+</package>
