@@ -1,0 +1,117 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{48E053FE-E591-4617-8C59-EB2EE8288AB2}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>GenericRepository</RootNamespace>
+    <AssemblyName>GenericRepository</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Ionic.Zip, Version=1.9.1.8, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL">
+      <HintPath>..\packages\Unofficial.Ionic.Zip.1.9.1.8\lib\Ionic.Zip.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.Entity.Design" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Attributes\GRAIPrimaryKeyAttribute.cs" />
+    <Compile Include="Attributes\GRAutoValueAttributes.cs" />
+    <Compile Include="Attributes\GRColumnNameAttribute.cs" />
+    <Compile Include="Attributes\GRDisplayNameAttribute.cs" />
+    <Compile Include="Attributes\GRIgnoreAttribute.cs" />
+    <Compile Include="Attributes\GRInsertOnlyAttribute.cs" />
+    <Compile Include="Attributes\GRJSONAttribute.cs" />
+    <Compile Include="Attributes\GRPrimaryKeyAttribute.cs" />
+    <Compile Include="Attributes\GRTableNameAttribute.cs" />
+    <Compile Include="Attributes\GRUpdateOnlyAttribute.cs" />
+    <Compile Include="ContextLoggers\GRConsoleLogger.cs" />
+    <Compile Include="Contexts\GRContext.cs" />
+    <Compile Include="Contexts\GRMSSQLContext.cs" />
+    <Compile Include="Enums\GRContextLogLevel.cs" />
+    <Compile Include="Enums\GRQueryOrderDirection.cs" />
+    <Compile Include="Exceptions\GRAttributeApplicationFailedException.cs" />
+    <Compile Include="Exceptions\GRInvalidOperationException.cs" />
+    <Compile Include="Exceptions\GRModelNotValidException.cs" />
+    <Compile Include="Exceptions\GRQueryBuildFailedException.cs" />
+    <Compile Include="Exceptions\GRUnknownColumnException.cs" />
+    <Compile Include="Exceptions\GRUnsuportedDataTypeException.cs" />
+    <Compile Include="Exceptions\GRUnsuportedExpressionException.cs" />
+    <Compile Include="Exceptions\GRUnsuportedAttributeException.cs" />
+    <Compile Include="Exceptions\GRUnsuportedOperatorException.cs" />
+    <Compile Include="Exceptions\GRQueryExecutionFailedException.cs" />
+    <Compile Include="Helpers\GRDataTypeHelper.cs" />
+    <Compile Include="Helpers\GRFileLog.cs" />
+    <Compile Include="Helpers\GRStringHelpers.cs" />
+    <Compile Include="Interfaces\IGRContextLogger.cs" />
+    <Compile Include="Interfaces\IGRDeletable.cs" />
+    <Compile Include="Interfaces\IGRRepository.cs" />
+    <Compile Include="Interfaces\IGRContext.cs" />
+    <Compile Include="Interfaces\IGRQueriable.cs" />
+    <Compile Include="Interfaces\IGRUpdatable.cs" />
+    <Compile Include="Models\GRDBProperty.cs" />
+    <Compile Include="Models\GRDBStructure.cs" />
+    <Compile Include="Models\GRDeletable.cs" />
+    <Compile Include="Models\GRExecutionStatistics.cs" />
+    <Compile Include="Models\GRJoinedListItem.cs" />
+    <Compile Include="Models\GRJoinedQueriable.cs" />
+    <Compile Include="Models\GRJoinType.cs" />
+    <Compile Include="Models\GRQueriable.cs" />
+    <Compile Include="Models\GRCommandParams.cs" />
+    <Compile Include="Models\GRContextQueueItem.cs" />
+    <Compile Include="Models\GRUpdatable.cs" />
+    <Compile Include="Models\GRStatements.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repositories\GRRepository.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Ionic.Zip.xml" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
