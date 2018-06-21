@@ -2,11 +2,12 @@
 <package>
   <metadata>
     <id>IntelligentStudios.GenericRepository</id>
-    <version>0.1.0.0</version>
+    <version>0.2.0.0</version>
     <authors>Intelligent Studios</authors>
     <owners>Intelligent Studios</owners>
     <description>Generic object-relational mapping (ORM) framework for MSSQL Server.</description>
-    <releaseNotes></releaseNotes>
+    <releaseNotes>
+    </releaseNotes>
     <copyright>Copyright 2018</copyright>
     <tags>GenericRepository</tags>
     <dependencies>
