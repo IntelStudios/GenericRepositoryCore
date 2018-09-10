@@ -2464,7 +2464,7 @@ namespace GenericRepository.Contexts
 
         #region Stored procedures methods
 
-        public override T GetItemFromSP<T>(string storedProcedureName, List<SqlParameter> parameters)
+        public override T GetItemFromSP<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1)
         {
             string spCommandStatementReadable = string.Empty;
             GRExecutionStatistics stats = null;
@@ -2477,7 +2477,7 @@ namespace GenericRepository.Contexts
             {
                 connection = GetSqlConnection();
 
-                using (SqlCommand command = CreateSPCommand(connection, storedProcedureName, parameters, sqlTransaction))
+                using (SqlCommand command = CreateSPCommand(connection, storedProcedureName, parameters, sqlTransaction, timeout))
                 {
                     spCommandStatementReadable = GetSPCommandStatement(command);
 
@@ -2520,7 +2520,7 @@ namespace GenericRepository.Contexts
             return ret;
         }
 
-        public override async Task<T> GetItemFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters)
+        public override async Task<T> GetItemFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1)
         {
             string spCommandStatementReadable = string.Empty;
             GRExecutionStatistics stats = null;
@@ -2533,7 +2533,7 @@ namespace GenericRepository.Contexts
             {
                 connection = await GetSqlConnectionAsync();
 
-                using (SqlCommand command = CreateSPCommand(connection, storedProcedureName, parameters, sqlTransaction))
+                using (SqlCommand command = CreateSPCommand(connection, storedProcedureName, parameters, sqlTransaction, timeout))
                 {
                     spCommandStatementReadable = GetSPCommandStatement(command);
 
@@ -2576,7 +2576,7 @@ namespace GenericRepository.Contexts
             return ret;
         }
 
-        public override List<T> GetListFromSP<T>(string storedProcedureName, List<SqlParameter> parameters)
+        public override List<T> GetListFromSP<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1)
         {
             string spCommandStatementReadable = string.Empty;
             GRExecutionStatistics stats = null;
@@ -2589,7 +2589,7 @@ namespace GenericRepository.Contexts
             {
                 connection = GetSqlConnection();
 
-                using (SqlCommand command = CreateSPCommand(connection, storedProcedureName, parameters, sqlTransaction))
+                using (SqlCommand command = CreateSPCommand(connection, storedProcedureName, parameters, sqlTransaction, timeout))
                 {
                     spCommandStatementReadable = GetSPCommandStatement(command);
 
@@ -2632,7 +2632,7 @@ namespace GenericRepository.Contexts
             return ret;
         }
 
-        public override async Task<List<T>> GetListFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters)
+        public override async Task<List<T>> GetListFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1)
         {
             string spCommandStatementReadable = string.Empty;
             GRExecutionStatistics stats = null;
@@ -2645,7 +2645,7 @@ namespace GenericRepository.Contexts
             {
                 connection = await GetSqlConnectionAsync();
 
-                using (SqlCommand command = CreateSPCommand(connection, storedProcedureName, parameters, sqlTransaction))
+                using (SqlCommand command = CreateSPCommand(connection, storedProcedureName, parameters, sqlTransaction, timeout))
                 {
                     spCommandStatementReadable = GetSPCommandStatement(command);
 
@@ -2688,7 +2688,7 @@ namespace GenericRepository.Contexts
             return ret;
         }
 
-        public override async Task<GRJoinedList> GetJoinedListFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, Dictionary<string, Type> typePairs)
+        public override async Task<GRJoinedList> GetJoinedListFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, Dictionary<string, Type> typePairs, int timeout = -1)
         {
             string spCommandStatementReadable = string.Empty;
             GRExecutionStatistics stats = null;
@@ -2701,7 +2701,7 @@ namespace GenericRepository.Contexts
             {
                 connection = await GetSqlConnectionAsync();
 
-                using (SqlCommand command = CreateSPCommand(connection, storedProcedureName, parameters, sqlTransaction))
+                using (SqlCommand command = CreateSPCommand(connection, storedProcedureName, parameters, sqlTransaction, timeout))
                 {
                     spCommandStatementReadable = GetSPCommandStatement(command);
 
@@ -2879,13 +2879,13 @@ namespace GenericRepository.Contexts
         }
 
 
-        public override async Task<DataTable> GetDataTableFromSPAsync(string storedProcedureName)
+        public override async Task<DataTable> GetDataTableFromSPAsync(string storedProcedureName, int timeout = -1)
         {
-            return await GetDataTableFromSPAsync(storedProcedureName, null, null);
+            return await GetDataTableFromSPAsync(storedProcedureName, null, null, timeout);
         }
-        public override async Task<DataTable> GetDataTableFromSPAsync(string storedProcedureName, List<SqlParameter> parameters)
+        public override async Task<DataTable> GetDataTableFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1)
         {
-            return await GetDataTableFromSPAsync(storedProcedureName, parameters, null);
+            return await GetDataTableFromSPAsync(storedProcedureName, parameters, null, timeout);
         }
         public override async Task<DataTable> GetDataTableFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, List<SqlParameter> returnParameters, int timeout = -1)
         {
@@ -2943,8 +2943,7 @@ namespace GenericRepository.Contexts
             }
         }
 
-
-        public override async Task<List<SqlParameter>> ExecuteSPAsync(string storedProcedureName, List<SqlParameter> parameters)
+        public override async Task<List<SqlParameter>> ExecuteSPAsync(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1)
         {
             string spCommandStatementReadable = string.Empty;
             GRExecutionStatistics stats = null;
@@ -2957,7 +2956,7 @@ namespace GenericRepository.Contexts
             {
                 connection = await GetSqlConnectionAsync();
 
-                using (SqlCommand command = CreateSPCommand(connection, storedProcedureName, parameters, sqlTransaction))
+                using (SqlCommand command = CreateSPCommand(connection, storedProcedureName, parameters, sqlTransaction, timeout))
                 {
                     spCommandStatementReadable = GetSPCommandStatement(command);
 

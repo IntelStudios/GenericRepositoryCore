@@ -55,16 +55,16 @@ namespace GenericRepository.Interfaces
         #endregion
 
         #region Stored procedures methods
-        T GetItemFromSP<T>(string storedProcedureName, List<SqlParameter> parameters);
-        Task<T> GetItemFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters);
-        List<T> GetListFromSP<T>(string storedProcedureName, List<SqlParameter> parameters);
-        Task<List<T>> GetListFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters);
-        Task<GRJoinedList> GetJoinedListFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, Dictionary<string, Type> types);
-        Task<List<SqlParameter>> ExecuteSPAsync(string storedProcedureName, List<SqlParameter> parameters);
+        T GetItemFromSP<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
+        Task<T> GetItemFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
+        List<T> GetListFromSP<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
+        Task<List<T>> GetListFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
+        Task<GRJoinedList> GetJoinedListFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, Dictionary<string, Type> types, int timeout = -1);
+        Task<List<SqlParameter>> ExecuteSPAsync(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
         DataSet GetDataSetFromSP(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
         DataTable GetDataTableFromSP(string storedProcedureName, List<SqlParameter> parameters, List<SqlParameter> returnParameters, int timeout = -1);
-        Task<DataTable> GetDataTableFromSPAsync(string storedProcedureName);
-        Task<DataTable> GetDataTableFromSPAsync(string storedProcedureName, List<SqlParameter> parameters);
+        Task<DataTable> GetDataTableFromSPAsync(string storedProcedureName, int timeout = -1);
+        Task<DataTable> GetDataTableFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
         Task<DataTable> GetDataTableFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, List<SqlParameter> returnParameters, int timeout = -1);
         Task<MemoryStream> GetMemoryStreamFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, CommandBehavior? commandBehavior = null);
         Task<Stream> GetZipStreamFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, CommandBehavior? commandBehavior = null, string fileName = "default");

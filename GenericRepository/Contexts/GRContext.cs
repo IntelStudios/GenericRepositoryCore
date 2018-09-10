@@ -127,17 +127,17 @@ namespace GenericRepository.Contexts
         #endregion
 
         #region Stored procedures methods
-        public abstract T GetItemFromSP<T>(string storedProcedureName, List<SqlParameter> parameters);
-        public abstract Task<T> GetItemFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters);
-        public abstract List<T> GetListFromSP<T>(string storedProcedureName, List<SqlParameter> parameters);
-        public abstract Task<List<T>> GetListFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters);
-        public abstract Task<GRJoinedList> GetJoinedListFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, Dictionary<string, Type> types);
-        public abstract Task<List<SqlParameter>> ExecuteSPAsync(string storedProcedureName, List<SqlParameter> parameters);
+        public abstract T GetItemFromSP<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
+        public abstract Task<T> GetItemFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
+        public abstract List<T> GetListFromSP<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
+        public abstract Task<List<T>> GetListFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameter, int timeout = -1);
+        public abstract Task<GRJoinedList> GetJoinedListFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, Dictionary<string, Type> types, int timeout = -1);
+        public abstract Task<List<SqlParameter>> ExecuteSPAsync(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
         public abstract DataSet GetDataSetFromSP(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
         public abstract DataTable GetDataTableFromSP(string storedProcedureName, List<SqlParameter> parameters, List<SqlParameter> returnParameters, int timeout = -1);
 
-        public abstract Task<DataTable> GetDataTableFromSPAsync(string storedProcedureName);
-        public abstract Task<DataTable> GetDataTableFromSPAsync(string storedProcedureName, List<SqlParameter> parameters);
+        public abstract Task<DataTable> GetDataTableFromSPAsync(string storedProcedureName, int timeout = -1);
+        public abstract Task<DataTable> GetDataTableFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
         public abstract Task<DataTable> GetDataTableFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, List<SqlParameter> returnParameters, int timeout = -1);
 
         public abstract Task<MemoryStream> GetMemoryStreamFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, CommandBehavior? commandBehavior = null);
