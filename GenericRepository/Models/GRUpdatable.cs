@@ -14,7 +14,7 @@ namespace GenericRepository.Models
         public Type Type { get; private set; }
         public GRDBStructure Structure { set; get; }
 
-        public GRUpdatable(Type type)
+        internal GRUpdatable(Type type)
         {
             this.Type = type;
         }
@@ -36,7 +36,7 @@ namespace GenericRepository.Models
             get; private set;
         }
 
-        public GRUpdatable(IGRContext context, T entity, IGRRepository repository) : base(typeof(T))
+        internal GRUpdatable(IGRContext context, T entity, IGRRepository repository) : base(typeof(T))
         {
             this.context = context;
             this.Entity = entity;
