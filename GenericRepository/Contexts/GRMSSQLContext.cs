@@ -1317,7 +1317,10 @@ namespace GenericRepository.Contexts
 
         private T ParseQueryResultLine<T>(List<GRDBProperty> columns, SqlDataReader reader, string prefix)
         {
-            if (IsAllNull(reader, prefix, columns)) return default(T);
+            if (IsAllNull(reader, prefix, columns))
+            {
+                return default(T);
+            }
 
             T t = Activator.CreateInstance<T>();
             foreach (var property in columns)
@@ -2688,7 +2691,7 @@ namespace GenericRepository.Contexts
             return ret;
         }
 
-        public override async Task<GRJoinedList> GetJoinedListFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, Dictionary<string, Type> typePairs, int timeout = -1)
+        public override async Task<GRJoinedList> GetJoinedListFromSPAsync(string spName, List<SqlParameter> spParams, Dictionary<string, Type> spPrefixes, GRPropertyCollection properties, int timeout = -1)
         {
             string spCommandStatementReadable = string.Empty;
             GRExecutionStatistics stats = null;
@@ -2701,7 +2704,7 @@ namespace GenericRepository.Contexts
             {
                 connection = await GetSqlConnectionAsync();
 
-                using (SqlCommand command = CreateSPCommand(connection, storedProcedureName, parameters, sqlTransaction, timeout))
+                using (SqlCommand command = CreateSPCommand(connection, spName, spParams, sqlTransaction, timeout))
                 {
                     spCommandStatementReadable = GetSPCommandStatement(command);
 
@@ -2717,7 +2720,7 @@ namespace GenericRepository.Contexts
                         {
                             GRJoinedListItem listItem = new GRJoinedListItem();
 
-                            foreach (var typePair in typePairs)
+                            foreach (var typePair in spPrefixes)
                             {
                                 string prefix = typePair.Key;
                                 string commonPrefix = prefix + "_";
@@ -2737,11 +2740,29 @@ namespace GenericRepository.Contexts
                                     }
                                 }
 
-                                if (allNull) continue;
+                                if (allNull)
+                                {
+                                    continue;
+                                }
 
-                                GRDBStructure structure = GRDataTypeHelper.GetDBStructure(type);
+                                List<GRDBProperty> typeProperties = null;
+
+                                // take only selected
+                                if (properties != null)
+                                {
+                                    typeProperties = properties.GetProperties(type);
+                                }
+                                // take them all
+                                else
+                                {
+                                    GRDBStructure structure = GRDataTypeHelper.GetDBStructure(type);
+                                    typeProperties = structure.Properties;
+                                }
+
+                                
                                 MethodInfo genericMethod = parseResultLineMethod.MakeGenericMethod(type);
-                                object obj = genericMethod.Invoke(this, new object[] { structure.Properties, reader, prefix });
+
+                                object obj = genericMethod.Invoke(this, new object[] { typeProperties, reader, prefix });
                                 listItem.Objects.Add(obj);
                             }
                             ret.Items.Add(listItem);
@@ -2760,7 +2781,7 @@ namespace GenericRepository.Contexts
             }
             catch (Exception exc)
             {
-                string errMessage = string.Format("An unknown error occured while get asynchronous joined list from stored procedure '{0}'.", storedProcedureName);
+                string errMessage = string.Format("An unknown error occured while get asynchronous joined list from stored procedure '{0}'.", spName);
                 LogFailedQueryStats(stats, errMessage, exc);
 
                 throw new GRQueryExecutionFailedException(exc, new GRExecutionStatistics(null, spCommandStatementReadable, null), errMessage);

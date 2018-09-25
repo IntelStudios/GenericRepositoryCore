@@ -131,7 +131,11 @@ namespace GenericRepository.Contexts
         public abstract Task<T> GetItemFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
         public abstract List<T> GetListFromSP<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
         public abstract Task<List<T>> GetListFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameter, int timeout = -1);
-        public abstract Task<GRJoinedList> GetJoinedListFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, Dictionary<string, Type> types, int timeout = -1);
+        public virtual async Task<GRJoinedList> GetJoinedListFromSPAsync(string spName, List<SqlParameter> spParams, Dictionary<string, Type> spPrefixes, int timeout = -1)
+        {
+            return await GetJoinedListFromSPAsync(spName, spParams, spPrefixes, null, timeout);
+        }
+        public abstract Task<GRJoinedList> GetJoinedListFromSPAsync(string spName, List<SqlParameter> spParams, Dictionary<string, Type> spPrefixes, GRPropertyCollection properties, int timeout = -1);
         public abstract Task<List<SqlParameter>> ExecuteSPAsync(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
         public abstract DataSet GetDataSetFromSP(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
         public abstract DataTable GetDataTableFromSP(string storedProcedureName, List<SqlParameter> parameters, List<SqlParameter> returnParameters, int timeout = -1);

@@ -82,6 +82,12 @@ namespace GenericRepository.Helpers
         {
             return GetDBStructure(obj.GetType());
         }
+
+        public static GRDBStructure GetDBStructure<T>()
+        {
+            return GetDBStructure(typeof(T));
+        }
+
         public static GRDBStructure GetDBStructure(Type type)
         {
             lock (structureCache)
