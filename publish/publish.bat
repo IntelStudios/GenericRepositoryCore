@@ -67,11 +67,17 @@ del "%WORKSPACE%\build\TestsResults\GenericRepository.trx"
 %mstest_location% /testcontainer:"%WORKSPACE%\build\GenericRepository\GenericRepository.Test.dll" /resultsfile:"%WORKSPACE%\build\TestsResults\GenericRepository.trx"
 
 echo ********* BUILD GenericRepository NUGET PACKAGE *************
-echo Mounting NuGet repository as drive N:
-%SystemRoot%\System32\net.exe use N: %NUGET_STORAGE% /user:%NUGET_USERNAME% %NUGET_PASSWORD% /persistent:no
-n:\nuget.exe pack %WORKSPACE%\publish\Package.nuspec -OutputDirectory n:\ || goto :error
-echo Unmounting drive N:
-%SystemRoot%\System32\net.exe use N: /delete /yes
+echo Mounting NuGet repository as drive M:
+%SystemRoot%\System32\net.exe use M: %NUGET_STORAGE% /user:%NUGET_USERNAME% %NUGET_PASSWORD% /persistent:no
+
+IF "%GIT_LOCAL_BRANCH%"=="master" (
+  ECHO Deleting old master packages
+  del M:\*GenericRepository*master*
+)
+
+M:\nuget.exe pack %WORKSPACE%\publish\Package.nuspec -OutputDirectory M:\ || goto :error
+echo Unmounting drive M:
+%SystemRoot%\System32\net.exe use M: /delete /yes
 
 endlocal
 exit /b 0
