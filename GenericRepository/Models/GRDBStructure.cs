@@ -1,4 +1,5 @@
 ﻿using GenericRepository.Attributes;
+using GenericRepository.Exceptions;
 using GenericRepository.Helpers;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,9 @@ namespace GenericRepository.Models
         public string TableName { get; private set; }
 
         public Type Type { get; private set; }
+
+        static readonly Type[] insertTypes = { typeof(GRBeforeInsertAttribute), typeof(GRBeforeSaveAttribute) };
+        static readonly Type[] updateTypes = { typeof(GRBeforeUpdateAttribute), typeof(GRBeforeSaveAttribute) };
 
         public List<GRDBProperty> Properties
         {
@@ -35,7 +39,7 @@ namespace GenericRepository.Models
         {
             this.Type = type;
             this.TableName = GRDataTypeHelper.GetDBTableName(type);
-            AnalyzeProperties();
+            AnalyzeType();
         }
 
         public static GRDBStructure Create(Type type)
@@ -50,6 +54,9 @@ namespace GenericRepository.Models
         List<GRDBProperty> autoUpdateProperties = null;
         List<GRDBProperty> autoInsertProperties = null;
         List<GRDBProperty> autoProperties = null;
+
+        public List<MethodInfo> BeforeUpdateMethods { private set; get; }
+        public List<MethodInfo> BeforeInsertMethods { private set; get; }
 
         public List<GRDBProperty> KeyProperties
         {
@@ -135,6 +142,36 @@ namespace GenericRepository.Models
             get
             {
                 return IdentityProperty != null;
+            }
+        }
+
+        private void AnalyzeType()
+        {
+            AnalyzeProperties();
+            AnalyzeMethods();
+        }
+
+        private void AnalyzeMethods()
+        {
+            BeforeInsertMethods = new List<MethodInfo>();
+            BeforeUpdateMethods = new List<MethodInfo>();
+
+            MethodInfo[] methods = this.Type.GetMethods();
+
+            foreach (var method in methods)
+            {
+                bool hasInsertAttribute = GRDataTypeHelper.HasOneOfAttributes(method, insertTypes);
+                bool hasUpdateAttribute = GRDataTypeHelper.HasOneOfAttributes(method, updateTypes);
+
+                if (hasInsertAttribute)
+                {
+                    BeforeInsertMethods.Add(method);
+                }
+
+                if (hasUpdateAttribute)
+                {
+                    BeforeUpdateMethods.Add(method);
+                }
             }
         }
 

@@ -54,6 +54,26 @@ namespace GenericRepository.Helpers
             return Attribute.GetCustomAttribute(property, attributeType) != null;
         }
 
+        public static bool HasOneOfAttributes(MethodInfo method, Type[] attributeTypes)
+        {
+            if (attributeTypes == null) return false;
+
+            foreach (var attribute in attributeTypes)
+            {
+                if (HasAttribute(method, attribute))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static bool HasAttribute(MethodInfo method, Type attributeType)
+        {
+            return Attribute.GetCustomAttribute(method, attributeType) != null;
+        }
+
         public static bool IsAutoInsertProperty(PropertyInfo property)
         {
             GRAutoValueAttribute autoAttr = Attribute.GetCustomAttribute(property, typeof(GRAutoValueAttribute)) as GRAutoValueAttribute;

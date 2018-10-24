@@ -51,6 +51,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attributes\GRBeforeSaveAttributes.cs" />
+    <Compile Include="Enums\GRPreSaveActionType.cs" />
+    <Compile Include="Exceptions\GRPreSaveException.cs" />
     <Compile Include="Models\GRPropertyCollection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Attributes\GRAIPrimaryKeyAttribute.cs" />

@@ -1062,7 +1062,8 @@ namespace GenericRepository.Contexts
                             MemberExpression memExp = methodCall.Object as MemberExpression;
                             object enumerable = GRDataTypeHelper.GetMemberValue(memExp);
                             en = enumerable as IEnumerable;
-                        } else
+                        }
+                        else
                         {
                             object enumerable = GRDataTypeHelper.GetExpressionValue(methodCall.Object);
                             en = enumerable as IEnumerable;
@@ -1837,6 +1838,8 @@ namespace GenericRepository.Contexts
 
         GRUpdateStatement BuildUpdateStatement<T>(IGRUpdatable<T> update, string[] propertiesToUpdate)
         {
+            CallPreSaveMethods(update.Entity, GRPreSaveActionType.Update);
+
             GRUpdateStatement updateStatement = new GRUpdateStatement();
 
             if (update.Structure.KeyProperties.Count == 0)
@@ -1902,6 +1905,25 @@ namespace GenericRepository.Contexts
             updateStatement.Statement = sb.ToString();
 
             return updateStatement;
+        }
+
+        private void CallPreSaveMethods<T>(T entity, GRPreSaveActionType action)
+        {
+            GRDBStructure structure = GRDataTypeHelper.GetDBStructure<T>();
+
+            List<MethodInfo> methods = action == GRPreSaveActionType.Insert ? structure.BeforeInsertMethods : structure.BeforeUpdateMethods;
+
+            foreach (var method in methods)
+            {
+                try
+                {
+                    method.Invoke(entity, null);
+                }
+                catch (Exception exc)
+                {
+                    throw new GRPreSaveException(exc, method, action, typeof(T));
+                }
+            }
         }
 
         public GRExecutionStatistics ParseDeleteStatistics(SqlConnection connection, GRDeleteStatement statement)
@@ -2149,6 +2171,8 @@ namespace GenericRepository.Contexts
 
         GRUpdateStatement BuildInsertStatement<T>(IGRUpdatable<T> updatable, string[] propertiesToInsert)
         {
+            CallPreSaveMethods(updatable.Entity, GRPreSaveActionType.Insert);
+
             GRUpdateStatement insertStatement = new GRUpdateStatement();
 
             // constructing DV assignments => Column = @Param
@@ -2759,7 +2783,7 @@ namespace GenericRepository.Contexts
                                     typeProperties = structure.Properties;
                                 }
 
-                                
+
                                 MethodInfo genericMethod = parseResultLineMethod.MakeGenericMethod(type);
 
                                 object obj = genericMethod.Invoke(this, new object[] { typeProperties, reader, prefix });
@@ -2945,7 +2969,7 @@ namespace GenericRepository.Contexts
 
                 return ret;
             }
-            catch(SqlException exc)
+            catch (SqlException exc)
             {
                 LogFailedQueryStats(stats, exc.Message, exc);
 
@@ -3180,7 +3204,7 @@ namespace GenericRepository.Contexts
 
             try
             {
-                while(reader.Read())
+                while (reader.Read())
                 {
                     ret.Add((T)Convert.ChangeType(reader[0], typeof(T)));
                 }
@@ -3198,7 +3222,7 @@ namespace GenericRepository.Contexts
 
             try
             {
-                while(reader.Read())
+                while (reader.Read())
                 {
                     T t = Activator.CreateInstance<T>();
                     foreach (var property in columns)
