@@ -5,12 +5,12 @@ using GenericRepository.Test.Repositories;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
-namespace GenericRepository.Test
+namespace GenericRepository.Test.CRUD
 {
     [TestClass]
-    public class EntityPKAITest
+    public class PrimaryKeys
     {
-        static string dbBaseName = "xeelo-tests-gr-insert-pkai";
+        static string dbBaseName = "xeelo-tests-gr-insert-pk";
         static string dbName = null;
 
         [ClassInitialize]
@@ -26,7 +26,7 @@ namespace GenericRepository.Test
         }
 
         [TestMethod]
-        public void Test_PrimaryKeys_AI()
+        public void PrimaryKey_AutoIncrement_Insert_Get()
         {
             TestEntityAIPKRepository grEntities = TestUtils.GetTestEntityAIPKRepository(dbName);
 
@@ -42,7 +42,7 @@ namespace GenericRepository.Test
 
             try
             {
-                updatable = grEntities.GRInsert(entity);
+                updatable = grEntities.GREnqueueInsert(entity);
                 updatable.GRExecute();
             }
             catch (Exception exc)
@@ -65,7 +65,7 @@ namespace GenericRepository.Test
 
             try
             {
-                updatable2 = grEntities.GRInsert(entity);
+                updatable2 = grEntities.GREnqueueInsert(entity);
                 updatable2.GRExecute();
             }
             catch (Exception exc)
@@ -74,6 +74,53 @@ namespace GenericRepository.Test
             }
 
             Assert.IsTrue(entity.TestEntityAIPKID != newEntityId, "AIID was not loaded");
+        }
+
+        [TestMethod]
+        public void PrimaryKey_Insert_Get()
+        {
+            TestEntityPKRepository grEntities = TestUtils.GetTestEntityPKRepository(dbName);
+
+            int entityId = 99;
+
+            TestEntityPK entity = new TestEntityPK()
+            {
+                TestEntityPKID = entityId,
+                TestEntityPKName = "Entity " + entityId
+            };
+
+            IGRUpdatable<TestEntityPK> updatable = null;
+
+            try
+            {
+                updatable = grEntities.GREnqueueInsert(entity);
+                updatable.GRExecute();
+            }
+            catch (Exception exc)
+            {
+                Assert.Fail("Unable to insert entity - {0}.", GRStringHelpers.GetExceptionString(exc));
+            }
+
+            Assert.IsTrue(updatable.ExecutionStats.AffectedRows == 1, "Only single entity should be inserted.");
+
+            Assert.IsTrue(entity.TestEntityPKID == entityId, "Entity ID was changed.");
+
+            TestEntityPK entityDB = grEntities.GRGet(entityId);
+
+            Assert.IsTrue(entityDB != null, "Entity was not found.");
+
+            // trying to save the same entity
+            IGRUpdatable<TestEntityPK> updatable2 = null;
+
+            try
+            {
+                updatable2 = grEntities.GREnqueueInsert(entity);
+                updatable2.GRExecute();
+                Assert.Fail("Duplicated entity was inserted - {0}.");
+            }
+            catch
+            {
+            }
         }
     }
 }

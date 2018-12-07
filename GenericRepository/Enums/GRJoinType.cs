@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GenericRepository.Models
+namespace GenericRepository.Enums
 {
     public enum GRJoinType
     {

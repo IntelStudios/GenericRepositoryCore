@@ -8,10 +8,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace GenericRepository.Test
+namespace GenericRepository.Test.CRUD
 {
     [TestClass]
-    public class EntityInsertTest
+    public class Insert
     {
         static string dbBaseName = "xeelo-tests-gr-insert";
         static string dbName = null;
@@ -29,7 +29,7 @@ namespace GenericRepository.Test
         }
 
         [TestMethod]
-        public void Insert_Entitity_Direct()
+        public void Insert_Entitity()
         {
             TestEntityAutoPropertiesRepository grEntities = TestUtils.GetTestEntityAutoPropertiesRepository(dbName);
 
@@ -42,7 +42,7 @@ namespace GenericRepository.Test
 
             try
             {
-                updatable = grEntities.GRInsert(entity);
+                updatable = grEntities.GREnqueueInsert(entity);
                 updatable.GRExecute();
             }
             catch (Exception exc)
@@ -82,7 +82,7 @@ namespace GenericRepository.Test
                 entity.TestEntityAutoPropertiesDescription = "NEW DESCRIPTION" + (i + 1);
                 entity.TestEntityAutoPropertiesOrder = 1000 + (i + 1);
 
-                updatables.Add(repoWithContext.TestEntityAutoPropertiesRepository.GRInsert(entity));
+                updatables.Add(repoWithContext.TestEntityAutoPropertiesRepository.GREnqueueInsert(entity));
             }
 
             try
@@ -115,7 +115,7 @@ namespace GenericRepository.Test
         }
 
         [TestMethod]
-        public void Insert_Entitity_Binary_Stream()
+        public void Insert_Entitity_With_Stream_Propery()
         {
             string testString = "Hello";
             byte[] testBytes = Encoding.UTF8.GetBytes(testString);
@@ -130,7 +130,7 @@ namespace GenericRepository.Test
 
             try
             {
-                updatable = grEntities.GRInsert(entity);
+                updatable = grEntities.GREnqueueInsert(entity);
                 updatable.GRExecute();
             }
             catch (Exception exc)
@@ -152,7 +152,7 @@ namespace GenericRepository.Test
         }
 
         [TestMethod]
-        public void Insert_Entitity_Binary_Stream_Null()
+        public void Insert_Entitity_With_Stream_Propery_Null()
         {
             TestEntityBinaryStreamRepository grEntities = TestUtils.GetTestEntityBinaryStreamRepository(dbName);
 
@@ -162,7 +162,7 @@ namespace GenericRepository.Test
 
             try
             {
-                updatable = grEntities.GRInsert(entity);
+                updatable = grEntities.GREnqueueInsert(entity);
                 updatable.GRExecute();
             }
             catch (Exception exc)
@@ -182,7 +182,7 @@ namespace GenericRepository.Test
         }
 
         [TestMethod]
-        public void Insert_Entitity_Binary_Array()
+        public void Insert_Entitity_With_Binary_Array_Propery()
         {
             string testString = "Hello";
             byte[] testBytes = Encoding.UTF8.GetBytes(testString);
@@ -196,7 +196,7 @@ namespace GenericRepository.Test
 
             try
             {
-                updatable = grEntities.GRInsert(entity);
+                updatable = grEntities.GREnqueueInsert(entity);
                 updatable.GRExecute();
             }
             catch (Exception exc)
@@ -216,7 +216,7 @@ namespace GenericRepository.Test
         }
 
         [TestMethod]
-        public void Insert_Entitity_Binary_Array_Null()
+        public void Insert_Entitity_With_Binary_Array_Propery_Null()
         {
             TestEntityBinaryArrayRepository grEntities = TestUtils.GetTestEntityBinaryArrayRepository(dbName);
 
@@ -226,7 +226,7 @@ namespace GenericRepository.Test
 
             try
             {
-                updatable = grEntities.GRInsert(entity);
+                updatable = grEntities.GREnqueueInsert(entity);
                 updatable.GRExecute();
             }
             catch (Exception exc)
@@ -246,7 +246,7 @@ namespace GenericRepository.Test
         }
 
         [TestMethod]
-        public void Insert_Entitity_Direct_Primitive_Null()
+        public void Insert_Entitity_With_Primitive_Types_Null()
         {
             TestEntityPrimitiveNullRepository grEntities = TestUtils.GetTestEntityPrimitiveNullRepository(dbName);
 
@@ -260,7 +260,7 @@ namespace GenericRepository.Test
 
             try
             {
-                updatable = grEntities.GRInsert(entity);
+                updatable = grEntities.GREnqueueInsert(entity);
                 updatable.GRExecute();
             }
             catch (Exception exc)

@@ -258,6 +258,31 @@ namespace GenericRepository.Test
             {
                 Assert.Fail("Could not create stored procedure - {0}.", GRStringHelpers.GetExceptionString(exc));
             }
+
+            // create test procedure sp6
+            string crSP6 = @"CREATE PROCEDURE [dbo].[spGetTestEntityAutoPropertiesPrefixed]
+                                AS
+                                select 
+	                                t.TestEntityAutoPropertiesID as prefix_TestEntityAutoPropertiesID,
+			                        t.TestEntityAutoPropertiesName as prefix_TestEntityAutoPropertiesName,
+			                        t.TestEntityAutoPropertiesOrder as prefix_TestEntityAutoPropertiesOrder,
+			                        t.ModifiedDate as prefix_ModifiedDate,
+			                        t.ModifiedBy as prefix_ModifiedBy,
+			                        t.CreatedDate as prefix_CreatedDate,
+			                        t.CreatedBy as prefix_CreatedBy,
+			                        t.IsActive as prefix_IsActive
+                                from [dbo].[TestEntityAutoPropertiesTable] as t";
+
+            SqlCommand crSP6Command = new SqlCommand(crSP6, connection);
+
+            try
+            {
+                crSP6Command.ExecuteNonQuery();
+            }
+            catch (Exception exc)
+            {
+                Assert.Fail("Could not create stored procedure - {0}.", GRStringHelpers.GetExceptionString(exc));
+            }
         }
 
         private static void CreateFunctions(SqlConnection connection)
@@ -435,8 +460,21 @@ namespace GenericRepository.Test
                                         [TestEntityJoiningType1ID][int] NOT NULL,
                                         [TestEntityJoiningType2Name] varchar(max) NOT NULL)";
 
+            string cr3 = @"CREATE TABLE [TestEntityJoiningType3] (
+                                        [TestEntityJoiningType3ID][int] IDENTITY(1, 1) NOT NULL,
+                                        [TestEntityJoiningType3Name] varchar(max) NOT NULL
+                                        CONSTRAINT PK_TestEntityJoiningType3 PRIMARY KEY (TestEntityJoiningType3ID));";
+
+            string cr4 = @"CREATE TABLE [TestEntityJoiningType4] (
+                                        [TestEntityJoiningType4ID][int] IDENTITY(1, 1) NOT NULL,
+                                        [TestEntityJoiningType3ID][int] NOT NULL,
+                                        [TestEntityJoiningType4Value][int] NULL
+                                        CONSTRAINT PK_TestEntityJoiningType4 PRIMARY KEY (TestEntityJoiningType4ID));";
+
             SqlCommand cr1Command = new SqlCommand(cr1, connection);
             SqlCommand cr2Command = new SqlCommand(cr2, connection);
+            SqlCommand cr3Command = new SqlCommand(cr3, connection);
+            SqlCommand cr4Command = new SqlCommand(cr4, connection);
 
             try
             {
@@ -456,6 +494,24 @@ namespace GenericRepository.Test
                 Assert.Fail("Could not create table - {0}.", GRStringHelpers.GetExceptionString(exc));
             }
 
+            try
+            {
+                cr3Command.ExecuteNonQuery();
+            }
+            catch (Exception exc)
+            {
+                Assert.Fail("Could not create table - {0}.", GRStringHelpers.GetExceptionString(exc));
+            }
+
+            try
+            {
+                cr4Command.ExecuteNonQuery();
+            }
+            catch (Exception exc)
+            {
+                Assert.Fail("Could not create table - {0}.", GRStringHelpers.GetExceptionString(exc));
+            }
+
             for (int i = 0; i < 10; i++)
             {
                 string insertTestEntityJoining = string.Format(@"INSERT INTO [TestEntityJoiningType1] (TestEntityJoiningType1ID, TestEntityJoiningType2ID, TestEntityJoiningType1Name) VALUES ({0}, {1}, '{2}')", i + 1, (i + 1) * 2, string.Format("Name1 {0}", i + 1));
@@ -467,6 +523,24 @@ namespace GenericRepository.Test
                 string insertTestEntityJoining = string.Format(@"INSERT INTO [TestEntityJoiningType2] (TestEntityJoiningType2ID, TestEntityJoiningType1ID, TestEntityJoiningType2Name) VALUES ({0}, {1}, '{2}')", i + 1, (i + 1) * 3, string.Format("Name2 {0}", i + 1));
                 new SqlCommand(insertTestEntityJoining, connection).ExecuteNonQuery();
             }
+
+            for (int i = 0; i < 10; i++)
+            {
+                string insCmdText = string.Format(
+                    @"INSERT INTO [TestEntityJoiningType3] (TestEntityJoiningType3Name) 
+                            VALUES ('{0}')", string.Format("Name {0}", i + 1));
+
+                new SqlCommand(insCmdText, connection).ExecuteNonQuery();
+            }
+
+            string insCmdTextValues = string.Format(
+                    @"  INSERT INTO [TestEntityJoiningType4] (TestEntityJoiningType3ID, TestEntityJoiningType4Value) 
+                            VALUES (1, NULL);
+                        INSERT INTO [TestEntityJoiningType4] (TestEntityJoiningType3ID, TestEntityJoiningType4Value) 
+                            VALUES (2, 1);
+                    ");
+
+            new SqlCommand(insCmdTextValues, connection).ExecuteNonQuery();
         }
 
         private static void InitializeTableAutoProperties(SqlConnection connection)
@@ -571,6 +645,30 @@ namespace GenericRepository.Test
             repoContext.RegisterLogger(new TraceLogger(), Enums.GRContextLogLevel.Debug | Enums.GRContextLogLevel.Error | Enums.GRContextLogLevel.Warning);
 
             TestEntityJoiningType2Repository grEntities = new TestEntityJoiningType2Repository(repoContext);
+
+            return grEntities;
+        }
+        public static TestEntityJoiningType3Repository GetTestEntityJoiningType3Repository(string dbName)
+        {
+            string repoConnectionString = string.Format("{0};initial catalog={1};", TestUtils.ConnectionString, dbName);
+
+            IGRContext repoContext = new GRMSSQLContext(repoConnectionString);
+
+            repoContext.RegisterLogger(new TraceLogger(), Enums.GRContextLogLevel.Debug | Enums.GRContextLogLevel.Error | Enums.GRContextLogLevel.Warning);
+
+            TestEntityJoiningType3Repository grEntities = new TestEntityJoiningType3Repository(repoContext);
+
+            return grEntities;
+        }
+        public static TestEntityJoiningType4Repository GetTestEntityJoiningType4Repository(string dbName)
+        {
+            string repoConnectionString = string.Format("{0};initial catalog={1};", TestUtils.ConnectionString, dbName);
+
+            IGRContext repoContext = new GRMSSQLContext(repoConnectionString);
+
+            repoContext.RegisterLogger(new TraceLogger(), Enums.GRContextLogLevel.Debug | Enums.GRContextLogLevel.Error | Enums.GRContextLogLevel.Warning);
+
+            TestEntityJoiningType4Repository grEntities = new TestEntityJoiningType4Repository(repoContext);
 
             return grEntities;
         }

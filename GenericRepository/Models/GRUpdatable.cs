@@ -59,7 +59,7 @@ namespace GenericRepository.Models
         {
             foreach (var propertyExpression in propertyExpressions)
             {
-                string propertyName = GRDataTypeHelper.GetExpressionPropertyName(propertyExpression);
+                string propertyName = GRDataTypeHelper.GetPropertyName(propertyExpression);
                 GRDBProperty property = Structure[propertyName];
                 CommandParams.Add(new GRCommandParamExclude<T>(property));
             }
@@ -70,7 +70,7 @@ namespace GenericRepository.Models
         {
             foreach (var propertyExpression in propertyExpressions)
             {
-                string propertyName = GRDataTypeHelper.GetExpressionPropertyName(propertyExpression);
+                string propertyName = GRDataTypeHelper.GetPropertyName(propertyExpression);
                 GRDBProperty property = Structure[propertyName];
                 CommandParams.Add(new GRCommandParamForceExclude<T>(property));
             }
@@ -81,7 +81,7 @@ namespace GenericRepository.Models
         {
             foreach (var propertyExpression in propertyExpressions)
             {
-                string propertyName = GRDataTypeHelper.GetExpressionPropertyName(propertyExpression);
+                string propertyName = GRDataTypeHelper.GetPropertyName(propertyExpression);
                 GRDBProperty property = Structure[propertyName];
                 CommandParams.Add(new GRCommandParamInclude<T>(property));
             }

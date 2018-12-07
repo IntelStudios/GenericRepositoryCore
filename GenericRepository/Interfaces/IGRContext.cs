@@ -18,8 +18,11 @@ namespace GenericRepository.Interfaces
         List<T> ExecuteQuery<T>(string sqlStatement);
         Task<List<T>> ExecuteQueryAsync<T>(string sqlStatement);
 
-        void ExecuteQuery(string sqlStatement);
-        Task ExecuteQueryAsync(string sqlStatement);
+        void ExecuteNonQuery(string sqlStatement);
+        Task ExecuteNonQueryAsync(string sqlStatement);
+
+        string ExecuteNonQuery(string sqlStatement, bool returnMessage);
+        Task<string> ExecuteNonQueryAsync(string sqlStatement, bool returnMessage);
 
         T ExecuteScalar<T>(IGRQueriable<T> queriable);
         T ExecuteScalar<T>(string sqlStatement);
@@ -29,14 +32,52 @@ namespace GenericRepository.Interfaces
 
         int ExecuteCount<T>(IGRQueriable<T> queriable);
         Task<int> ExecuteCountAsync<T>(IGRQueriable<T> queriable);
+
+        DataSet GetDataSetFromCommand(string commandString);
+        DataSet GetDataSetFromCommand(string commandString, int timeout);
+        GRDataSet GetDataSetFromCommand(string commandString, bool returnMessage);
+        GRDataSet GetDataSetFromCommand(string commandString, bool returnMessage, int timeout);
         #endregion
 
-        #region Update/insert/delete methods
-        void Update<T>(IGRUpdatable<T> updatable);
-        void Insert<T>(IGRUpdatable<T> updatable);
-        void Delete<T>(IGRDeletable<T> deletable);
+        #region Update/insert methods
+        /// <summary>
+        /// Puts entity into the insert/update/delete queue. Changes will be written into the DB just after calling any of SaveChanges... methods.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="updatable"></param>
+        void EnqueueUpdate<T>(IGRUpdatable<T> updatable);
+
+        /// <summary>
+        /// Puts entity into the insert/update/delete queue. Entity will be written into the DB just after calling any of SaveChanges... methods.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="updatable"></param>
+        void EnqueueInsert<T>(IGRUpdatable<T> updatable);
+
+        /// <summary>
+        /// Removes entity from queue and immediately inserts/updates it synchronously.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="updatable"></param>
+        /// <returns></returns>
         GRExecutionStatistics Execute<T>(IGRUpdatable<T> updatable);
+
+        /// <summary>
+        /// Removes entity from queue and immediately inserts/updates it asynchronously.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="updatable"></param>
+        /// <returns></returns>
         Task<GRExecutionStatistics> ExecuteAsync<T>(IGRUpdatable<T> updatable);
+        #endregion
+
+        #region Delete methods
+        /// <summary>
+        /// Puts entity into the insert/update/delete queue. Entity will be deleted from DB just after calling any of SaveChanges... methods.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="updatable"></param>
+        void EnqueueDelete<T>(IGRDeletable<T> deletable);
         GRExecutionStatistics Execute<T>(IGRDeletable<T> deletable);
         Task<GRExecutionStatistics> ExecuteAsync<T>(IGRDeletable<T> deletable);
         #endregion
@@ -55,21 +96,71 @@ namespace GenericRepository.Interfaces
         #endregion
 
         #region Stored procedures methods
-        T GetItemFromSP<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
-        Task<T> GetItemFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
-        List<T> GetListFromSP<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
-        Task<List<T>> GetListFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
-        Task<GRJoinedList> GetJoinedListFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, Dictionary<string, Type> types, int timeout = -1);
-        Task<GRJoinedList> GetJoinedListFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, Dictionary<string, Type> types, GRPropertyCollection properties, int timeout = -1);
-        Task<List<SqlParameter>> ExecuteSPAsync(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
+        Task ExecuteSPAsync(string storedProcedureName);
+        Task ExecuteSPAsync(string storedProcedureName, int timeout);
+        Task ExecuteSPAsync(string storedProcedureName, List<SqlParameter> parameters);
+        Task ExecuteSPAsync(string storedProcedureName, List<SqlParameter> parameters, int timeout);
+
+        Task<List<SqlParameter>> ExecuteSPWithOutParamsAsync(string storedProcedureName);
+        Task<List<SqlParameter>> ExecuteSPWithOutParamsAsync(string storedProcedureName, int timeout);
+        Task<List<SqlParameter>> ExecuteSPWithOutParamsAsync(string storedProcedureName, List<SqlParameter> parameters);
+        Task<List<SqlParameter>> ExecuteSPWithOutParamsAsync(string storedProcedureName, List<SqlParameter> parameters, int timeout);
+
+        Task<T> GetValueFromSPAsync<T>(string storedProcedureName);
+        Task<T> GetValueFromSPAsync<T>(string storedProcedureName, int timeout);
+        Task<T> GetValueFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters);
+        Task<T> GetValueFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout);
+
+        Task<T> GetValueFromSPAsync<T>(string storedProcedureName, string columnName);
+        Task<T> GetValueFromSPAsync<T>(string storedProcedureName, string columnName, int timeout);
+        Task<T> GetValueFromSPAsync<T>(string storedProcedureName, string columnName, List<SqlParameter> parameters);
+        Task<T> GetValueFromSPAsync<T>(string storedProcedureName, string columnName, List<SqlParameter> parameters, int timeout);
+
+        Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName);
+        Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, int timeout);
+        Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters);
+        Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout);
+
+        Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, string columnName);
+        Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, string columnName, int timeout);
+        Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, string columnName, List<SqlParameter> parameters);
+        Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, string columnName, List<SqlParameter> parameters, int timeout);
+
+        Task<T> GetEntityFromSPAsync<T>(string storedProcedureName);
+        Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, int timeout);
+        Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters);
+        Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout);
+
+        Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, string prefix);
+        Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, string prefix, int timeout);
+        Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, string prefix, List<SqlParameter> parameters);
+        Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, string prefix, List<SqlParameter> parameters, int timeout);
+
+        Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName);
+        Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, int timeout);
+        Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters);
+        Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout);
+
+        Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, string prefix);
+        Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, string prefix, int timeout);
+        Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, string prefix, List<SqlParameter> parameters);
+        Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, string prefix, List<SqlParameter> parameters, int timeout);
+
+        Task<GRTable> GetEntitiesFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, GRPropertyCollection properties);
+        Task<GRTable> GetEntitiesFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, GRPropertyCollection properties, int timeout);
+
+        DataSet GetDataSetFromSP(string storedProcedureName, List<SqlParameter> parameters);
         DataSet GetDataSetFromSP(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
+
+        DataTable GetDataTableFromSP(string storedProcedureName, List<SqlParameter> parameters, List<SqlParameter> returnParameters);
         DataTable GetDataTableFromSP(string storedProcedureName, List<SqlParameter> parameters, List<SqlParameter> returnParameters, int timeout = -1);
+
         Task<DataTable> GetDataTableFromSPAsync(string storedProcedureName, int timeout = -1);
         Task<DataTable> GetDataTableFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
         Task<DataTable> GetDataTableFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, List<SqlParameter> returnParameters, int timeout = -1);
+
         Task<MemoryStream> GetMemoryStreamFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, CommandBehavior? commandBehavior = null);
         Task<Stream> GetZipStreamFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, CommandBehavior? commandBehavior = null, string fileName = "default");
-        Task<Tuple<string, DataSet>> GetQueryStoreStatementResultSetAsync(string statement, bool returnTables = true);
         #endregion
 
         # region Scalar functions methods
@@ -86,8 +177,8 @@ namespace GenericRepository.Interfaces
         #endregion
 
         #region Join
-        GRJoinedList ExecuteJoinQuery(IGRQueriable queriable);
-        Task<GRJoinedList> ExecuteJoinQueryAsync(IGRQueriable queriable);
+        GRTable ExecuteJoinQuery(IGRQueriable queriable);
+        Task<GRTable> ExecuteJoinQueryAsync(IGRQueriable queriable);
         #endregion
     }
 }

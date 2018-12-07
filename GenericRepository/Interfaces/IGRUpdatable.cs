@@ -12,7 +12,6 @@ namespace GenericRepository.Interfaces
         IGRRepository Repository { get; }
         GRExecutionStatistics ExecutionStats { get; set; }
         GRDBStructure Structure { get; }
-
     }
     public interface IGRUpdatable<T> : IGRUpdatable
     {
@@ -28,11 +27,11 @@ namespace GenericRepository.Interfaces
         bool HasForceExcludedProperties { get; }
         bool HasIncludedProperties { get; }
         bool HasExcludedProperties { get; }
+
         List<GRCommandParamExclude<T>> ExcludedProperties { get; }
         List<GRCommandParamForceExclude<T>> ForceExcludedProperties { get; }
         List<GRCommandParamInclude<T>> IncludedProperties { get; }
         bool ContainsExcludedProperty(string propertyName);
         bool ContainsIncludedProperty(string propertyName);
-
     }
 }

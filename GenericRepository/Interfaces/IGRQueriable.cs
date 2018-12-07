@@ -10,6 +10,7 @@ namespace GenericRepository.Interfaces
     public interface IGRQueriable
     {
         string Prefix { get; set; }
+        bool HasTemporaryPrefix { get; }
         GRJoinedQueriable Joined { get; set; }
         GRJoinedQueriable JoiningQueriable { get; set; }
         Type Type { get; }
@@ -44,8 +45,8 @@ namespace GenericRepository.Interfaces
             Expression<Func<U, object>> property2
             ) where U : new();
 
-        GRJoinedList GRToJoinedList();
-        Task<GRJoinedList> GRToJoinedListAsync();
+        GRTable GRToTable();
+        Task<GRTable> GRToTableAsync();
 
         bool IsDistinct { get; }
         bool HasLimit { get; }

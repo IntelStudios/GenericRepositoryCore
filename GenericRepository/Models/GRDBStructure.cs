@@ -10,7 +10,9 @@ namespace GenericRepository.Models
 {
     public class GRDBStructure
     {
-        List<GRDBProperty> properties;
+        Dictionary<string, GRDBProperty> propDictionary;
+        List<GRDBProperty> propList;
+        Dictionary<GRDBProperty, GRDBQueryProperty> retPropList;
 
         public string TableName { get; private set; }
 
@@ -23,7 +25,15 @@ namespace GenericRepository.Models
         {
             get
             {
-                return properties;
+                return propList;
+            }
+        }
+
+        public Dictionary<GRDBProperty, GRDBQueryProperty> RetProperties
+        {
+            get
+            {
+                return retPropList;
             }
         }
 
@@ -31,7 +41,11 @@ namespace GenericRepository.Models
         {
             get
             {
-                return properties.Where(p => p.PropertyInfo.Name == propertyName).Single();
+                if (!propDictionary.ContainsKey(propertyName))
+                {
+                    return null;
+                }
+                return propDictionary[propertyName];
             }
         }
 
@@ -64,7 +78,7 @@ namespace GenericRepository.Models
             {
                 if (keyProperties == null)
                 {
-                    keyProperties = properties.Where(p => p.IsPrimaryKeyAutoIncremented || p.IsPrimaryKey).ToList();
+                    keyProperties = propDictionary.Values.Where(p => p.IsPrimaryKeyAutoIncremented || p.IsPrimaryKey).ToList();
                 }
                 return keyProperties;
             }
@@ -76,7 +90,7 @@ namespace GenericRepository.Models
             {
                 if (nonKeyProperties == null)
                 {
-                    nonKeyProperties = properties.Where(p => !(p.IsPrimaryKeyAutoIncremented || p.IsPrimaryKey)).ToList();
+                    nonKeyProperties = propDictionary.Values.Where(p => !(p.IsPrimaryKeyAutoIncremented || p.IsPrimaryKey)).ToList();
                 }
                 return nonKeyProperties;
             }
@@ -88,7 +102,7 @@ namespace GenericRepository.Models
             {
                 if (insertProperties == null)
                 {
-                    insertProperties = properties.Where(p => !p.IsPrimaryKeyAutoIncremented).ToList();
+                    insertProperties = propDictionary.Values.Where(p => !p.IsPrimaryKeyAutoIncremented).ToList();
                 }
                 return insertProperties;
             }
@@ -100,7 +114,7 @@ namespace GenericRepository.Models
             {
                 if (autoUpdateProperties == null)
                 {
-                    autoUpdateProperties = properties.Where(p => GRDataTypeHelper.IsAutoUpdateProperty(p.PropertyInfo)).ToList();
+                    autoUpdateProperties = propDictionary.Values.Where(p => p.IsAutoUpdateProperty).ToList();
                 }
                 return autoUpdateProperties;
             }
@@ -112,7 +126,7 @@ namespace GenericRepository.Models
             {
                 if (autoInsertProperties == null)
                 {
-                    autoInsertProperties = properties.Where(p => GRDataTypeHelper.IsAutoInsertProperty(p.PropertyInfo)).ToList();
+                    autoInsertProperties = propDictionary.Values.Where(p => p.IsAutoInsertProperty).ToList();
                 }
                 return autoInsertProperties;
             }
@@ -124,12 +138,10 @@ namespace GenericRepository.Models
             {
                 if (autoProperties == null)
                 {
-                    autoProperties = Type.GetProperties()
+                    autoProperties = this.Type.GetProperties()
                         .Where(p => GRDataTypeHelper.IsAutoProperty(p))
-                        .Select(p => new GRDBProperty()
-                        {
-                            PropertyInfo = p
-                        }).ToList();
+                        .Select(p => new GRDBProperty(p))
+                        .ToList();
                 }
                 return autoProperties;
             }
@@ -179,7 +191,7 @@ namespace GenericRepository.Models
         {
             PropertyInfo[] typeProperties = Type.GetProperties();
 
-            properties = new List<GRDBProperty>();
+            propDictionary = new Dictionary<string, GRDBProperty>();
 
             foreach (PropertyInfo typeProperty in typeProperties)
             {
@@ -196,16 +208,26 @@ namespace GenericRepository.Models
                     continue;
                 }
 
-                GRDBProperty property = new GRDBProperty();
-                property.DBColumnName = GRDataTypeHelper.GetDBColumnName(typeProperty);
-                property.IsPrimaryKey = GRDataTypeHelper.HasAttribute(typeProperty, typeof(GRPrimaryKeyAttribute));
-                property.IsPrimaryKeyAutoIncremented = GRDataTypeHelper.HasAttribute(typeProperty, typeof(GRAIPrimaryKey));
-                property.PropertyInfo = typeProperty;
+                GRDBProperty grProperty = new GRDBProperty(typeProperty);
 
-                properties.Add(property);
+                propDictionary.Add(grProperty.PropertyInfo.Name, grProperty);
             }
 
-            IdentityProperty = properties.Where(p => p.IsPrimaryKeyAutoIncremented).FirstOrDefault();
+            IdentityProperty = propDictionary.Values.Where(p => p.IsPrimaryKeyAutoIncremented).FirstOrDefault();
+
+            propList = propDictionary.Values.ToList();
+
+            retPropList = new Dictionary<GRDBProperty, GRDBQueryProperty>();
+
+            propList.ForEach(p =>
+            {
+                retPropList.Add(p, new GRDBQueryProperty(p, false));
+            });
+        }
+
+        public override string ToString()
+        {
+            return $"GRDBStructure of {Type} (table {TableName})";
         }
     }
 }

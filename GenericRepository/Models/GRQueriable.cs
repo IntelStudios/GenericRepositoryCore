@@ -1,4 +1,5 @@
-﻿using GenericRepository.Exceptions;
+﻿using GenericRepository.Enums;
+using GenericRepository.Exceptions;
 using GenericRepository.Helpers;
 using GenericRepository.Interfaces;
 using System;
@@ -15,7 +16,10 @@ namespace GenericRepository.Models
         public virtual Type Type { get; protected set; }
         public virtual IGRContext Context { get; protected set; }
         public GRDBStructure Structure { set; get; }
+
         public string Prefix { get; set; }
+        public bool HasTemporaryPrefix { get; internal set; } = false;
+
         public IGRRepository Repository
         {
             get; protected set;
@@ -29,23 +33,38 @@ namespace GenericRepository.Models
 
         bool IsPrefixAvailable(string prefix)
         {
-            if (prefix == Prefix) return false;
-            if (JoiningQueriable == null) return true;
+            if (prefix == Prefix)
+            {
+                return false;
+            }
+
+            if (JoiningQueriable == null)
+            {
+                return true;
+            }
+
             return JoiningQueriable.Queriable.IsPrefixAvailable(prefix);
         }
 
         protected string GeneratePrefix()
         {
-            string baseName = "t";
+            const string baseName = "t";
 
-            if (IsPrefixAvailable(baseName)) return baseName;
+            if (IsPrefixAvailable(baseName))
+            {
+                return baseName;
+            }
 
             int cntr = 2;
 
             while (true)
             {
                 string prefix = baseName + cntr++;
-                if (IsPrefixAvailable(prefix)) return prefix;
+
+                if (IsPrefixAvailable(prefix))
+                {
+                    return prefix;
+                }
             }
         }
         #endregion
@@ -125,15 +144,15 @@ namespace GenericRepository.Models
             return count;
         }
 
-        public GRJoinedList GRToJoinedList()
+        public GRTable GRToTable()
         {
-            GRJoinedList result = Context.ExecuteJoinQuery(this);
+            GRTable result = Context.ExecuteJoinQuery(this);
             return result;
         }
 
-        public async Task<GRJoinedList> GRToJoinedListAsync()
+        public async Task<GRTable> GRToTableAsync()
         {
-            GRJoinedList result = await Context.ExecuteJoinQueryAsync(this);
+            GRTable result = await Context.ExecuteJoinQueryAsync(this);
             return result;
         }
         #endregion
@@ -153,7 +172,7 @@ namespace GenericRepository.Models
         {
             foreach (var propertyExpression in propertyExpressions)
             {
-                string propertyName = GRDataTypeHelper.GetExpressionPropertyName(propertyExpression);
+                string propertyName = GRDataTypeHelper.GetPropertyName(propertyExpression);
                 GRDBProperty property = Structure[propertyName];
                 QueryParams.Add(new GRCommandParamInclude<T>(property));
             }
@@ -170,7 +189,7 @@ namespace GenericRepository.Models
         {
             foreach (var propertyExpression in propertyExpressions)
             {
-                string propertyName = GRDataTypeHelper.GetExpressionPropertyName(propertyExpression);
+                string propertyName = GRDataTypeHelper.GetPropertyName(propertyExpression);
                 GRDBProperty property = Structure[propertyName];
                 QueryParams.Add(new GRCommandParamExclude<T>(property));
             }
@@ -204,7 +223,7 @@ namespace GenericRepository.Models
         {
             foreach (var propertyExpression in propertyExpressions)
             {
-                string properyName = GRDataTypeHelper.GetExpressionPropertyName(propertyExpression);
+                string properyName = GRDataTypeHelper.GetPropertyName(propertyExpression);
                 GRDBProperty prop = Structure[properyName];
                 this.QueryParams.Add(new GRCommandParamOrder<T>(prop, Enums.GRQueryOrderDirection.Ascending));
             }
@@ -216,7 +235,7 @@ namespace GenericRepository.Models
         {
             foreach (var property in properties)
             {
-                string properyName = GRDataTypeHelper.GetExpressionPropertyName(property);
+                string properyName = GRDataTypeHelper.GetPropertyName(property);
                 GRDBProperty prop = this.Structure[properyName];
                 this.QueryParams.Add(new GRCommandParamOrder<T>(prop, Enums.GRQueryOrderDirection.Descending));
             }
@@ -228,30 +247,29 @@ namespace GenericRepository.Models
         #region Joining
         public IGRQueriable<U> GRLeftJoin<U>(Expression<Func<T, object>> joiningLocalProperty, Expression<Func<U, object>> joinedProperty) where U : new()
         {
-            GRQueriable<U> joinedQueriable = PrepareJoinQuriable(joiningLocalProperty, joinedProperty, GRJoinType.LeftJoin);
+            GRQueriable<U> joinedQueriable = PrepareJoinQueriable(joiningLocalProperty, joinedProperty, GRJoinType.LeftJoin);
             return joinedQueriable;
         }
 
-
         public IGRQueriable<U> GRRightJoin<U>(Expression<Func<T, object>> joiningLocalProperty, Expression<Func<U, object>> joinedProperty) where U : new()
         {
-            GRQueriable<U> joinedQueriable = PrepareJoinQuriable(joiningLocalProperty, joinedProperty, GRJoinType.RightJoin);
+            GRQueriable<U> joinedQueriable = PrepareJoinQueriable(joiningLocalProperty, joinedProperty, GRJoinType.RightJoin);
             return joinedQueriable;
         }
 
         public IGRQueriable<U> GRInnerJoin<U>(Expression<Func<T, object>> joiningLocalProperty, Expression<Func<U, object>> joinedProperty) where U : new()
         {
-            GRQueriable<U> joinedQueriable = PrepareJoinQuriable(joiningLocalProperty, joinedProperty, GRJoinType.InnerJoin);
+            GRQueriable<U> joinedQueriable = PrepareJoinQueriable(joiningLocalProperty, joinedProperty, GRJoinType.InnerJoin);
             return joinedQueriable;
         }
 
         public IGRQueriable<U> GRFullOuterJoin<U>(Expression<Func<T, object>> joiningLocalProperty, Expression<Func<U, object>> joinedProperty) where U : new()
         {
-            GRQueriable<U> joinedQueriable = PrepareJoinQuriable(joiningLocalProperty, joinedProperty, GRJoinType.FullOuterJoin);
+            GRQueriable<U> joinedQueriable = PrepareJoinQueriable(joiningLocalProperty, joinedProperty, GRJoinType.FullOuterJoin);
             return joinedQueriable;
         }
 
-        private GRQueriable<U> PrepareJoinQuriable<U>(Expression<Func<T, object>> joiningLocalProperty, Expression<Func<U, object>> joinedProperty, GRJoinType type) where U : new()
+        private GRQueriable<U> PrepareJoinQueriable<U>(Expression<Func<T, object>> joiningLocalProperty, Expression<Func<U, object>> joinedProperty, GRJoinType type) where U : new()
         {
             GRQueriable<U> joinedQueriable = new GRQueriable<U>(Context, Repository);
 
@@ -259,24 +277,27 @@ namespace GenericRepository.Models
             {
                 Queriable = this,
                 Type = type,
-                SourcePropertyName = GRDataTypeHelper.GetExpressionPropertyName(joiningLocalProperty),
-                TargetPropertyName = GRDataTypeHelper.GetExpressionPropertyName(joinedProperty)
+                SourcePropertyName = GRDataTypeHelper.GetPropertyName(joiningLocalProperty),
+                TargetPropertyName = GRDataTypeHelper.GetPropertyName(joinedProperty)
             };
 
             Joined = new GRJoinedQueriable
             {
                 Queriable = joinedQueriable,
                 Type = type,
-                SourcePropertyName = GRDataTypeHelper.GetExpressionPropertyName(joinedProperty),
-                TargetPropertyName = GRDataTypeHelper.GetExpressionPropertyName(joiningLocalProperty)
+                SourcePropertyName = GRDataTypeHelper.GetPropertyName(joinedProperty),
+                TargetPropertyName = GRDataTypeHelper.GetPropertyName(joiningLocalProperty)
             };
 
             if (string.IsNullOrEmpty(this.Prefix))
             {
                 this.Prefix = GeneratePrefix();
+                this.HasTemporaryPrefix = true;
             }
 
             joinedQueriable.Prefix = joinedQueriable.GeneratePrefix();
+            joinedQueriable.HasTemporaryPrefix = true;
+
             return joinedQueriable;
         }
         #endregion

@@ -1,0 +1,220 @@
+﻿using GenericRepository.Helpers;
+using GenericRepository.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text;
+using System.Threading.Tasks;
+using System.Collections;
+using GenericRepository.Exceptions;
+
+namespace GenericRepository.Models
+{
+    public struct GRPropertyCollectionKey
+    {
+        public string Prefix { get; private set; }
+        public Type Type { get; private set; }
+
+        public GRPropertyCollectionKey()
+        {
+
+        }
+    }
+
+    public class GRPropertyCollectionItem
+    {
+        public string Prefix { get; private set; }
+        public List<GRDBProperty> Properties { get; private set; }
+        public Type Type { get; private set; }
+
+        public GRPropertyCollectionItem(string prefix, Type type)
+        {
+            Prefix = prefix;
+            Type = type;
+            Properties = new List<GRDBProperty>();
+        }
+    }
+
+    public class GRPropertyCollection : IEnumerable<GRPropertyCollectionItem>
+    {
+        // list of properties grouped by prefix
+        private Dictionary<GRPropertyCollectionKey, GRPropertyCollectionItem> collection = new Dictionary<GRPropertyCollectionKey, GRPropertyCollectionItem>();
+
+        public void AddType(Type type)
+        {
+            AddType(string.Empty, type);
+        }
+
+        public void AddType(string prefix, Type type)
+        {
+            GRDBStructure structure = GRDataTypeHelper.GetDBStructure(type);
+
+            structure.Properties.ForEach(prop =>
+            {
+                AddProperty(prefix, prop);
+            });
+        }
+
+        public void AddProperty<T>(params Expression<Func<T, object>>[] propExps)
+        {
+            AddProperty(string.Empty, propExps);
+        }
+
+        public void AddProperty<T>(string prefix, params Expression<Func<T, object>>[] propExps)
+        {
+            foreach (Expression<Func<T, object>> propExp in propExps)
+            {
+                GRDBProperty property = GRDataTypeHelper.GetDBProperty(propExp);
+                AddProperty(prefix, property);
+            }
+        }
+
+        void AddProperty(string prefix, GRDBProperty property)
+        {
+            Type propertyType = property.PropertyInfo.DeclaringType;
+            GRPropertyCollectionKey key = new GRPropertyCollectionKey();
+
+            if (!collection.ContainsKey(prefix))
+            {
+                collection.Add(prefix, new GRPropertyCollectionItem(prefix, property.PropertyInfo.DeclaringType));
+            }
+
+            GRPropertyCollectionItem item = collection[prefix];
+
+            if (property.PropertyInfo.DeclaringType != item.Type)
+            {
+                throw new GRInvalidOperationException("Property '{0}' of type '{1}' cannot be added with prefix '{2}'. This prefix is already bound to type '{3}'.",
+                    property.PropertyInfo.Name,
+                    property.PropertyInfo.DeclaringType.Name,
+                    prefix,
+                    item.Type.Name);
+            }
+
+
+            item.Properties.Add(property);
+        }
+
+        public void RemoveProperty<T>(params Expression<Func<T, object>>[] propsExps)
+        {
+            RemoveProperty(null, propsExps);
+        }
+
+        /// <summary>
+        /// Removes properties from collection. If no concrete properties are specified, all properties of the generic type will be removed.
+        /// </summary>
+        /// <typeparam name="T">Generic type</typeparam>
+        /// <param name="propsExps">Property expressions</param>
+        public void RemoveProperty<T>(string prefix, params Expression<Func<T, object>>[] propsExps)
+        {
+            // nothing to remove
+            if (!collection.ContainsKey(key))
+            {
+                return;
+            }
+
+            GRDBStructure structure = GRDataTypeHelper.GetDBStructure<T>();
+
+            Type type = typeof(T);
+            GRKey key = new GRKey(type, prefix);
+
+
+            // if no properties are specified, removing whole type
+            if (!propsExps.Any())
+            {
+                collection.Remove(key);
+                return;
+            }
+
+            // removing only specified properties
+            foreach (var propExp in propsExps)
+            {
+                // string propertyName = GRDataTypeHelper.GetPropertyName(propExp);
+                // GRDBProperty property = structure[propertyName];
+
+                GRDBProperty property = GRDataTypeHelper.GetDBProperty(propExp);
+
+                if (collection[key].Contains(property))
+                {
+                    collection[key].Remove(property);
+                }
+            }
+
+        }
+
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            foreach (var pair in collection)
+            {
+                sb.AppendLine(string.Format("Type {0}:", pair.Key));
+
+                foreach (GRDBProperty property in pair.Value)
+                {
+                    sb.AppendLine(string.Format(" - {0}: {1}", property.PropertyInfo.Name, property.PropertyInfo.PropertyType));
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Returns properties for provided data type.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public List<GRDBProperty> GetProperties<T>()
+        {
+            Type type = typeof(T);
+            return GetProperties(null, type);
+        }
+
+        public List<GRDBProperty> GetProperties(Type type)
+        {
+            return GetProperties(null, type);
+        }
+
+        public List<GRDBProperty> GetProperties<T>(string prefix)
+        {
+            Type type = typeof(T);
+            return GetProperties(prefix, type);
+        }
+
+        /// <summary>
+        /// Returns properties for provided data type.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public List<GRDBProperty> GetProperties(string prefix, Type type)
+        {
+            GRKey key = new GRKey(type, prefix);
+
+            if (!collection.ContainsKey(key))
+            {
+                return new List<GRDBProperty>();
+            }
+
+            return collection[key];
+        }
+
+        public IEnumerator<GRPropertyCollectionItem> GetEnumerator()
+        {
+            if (collection == null || !collection.Any())
+            {
+                yield break;
+            }
+
+            foreach (KeyValuePair<string, GRPropertyCollectionItem> pair in collection)
+            {
+                yield return pair.Value;
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
+    }
+}

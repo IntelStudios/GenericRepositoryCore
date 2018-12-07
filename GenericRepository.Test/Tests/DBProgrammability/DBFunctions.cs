@@ -6,10 +6,10 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using GenericRepository.Helpers;
 
-namespace GenericRepository.Test
+namespace GenericRepository.Test.DBProgrammability
 {
     [TestClass]
-    public class FNTest
+    public class DBFunction
     {
         static string dbBaseName = "xeelo-tests-gr-fn";
         static string dbName = null;

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GenericRepository.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,11 +9,14 @@ namespace GenericRepository.Exceptions
 {
     public class GRUnknownColumnException : ApplicationException
     {
-        public string ColumnName { get; private set; }
+        public string DBColumnName { get; private set; }
+        public string PropertyName { get; private set; }
 
-        public GRUnknownColumnException(string columnName) : base(string.Format("Column '{0}' was not found in output data.", columnName))
+        public GRUnknownColumnException(string propertyName, string dbColumnName) :
+            base($"Column '{dbColumnName}' (property {propertyName}) was not found in output data.")
         {
-            this.ColumnName = columnName;
+            this.DBColumnName = dbColumnName;
+            this.PropertyName = propertyName;
         }
     }
 }

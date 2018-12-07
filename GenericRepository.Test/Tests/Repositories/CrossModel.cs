@@ -5,10 +5,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 
-namespace GenericRepository.Test.Tests
+namespace GenericRepository.Test.Repositories
 {
     [TestClass]
-    public class EntityCrossModelTest
+    public class CrossModelRepository
     {
         static string dbBaseName = "xeelo-tests-gr-join-types";
         static string dbName = null;
@@ -43,7 +43,7 @@ namespace GenericRepository.Test.Tests
 
             joiningEntity.Description = "Changed description";
 
-            grEntities.GRUpdate<TestEntityJoining>(joiningEntity).GRExecuteAsync().GetAwaiter().GetResult();
+            grEntities.GREnqueueUpdate<TestEntityJoining>(joiningEntity).GRExecuteAsync().GetAwaiter().GetResult();
 
             TestEntityJoining updatedEntity = grEntities.CrossGRGetAsync(2).GetAwaiter().GetResult();
 
@@ -61,7 +61,7 @@ namespace GenericRepository.Test.Tests
                 TestEntityAutoPropertiesID = 1
             };
 
-            grEntities.GRInsert<TestEntityJoining>(joiningEntity).GRExecuteAsync().GetAwaiter().GetResult();
+            grEntities.GREnqueueInsert<TestEntityJoining>(joiningEntity).GRExecuteAsync().GetAwaiter().GetResult();
 
             Assert.IsTrue(joiningEntity.TestEntityJoiningID > 0, "Pripary key was not assigned.");
         }
@@ -77,13 +77,13 @@ namespace GenericRepository.Test.Tests
                 TestEntityAutoPropertiesID = 1
             };
 
-            grEntities.GRInsert<TestEntityJoining>(joiningEntity).GRExecuteAsync().GetAwaiter().GetResult();
+            grEntities.GREnqueueInsert<TestEntityJoining>(joiningEntity).GRExecuteAsync().GetAwaiter().GetResult();
 
             Assert.IsTrue(joiningEntity.TestEntityJoiningID > 0, "Pripary key was not assigned.");
 
             int id = joiningEntity.TestEntityJoiningID;
 
-            grEntities.GRDelete<TestEntityJoining>(joiningEntity).GRExecuteAsync().GetAwaiter().GetResult();
+            grEntities.GREnqueueDelete<TestEntityJoining>(joiningEntity).GRExecuteAsync().GetAwaiter().GetResult();
 
             TestEntityJoining deletedEntity = grEntities.CrossGRGetAsync(id).GetAwaiter().GetResult();
 

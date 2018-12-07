@@ -7,10 +7,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Threading.Tasks;
 
-namespace GenericRepository.Test
+namespace GenericRepository.Test.CRUD
 {
     [TestClass]
-    public class EntityDeleteTest
+    public class Delete
     {
         static string dbBaseName = "xeelo-tests-gr-delete";
         static string dbName = null;
@@ -66,7 +66,7 @@ namespace GenericRepository.Test
 
             try
             {
-                entity1Deletable = grEntities.GRDelete(entity);
+                entity1Deletable = grEntities.GREnqueueDelete(entity);
                 entity1Deletable.GRExecute();
             }
             catch (Exception exc)

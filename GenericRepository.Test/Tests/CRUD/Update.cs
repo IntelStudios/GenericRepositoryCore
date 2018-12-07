@@ -8,10 +8,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace GenericRepository.Test
+namespace GenericRepository.Test.CRUD
 {
     [TestClass]
-    public class EntityUpdateTest
+    public class Update
     {
         static string dbBaseName = "xeelo-tests-gr-update";
         static string dbName = null;
@@ -29,7 +29,7 @@ namespace GenericRepository.Test
         }
 
         [TestMethod]
-        public void Update_Entitity_Direct()
+        public void Update_Entitity()
         {
             TestEntityAutoPropertiesRepository grEntities = TestUtils.GetTestEntityAutoPropertiesRepository(dbName);
 
@@ -39,7 +39,7 @@ namespace GenericRepository.Test
 
             try
             {
-                updatable = grEntities.GRUpdate(entity);
+                updatable = grEntities.GREnqueueUpdate(entity);
                 updatable.GRExecute();
             }
             catch (Exception exc)
@@ -85,7 +85,7 @@ namespace GenericRepository.Test
 
             try
             {
-                updatable = grEntities.GRUpdate(entityToUpdate).GRInclude(e => e.IsActive);
+                updatable = grEntities.GREnqueueUpdate(entityToUpdate).GRInclude(e => e.IsActive);
                 updatable.GRExecute();
             }
             catch (Exception exc)
@@ -127,7 +127,7 @@ namespace GenericRepository.Test
 
             try
             {
-                updatable = grentities.GRInsert(entity);
+                updatable = grentities.GREnqueueInsert(entity);
                 updatable.GRExecute();
             }
             catch (Exception exc)
@@ -143,7 +143,7 @@ namespace GenericRepository.Test
             entity.TestEntityBinaryData = null;
             try
             {
-                updatable = grentities.GRUpdate(entity);
+                updatable = grentities.GREnqueueUpdate(entity);
                 updatable.GRExecute();
             }
             catch (Exception exc)
@@ -159,7 +159,7 @@ namespace GenericRepository.Test
             entity.TestEntityBinaryData = testbytes;
             try
             {
-                updatable = grentities.GRUpdate(entity);
+                updatable = grentities.GREnqueueUpdate(entity);
                 updatable.GRExecute();
             }
             catch (Exception exc)
@@ -190,7 +190,7 @@ namespace GenericRepository.Test
 
             try
             {
-                updatable = grentities.GRInsert(entity);
+                updatable = grentities.GREnqueueInsert(entity);
                 updatable.GRExecute();
             }
             catch (Exception exc)
@@ -207,7 +207,7 @@ namespace GenericRepository.Test
             entity.TestEntityBinaryData = null;
             try
             {
-                updatable = grentities.GRUpdate(entity);
+                updatable = grentities.GREnqueueUpdate(entity);
                 updatable.GRExecute();
             }
             catch (Exception exc)
@@ -223,7 +223,7 @@ namespace GenericRepository.Test
             entity.TestEntityBinaryData = new MemoryStream(testbytes);
             try
             {
-                updatable = grentities.GRUpdate(entity);
+                updatable = grentities.GREnqueueUpdate(entity);
                 updatable.GRExecute();
             }
             catch (Exception exc)
@@ -261,7 +261,7 @@ namespace GenericRepository.Test
 
             try
             {
-                updatable = grentities.GRInsert(entity);
+                updatable = grentities.GREnqueueInsert(entity);
                 updatable.GRExecute();
             }
             catch (Exception exc)
@@ -284,7 +284,7 @@ namespace GenericRepository.Test
 
             try
             {
-                updatable = grentities.GRUpdate(entity);
+                updatable = grentities.GREnqueueUpdate(entity);
                 updatable.GRExecute();
             }
             catch (Exception exc)
@@ -307,7 +307,7 @@ namespace GenericRepository.Test
 
             try
             {
-                updatable = grentities.GRUpdate(entity);
+                updatable = grentities.GREnqueueUpdate(entity);
                 updatable.GRExecute();
             }
             catch (Exception exc)

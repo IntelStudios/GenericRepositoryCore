@@ -52,9 +52,27 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\GRBeforeSaveAttributes.cs" />
+    <Compile Include="Contexts\GRContext.StoredProcedures.cs" />
+    <Compile Include="Contexts\MSSQL\GRMSSQLContext.Execution.cs" />
+    <Compile Include="Contexts\MSSQL\GRMSSQLContext.Parsing.cs" />
+    <Compile Include="Contexts\MSSQL\GRMSSQLContext.Save.cs" />
+    <Compile Include="Contexts\MSSQL\GRMSSQLContext.Delete.cs" />
+    <Compile Include="Contexts\MSSQL\GRMSSQLContext.Insert.cs" />
+    <Compile Include="Contexts\MSSQL\GRMSSQLContext.Logging.cs" />
+    <Compile Include="Contexts\MSSQL\GRMSSQLContext.Select.cs" />
+    <Compile Include="Contexts\MSSQL\GRMSSQLContext.StatementBuilding.cs" />
+    <Compile Include="Contexts\MSSQL\GRMSSQLContext.Statistics.cs" />
+    <Compile Include="Contexts\MSSQL\GRMSSQLContext.Update.cs" />
     <Compile Include="Enums\GRPreSaveActionType.cs" />
     <Compile Include="Exceptions\GRPreSaveException.cs" />
+    <Compile Include="Helpers\GRExtensions.cs" />
+    <Compile Include="Models\GRDataSet.cs" />
+    <Compile Include="Models\GRDBQueryProperty.cs" />
+    <Compile Include="Models\GRTable.cs" />
+    <Compile Include="Models\GRTableItem.cs" />
     <Compile Include="Models\GRPropertyCollection.cs" />
+    <Compile Include="Models\GRPropertyCollectionItem.cs" />
+    <Compile Include="Models\GRPropertyCollectionKey.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Attributes\GRAIPrimaryKeyAttribute.cs" />
     <Compile Include="Attributes\GRAutoValueAttributes.cs" />
@@ -68,7 +86,7 @@
     <Compile Include="Attributes\GRUpdateOnlyAttribute.cs" />
     <Compile Include="ContextLoggers\GRConsoleLogger.cs" />
     <Compile Include="Contexts\GRContext.cs" />
-    <Compile Include="Contexts\GRMSSQLContext.cs" />
+    <Compile Include="Contexts\MSSQL\GRMSSQLContext.cs" />
     <Compile Include="Enums\GRContextLogLevel.cs" />
     <Compile Include="Enums\GRQueryOrderDirection.cs" />
     <Compile Include="Exceptions\GRAttributeApplicationFailedException.cs" />
@@ -94,17 +112,21 @@
     <Compile Include="Models\GRDBStructure.cs" />
     <Compile Include="Models\GRDeletable.cs" />
     <Compile Include="Models\GRExecutionStatistics.cs" />
-    <Compile Include="Models\GRJoinedListItem.cs" />
+    <Compile Include="Models\GRTableRow.cs" />
     <Compile Include="Models\GRJoinedQueriable.cs" />
-    <Compile Include="Models\GRJoinType.cs" />
+    <Compile Include="Enums\GRJoinType.cs" />
     <Compile Include="Models\GRQueriable.cs" />
     <Compile Include="Models\GRCommandParams.cs" />
     <Compile Include="Models\GRContextQueueItem.cs" />
     <Compile Include="Models\GRUpdatable.cs" />
     <Compile Include="Models\GRStatements.cs" />
     <Compile Include="Repositories\GRRepository.cs" />
+    <Compile Include="Helpers\GRInstantiator.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Contexts\MSSQL\GRMSSQLContext.Transactions.cs" />
+    <Compile Include="Contexts\MSSQL\GRMSSQLContext.StoredProcedures.cs" />
+    <Compile Include="Contexts\MSSQL\GRMSSQLContext.Functions.cs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

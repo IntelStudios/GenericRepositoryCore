@@ -12,12 +12,14 @@ using System.Text;
 using GenericRepository.Exceptions;
 using GenericRepository.Helpers;
 using Ionic.Zip;
+using GenericRepository.Models;
 
-namespace GenericRepository.Test
+namespace GenericRepository.Test.DBProgrammability
 {
     [TestClass]
-    public class SPTest
+    public class DBStoredProcedures
     {
+        #region Init and cleanup
         static string dbBaseName = "xeelo-tests-gr-sp";
         static string dbName = null;
 
@@ -32,6 +34,7 @@ namespace GenericRepository.Test
         {
             TestUtils.DeleteDatabase(dbName);
         }
+        #endregion
 
         [TestMethod]
         public async Task Get_ListFromSP5_Primitive_All()
@@ -42,7 +45,33 @@ namespace GenericRepository.Test
 
             try
             {
-                ret = await context.GetListFromSPAsync<int>("spGetTestEntityAutoPropertyIDs", null);
+                ret = await context.GetValuesFromSPAsync<int>("spGetTestEntityAutoPropertyIDs");
+            }
+            catch (Exception exc)
+            {
+                Assert.Fail("Unable to get list from spGetTestEntityAutoPropertyIDs - {0}.", GRStringHelpers.GetExceptionString(exc));
+            }
+
+            Assert.IsTrue(ret.Count == TestUtils.TestCollectionSize, "Returned {0} entities instead of {1}.", ret.Count, TestUtils.TestCollectionSize);
+
+            foreach (var item in ret)
+            {
+                Assert.IsTrue(item > -1, "Entity was loaded incorrectly!");
+            }
+
+            Assert.IsTrue(ret.Distinct().Count() == ret.Count, "Entities are not unique!");
+        }
+
+        [TestMethod]
+        public async Task Get_ListFromSP5_Primitive_All_ColumnName()
+        {
+            IGRContext context = TestUtils.GetContext(dbName);
+
+            List<int> ret = null;
+
+            try
+            {
+                ret = await context.GetValuesFromSPAsync<int>("spGetTestEntityAutoPropertyIDs", "id");
             }
             catch (Exception exc)
             {
@@ -68,7 +97,7 @@ namespace GenericRepository.Test
 
             try
             {
-                testEntities = await context.GetListFromSPAsync<TestEntitySP1>("spGetTestEntityAutoProperties", null);
+                testEntities = await context.GetEntitiesFromSPAsync<TestEntitySP1>("spGetTestEntityAutoProperties");
             }
             catch (Exception exc)
             {
@@ -112,7 +141,7 @@ namespace GenericRepository.Test
 
             try
             {
-                testEntities = await context.GetListFromSPAsync<TestEntitySP1>("spGetTestEntityAutoProperties", new List<SqlParameter> { new SqlParameter("@TestEntityAutoPropertiesID", 1) });
+                testEntities = await context.GetEntitiesFromSPAsync<TestEntitySP1>("spGetTestEntityAutoProperties", new List<SqlParameter> { new SqlParameter("@TestEntityAutoPropertiesID", 1) });
             }
             catch (Exception exc)
             {
@@ -148,6 +177,22 @@ namespace GenericRepository.Test
         }
 
         [TestMethod]
+        public async Task Get_ItemFromSP1_ID1_TEST()
+        {
+            IGRContext context = TestUtils.GetContext(dbName);
+
+            try
+            {
+                var testEntity = await context.GetEntityFromSPAsync<TestEntitySP1>(
+                    "spGetTestEntityAutoProperties"); //, new List<SqlParameter> { new SqlParameter("@TestEntityAutoPropertiesID", 1) });
+            }
+            catch (Exception exc)
+            {
+                Assert.Fail("Unable to get item (ID: 1) from spGetTestEntityAutoProperties - {0}.", GRStringHelpers.GetExceptionString(exc));
+            }
+        }
+
+        [TestMethod]
         public async Task Get_ItemFromSP1_ID1()
         {
             IGRContext context = TestUtils.GetContext(dbName);
@@ -156,11 +201,42 @@ namespace GenericRepository.Test
 
             try
             {
-                testEntity = await context.GetItemFromSPAsync<TestEntitySP1>("spGetTestEntityAutoProperties", new List<SqlParameter> { new SqlParameter("@TestEntityAutoPropertiesID", 1) });
+                testEntity = await context.GetEntityFromSPAsync<TestEntitySP1>("spGetTestEntityAutoProperties", new List<SqlParameter> { new SqlParameter("@TestEntityAutoPropertiesID", 1) });
             }
             catch (Exception exc)
             {
                 Assert.Fail("Unable to get item (ID: 1) from spGetTestEntityAutoProperties - {0}.", GRStringHelpers.GetExceptionString(exc));
+            }
+
+            Assert.IsTrue(testEntity.id > 0, "Entity was not loaded!");
+
+            Assert.IsTrue(testEntity.name == string.Format(TestUtils.NameFormatString, testEntity.id),
+                "Entity name was loaded incorrectly! Entity should have Name = '{0}' instead of Name = '{1}'.",
+                string.Format(TestUtils.NameFormatString, testEntity.id),
+                testEntity.name
+                );
+
+            Assert.IsTrue(testEntity.order == (testEntity.id + 49) % 100 + 1,
+                "Entity name was loaded incorrectly! Entity should have Order = '{0}' instead of Order = '{1}'.",
+                (testEntity.id + 49) % 100 + 1,
+                testEntity.order
+                );
+        }
+
+        [TestMethod]
+        public async Task Get_ItemFromSP1()
+        {
+            IGRContext context = TestUtils.GetContext(dbName);
+
+            TestEntitySP1 testEntity = null;
+
+            try
+            {
+                testEntity = await context.GetEntityFromSPAsync<TestEntitySP1>("spGetTestEntityAutoProperties");
+            }
+            catch (Exception exc)
+            {
+                Assert.Fail("Unable to get item from spGetTestEntityAutoProperties - {0}.", GRStringHelpers.GetExceptionString(exc));
             }
 
             Assert.IsTrue(testEntity.id > 0, "Entity was not loaded!");
@@ -355,7 +431,7 @@ namespace GenericRepository.Test
         }
 
         [TestMethod]
-        public async Task ExecuteSP2_ALL()
+        public async Task SP_WithOutParams()
         {
             IGRContext context = TestUtils.GetContext(dbName);
 
@@ -363,7 +439,7 @@ namespace GenericRepository.Test
 
             try
             {
-                returnParams = await context.ExecuteSPAsync("spGetTestEntityAutoPropertiesWithReturningCount",
+                returnParams = await context.ExecuteSPWithOutParamsAsync("spGetTestEntityAutoPropertiesWithReturningCount",
                     new List<SqlParameter> {
                         new SqlParameter("@TestEntityAutoPropertiesID", DBNull.Value),
                         new SqlParameter("@EntryCount", SqlDbType.Int) { Direction = ParameterDirection.Output }
@@ -388,7 +464,7 @@ namespace GenericRepository.Test
 
             try
             {
-                returnParams = await context.ExecuteSPAsync("spGetTestEntityAutoPropertiesWithReturningCount",
+                returnParams = await context.ExecuteSPWithOutParamsAsync("spGetTestEntityAutoPropertiesWithReturningCount",
                     new List<SqlParameter> {
                         new SqlParameter("@TestEntityAutoPropertiesID", 1),
                         new SqlParameter("@EntryCount", SqlDbType.Int) { Direction = ParameterDirection.Output }
@@ -475,7 +551,6 @@ namespace GenericRepository.Test
             fileStream.Close();
         }        
 
-
         [TestMethod]
         public async Task Get_ListFromSP4_Primitive_Error()
         {
@@ -485,7 +560,7 @@ namespace GenericRepository.Test
 
             try
             {
-                res = await context.GetListFromSPAsync<int>("spRaiseError", null);
+                res = await context.GetValuesFromSPAsync<int>("spRaiseError");
 
                 Assert.Fail("No exception was thrown");
             }
@@ -509,7 +584,7 @@ namespace GenericRepository.Test
 
             try
             {
-                res = await context.GetListFromSPAsync<TestEntitySP4>("spRaiseError", null);
+                res = await context.GetEntitiesFromSPAsync<TestEntitySP4>("spRaiseError");
 
                 Assert.Fail("No exception was thrown");
             }
@@ -533,7 +608,7 @@ namespace GenericRepository.Test
 
             try
             {
-                res = await context.GetItemFromSPAsync<int>("spRaiseError", null);
+                res = await context.GetValueFromSPAsync<int>("spRaiseError");
 
                 Assert.Fail("No exception was thrown");
             }
@@ -557,7 +632,7 @@ namespace GenericRepository.Test
 
             try
             {
-                res = await context.GetItemFromSPAsync<TestEntitySP4>("spRaiseError", null);
+                res = await context.GetEntityFromSPAsync<TestEntitySP4>("spRaiseError");
 
                 Assert.Fail("No exception was thrown");
             }
@@ -629,7 +704,7 @@ namespace GenericRepository.Test
 
             try
             {
-                res = await context.ExecuteSPAsync("spRaiseError", null);
+                res = await context.ExecuteSPWithOutParamsAsync("spRaiseError");
 
                 Assert.Fail("No exception was thrown");
             }
@@ -704,6 +779,182 @@ namespace GenericRepository.Test
                 Assert.IsTrue(((SqlException)exc.InnerException).Message == "Error occured", "InnerException should have Message = 'Error occured' insteed of Message = '{0}'", ((SqlException)exc.InnerException).Message);
                 Assert.IsTrue(((SqlException)exc.InnerException).Number == 50000, "InnerException should have Number = 50000 insteed of Number = {0}", ((SqlException)exc.InnerException).Number);
                 Assert.IsTrue(((SqlException)exc.InnerException).Procedure == "spRaiseError", "InnerException should have Procedure = 'spRaiseError' insteed of Procedure = '{0}'", ((SqlException)exc.InnerException).Procedure);
+            }
+        }
+
+        [TestMethod]
+        public async Task Get_ListFromSP5_Prefixed()
+        {
+            IGRContext context = TestUtils.GetContext(dbName);
+
+            List<TestEntityAutoProperties> testEntities = null;
+
+            try
+            {
+                testEntities = await context.GetEntitiesFromSPAsync<TestEntityAutoProperties>("spGetTestEntityAutoPropertiesPrefixed", "prefix");
+            }
+            catch (Exception exc)
+            {
+                Assert.Fail("Unable to get list from sp5 - {0}.", GRStringHelpers.GetExceptionString(exc));
+            }
+
+            Assert.IsTrue(testEntities.Count == TestUtils.TestCollectionSize, "Returned {0} entities instead of {1}.", testEntities.Count, TestUtils.TestCollectionSize);
+
+            foreach (var item in testEntities)
+            {
+                Assert.IsTrue(item.TestEntityAutoPropertiesID > 0, "Entity was not loaded!");
+
+                Assert.IsTrue(item.Name == string.Format(TestUtils.NameFormatString, item.TestEntityAutoPropertiesID),
+                    "Entity name was loaded incorrectly! Entity with ID = {0} should have Name = '{1}' instead of Name = '{2}'.",
+                    item.TestEntityAutoPropertiesID,
+                    string.Format(TestUtils.NameFormatString, item.TestEntityAutoPropertiesID),
+                    item.Name
+                    );
+
+                Assert.IsTrue(item.TestEntityAutoPropertiesOrder == (item.TestEntityAutoPropertiesID + 49) % 100 + 1,
+                    "Entity name was loaded incorrectly! Entity with ID = {0} should have Order = '{1}' instead of Order = '{2}'.",
+                    item.TestEntityAutoPropertiesID,
+                    (item.TestEntityAutoPropertiesID + 49) % 100 + 1,
+                    item.TestEntityAutoPropertiesOrder
+                    );
+            }
+
+            List<int> allIds = testEntities.Select(e => e.TestEntityAutoPropertiesID).ToList();
+            List<string> allNames = testEntities.Select(e => e.Name).ToList();
+
+            Assert.IsTrue(allIds.Distinct().Count() == testEntities.Count, "Entity IDs are not unique!");
+            Assert.IsTrue(allNames.Distinct().Count() == testEntities.Count, "Entity names are not unique!");
+        }
+
+        [TestMethod]
+        public async Task Get_ListFromSP5_PropCollection()
+        {
+            IGRContext context = TestUtils.GetContext(dbName);
+
+            GRTable testEntities = null;
+
+            GRPropertyCollection propCol = new GRPropertyCollection();
+            propCol.AddType<TestEntityAutoProperties>("prefix");
+
+            try
+            {
+                testEntities = await context.GetEntitiesFromSPAsync("spGetTestEntityAutoPropertiesPrefixed", null, propCol);
+            }
+            catch (Exception exc)
+            {
+                Assert.Fail("Unable to get list from sp5 - {0}.", GRStringHelpers.GetExceptionString(exc));
+            }
+
+            Assert.IsTrue(testEntities.Count == TestUtils.TestCollectionSize, "Returned {0} entities instead of {1}.", testEntities.Count, TestUtils.TestCollectionSize);
+
+            foreach (var row in testEntities)
+            {
+                TestEntityAutoProperties item = row.Get<TestEntityAutoProperties>("prefix");
+
+                Assert.IsTrue(item.TestEntityAutoPropertiesID > 0, "Entity was not loaded!");
+
+                Assert.IsTrue(item.Name == string.Format(TestUtils.NameFormatString, item.TestEntityAutoPropertiesID),
+                    "Entity name was loaded incorrectly! Entity with ID = {0} should have Name = '{1}' instead of Name = '{2}'.",
+                    item.TestEntityAutoPropertiesID,
+                    string.Format(TestUtils.NameFormatString, item.TestEntityAutoPropertiesID),
+                    item.Name
+                    );
+
+                Assert.IsTrue(item.TestEntityAutoPropertiesOrder == (item.TestEntityAutoPropertiesID + 49) % 100 + 1,
+                    "Entity name was loaded incorrectly! Entity with ID = {0} should have Order = '{1}' instead of Order = '{2}'.",
+                    item.TestEntityAutoPropertiesID,
+                    (item.TestEntityAutoPropertiesID + 49) % 100 + 1,
+                    item.TestEntityAutoPropertiesOrder
+                    );
+            }
+        }
+
+        [TestMethod]
+        public async Task Get_ListFromSP5_PropCollection_ExcludeProperty()
+        {
+            IGRContext context = TestUtils.GetContext(dbName);
+
+            GRTable testEntities = null;
+
+            GRPropertyCollection propCol = new GRPropertyCollection();
+            propCol.AddType<TestEntityAutoProperties>("prefix");
+            propCol.RemoveProperty<TestEntityAutoProperties>("prefix", p => p.Name);
+
+            try
+            {
+                testEntities = await context.GetEntitiesFromSPAsync("spGetTestEntityAutoPropertiesPrefixed", null, propCol);
+            }
+            catch (Exception exc)
+            {
+                Assert.Fail("Unable to get list from sp5 - {0}.", GRStringHelpers.GetExceptionString(exc));
+            }
+
+            Assert.IsTrue(testEntities.Count == TestUtils.TestCollectionSize, "Returned {0} entities instead of {1}.", testEntities.Count, TestUtils.TestCollectionSize);
+
+            foreach (var row in testEntities)
+            {
+                TestEntityAutoProperties item = row.Get<TestEntityAutoProperties>("prefix");
+
+                Assert.IsTrue(item.TestEntityAutoPropertiesID > 0, "Entity was not loaded!");
+
+                Assert.IsTrue(item.Name == null, "Entity name was loaded but it shouldn't.");
+
+                Assert.IsTrue(item.TestEntityAutoPropertiesOrder == (item.TestEntityAutoPropertiesID + 49) % 100 + 1,
+                    "Entity name was loaded incorrectly! Entity with ID = {0} should have Order = '{1}' instead of Order = '{2}'.",
+                    item.TestEntityAutoPropertiesID,
+                    (item.TestEntityAutoPropertiesID + 49) % 100 + 1,
+                    item.TestEntityAutoPropertiesOrder
+                    );
+            }
+        }
+
+        [TestMethod]
+        public async Task Get_ValuesFromSP_FirstColumn()
+        {
+            IGRContext context = TestUtils.GetContext(dbName);
+
+            List<int> result = null;
+
+            try
+            {
+                result = await context.GetValuesFromSPAsync<int>("spGetTestEntityAutoPropertiesPrefixed");
+            }
+            catch (Exception exc)
+            {
+                Assert.Fail("Unable to get list from sp5 - {0}.", GRStringHelpers.GetExceptionString(exc));
+            }
+
+            Assert.IsTrue(result.Count == TestUtils.TestCollectionSize, "Returned {0} entities instead of {1}.", result.Count, TestUtils.TestCollectionSize);
+
+            for (int i = 0; i < result.Count; i++)
+            {
+                Assert.IsTrue(result[i] == i + 1, $"Parsed value {result[i]} does not correspond to expected value {i + 1}.");
+            }
+        }
+
+        [TestMethod]
+        public async Task Get_ValuesFromSP_NamedColumn()
+        {
+            IGRContext context = TestUtils.GetContext(dbName);
+
+            List<int> result = null;
+
+            try
+            {
+                result = await context.GetValuesFromSPAsync<int>("spGetTestEntityAutoPropertiesPrefixed", "prefix_TestEntityAutoPropertiesOrder");
+            }
+            catch (Exception exc)
+            {
+                Assert.Fail("Unable to get list from sp5 - {0}.", GRStringHelpers.GetExceptionString(exc));
+            }
+
+            Assert.IsTrue(result.Count == TestUtils.TestCollectionSize, "Returned {0} entities instead of {1}.", result.Count, TestUtils.TestCollectionSize);
+
+            for (int i = 0; i < result.Count; i++)
+            {
+                int res = result[i];
+                int exp = (50 + i) % 100 + 1;
+                Assert.IsTrue(res == exp, $"Parsed value {exp} on row {i+1} does not correspond to expected value {res}.");
             }
         }
     }

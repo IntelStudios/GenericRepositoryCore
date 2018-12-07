@@ -8,18 +8,29 @@ using System.Data.SqlClient;
 using System.Data;
 using System.IO;
 using System.Web;
+using GenericRepository.Helpers;
+using System.Reflection;
+using GenericRepository.Attributes;
+using System.Linq;
+using GenericRepository.Exceptions;
 
 namespace GenericRepository.Contexts
 {
-    public abstract class GRContext : IGRContext
+    public abstract partial class GRContext : IGRContext
     {
         protected Dictionary<GRContextLogLevel, List<IGRContextLogger>> loggers = null;
 
+        #region Constructors & destructors
         public GRContext()
         {
             loggers = new Dictionary<GRContextLogLevel, List<IGRContextLogger>>();
             cache = new Dictionary<string, object>();
         }
+
+        public virtual void Dispose()
+        {
+        }
+        #endregion
 
         #region Logging methods
         protected bool HasAttachedDebugLogger = false;
@@ -98,8 +109,18 @@ namespace GenericRepository.Contexts
         public abstract Task<List<T>> ExecuteQueryAsync<T>(IGRQueriable<T> query);
         public abstract List<T> ExecuteQuery<T>(string sqlStatement);
         public abstract Task<List<T>> ExecuteQueryAsync<T>(string sqlStatement);
-        public abstract void ExecuteQuery(string sqlStatement);
-        public abstract Task ExecuteQueryAsync(string sqlStatement);
+
+        public abstract string ExecuteNonQuery(string sqlStatement, bool returnMessage);
+        public virtual void ExecuteNonQuery(string sqlStatement)
+        {
+            ExecuteNonQuery(sqlStatement, false);
+        }
+        public abstract Task<string> ExecuteNonQueryAsync(string sqlStatement, bool returnMessage);
+        public virtual Task ExecuteNonQueryAsync(string sqlStatement)
+        {
+            return ExecuteNonQueryAsync(sqlStatement, false);
+        }
+
         public abstract T ExecuteScalar<T>(IGRQueriable<T> queriable);
         public abstract T ExecuteScalar<T>(string sqlStatement);
         public abstract Task<T> ExecuteScalarAsync<T>(IGRQueriable<T> queriable);
@@ -110,9 +131,9 @@ namespace GenericRepository.Contexts
         #endregion
 
         #region Update/insert/delete methods
-        public abstract void Update<T>(IGRUpdatable<T> updatable);
-        public abstract void Delete<T>(IGRDeletable<T> deletable);
-        public abstract void Insert<T>(IGRUpdatable<T> updatable);
+        public abstract void EnqueueUpdate<T>(IGRUpdatable<T> updatable);
+        public abstract void EnqueueDelete<T>(IGRDeletable<T> deletable);
+        public abstract void EnqueueInsert<T>(IGRUpdatable<T> updatable);
         public abstract GRExecutionStatistics Execute<T>(IGRUpdatable<T> updatable);
         public abstract Task<GRExecutionStatistics> ExecuteAsync<T>(IGRUpdatable<T> updatable);
         public abstract GRExecutionStatistics Execute<T>(IGRDeletable<T> deletable);
@@ -126,35 +147,9 @@ namespace GenericRepository.Contexts
         public abstract Task SaveChangesInTransactionAsync();
         #endregion
 
-        #region Stored procedures methods
-        public abstract T GetItemFromSP<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
-        public abstract Task<T> GetItemFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
-        public abstract List<T> GetListFromSP<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
-        public abstract Task<List<T>> GetListFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameter, int timeout = -1);
-        public virtual async Task<GRJoinedList> GetJoinedListFromSPAsync(string spName, List<SqlParameter> spParams, Dictionary<string, Type> spPrefixes, int timeout = -1)
-        {
-            return await GetJoinedListFromSPAsync(spName, spParams, spPrefixes, null, timeout);
-        }
-        public abstract Task<GRJoinedList> GetJoinedListFromSPAsync(string spName, List<SqlParameter> spParams, Dictionary<string, Type> spPrefixes, GRPropertyCollection properties, int timeout = -1);
-        public abstract Task<List<SqlParameter>> ExecuteSPAsync(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
-        public abstract DataSet GetDataSetFromSP(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
-        public abstract DataTable GetDataTableFromSP(string storedProcedureName, List<SqlParameter> parameters, List<SqlParameter> returnParameters, int timeout = -1);
-
-        public abstract Task<DataTable> GetDataTableFromSPAsync(string storedProcedureName, int timeout = -1);
-        public abstract Task<DataTable> GetDataTableFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
-        public abstract Task<DataTable> GetDataTableFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, List<SqlParameter> returnParameters, int timeout = -1);
-
-        public abstract Task<MemoryStream> GetMemoryStreamFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, CommandBehavior? commandBehavior = null);
-        public abstract Task<Stream> GetZipStreamFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, CommandBehavior? commandBehavior = null, string fileName = "default");
-        #endregion
-
         #region Scalar functions methods
         public abstract T ExecuteScalarFunction<T>(string functionName, List<SqlParameter> parameters);
         public abstract Task<T> ExecuteScalarFunctionAsync<T>(string functionName, List<SqlParameter> parameters);
-        #endregion
-
-        #region Query store methods
-        public abstract Task<Tuple<string, DataSet>> GetQueryStoreStatementResultSetAsync(string statement, bool returnTables = true);
         #endregion
 
         #region Transactions
@@ -164,8 +159,13 @@ namespace GenericRepository.Contexts
 
         #endregion
 
+        #region Join
+        public abstract GRTable ExecuteJoinQuery(IGRQueriable queriable);
+        public abstract Task<GRTable> ExecuteJoinQueryAsync(IGRQueriable queriable);
+        #endregion
+
         #region Cache
-        Dictionary<string, object> cache;
+        protected Dictionary<string, object> cache;
         public Dictionary<string, object> Cache
         {
             get
@@ -175,30 +175,21 @@ namespace GenericRepository.Contexts
         }
         #endregion
 
-        #region Join
-        public abstract GRJoinedList ExecuteJoinQuery(IGRQueriable queriable);
-        public abstract Task<GRJoinedList> ExecuteJoinQueryAsync(IGRQueriable queriable);
+        #region Data sets
+        public virtual DataSet GetDataSetFromCommand(string commandString)
+        {
+            return GetDataSetFromCommand(commandString, defaultTimeout);
+        }
+        public virtual DataSet GetDataSetFromCommand(string commandString, int timeout)
+        {
+            GRDataSet dataSet = GetDataSetFromCommand(commandString, false, timeout);
+            return dataSet.DataSet;
+        }
+        public virtual GRDataSet GetDataSetFromCommand(string commandString, bool returnMessage)
+        {
+            return GetDataSetFromCommand(commandString, returnMessage, defaultTimeout);
+        }
+        public abstract GRDataSet GetDataSetFromCommand(string commandString, bool returnMessage, int timeout);
         #endregion
-
-        protected bool IsPrimitiveType<T>()
-        {
-            if (typeof(T).IsPrimitive || 
-                typeof(T) == typeof(String) || 
-                typeof(T) == typeof(DateTime) ||
-                typeof(T) == typeof(DateTime?) ||
-                typeof(T) == typeof(int?) || 
-                typeof(T) == typeof(long?) ||
-                typeof(T) == typeof(Guid) ||
-                typeof(T) == typeof(Guid?))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        public virtual void Dispose()
-        {
-        }
     }
 }

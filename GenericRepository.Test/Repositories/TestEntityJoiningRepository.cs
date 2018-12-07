@@ -17,4 +17,18 @@ namespace GenericRepository.Test.Repositories
         {
         }
     }
+
+    public class TestEntityJoiningType3Repository : GRRepository<TestEntityJoiningType3>, IGRRepository<TestEntityJoiningType3>
+    {
+        public TestEntityJoiningType3Repository(IGRContext context) : base(context)
+        {
+        }
+    }
+
+    public class TestEntityJoiningType4Repository : GRRepository<TestEntityJoiningType4>, IGRRepository<TestEntityJoiningType4>
+    {
+        public TestEntityJoiningType4Repository(IGRContext context) : base(context)
+        {
+        }
+    }
 }

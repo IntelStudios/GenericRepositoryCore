@@ -112,6 +112,24 @@ namespace GenericRepository.Repositories
             return queryBuilder.GRLeftJoin<U>(property1, property2);
         }
 
+        public IGRQueriable<U> GRRightJoin<U>(Expression<Func<T, object>> property1, Expression<Func<U, object>> property2) where U : new()
+        {
+            GRQueriable<T> queryBuilder = new GRQueriable<T>(context, this);
+            return queryBuilder.GRRightJoin<U>(property1, property2);
+        }
+
+        public IGRQueriable<U> GRInnerJoin<U>(Expression<Func<T, object>> property1, Expression<Func<U, object>> property2) where U : new()
+        {
+            GRQueriable<T> queryBuilder = new GRQueriable<T>(context, this);
+            return queryBuilder.GRInnerJoin<U>(property1, property2);
+        }
+
+        public IGRQueriable<U> GRFullOuterJoin<U>(Expression<Func<T, object>> property1, Expression<Func<U, object>> property2) where U : new()
+        {
+            GRQueriable<T> queryBuilder = new GRQueriable<T>(context, this);
+            return queryBuilder.GRFullOuterJoin<U>(property1, property2);
+        }
+
         public IGRQueriable<T> GROrderBy(params Expression<Func<T, object>>[] properties)
         {
             GRQueriable<T> queryBuilder = new GRQueriable<T>(context, this);
@@ -183,31 +201,31 @@ namespace GenericRepository.Repositories
         #endregion
 
         #region Insert/Update/Delete methods
-        public IGRUpdatable<T> GRUpdate(T entity)
+        public IGRUpdatable<T> GREnqueueUpdate(T entity)
         {
-            return GRUpdate<T>(entity);
+            return GREnqueueUpdate<T>(entity);
         }
 
-        public IGRUpdatable<R> GRUpdate<R>(R entity)
+        public IGRUpdatable<R> GREnqueueUpdate<R>(R entity)
         {
             GRUpdatable<R> updatable = new GRUpdatable<R>(context, entity, this);
-            context.Update(updatable);
+            context.EnqueueUpdate(updatable);
             return updatable;
         }
 
-        public IGRUpdatable<T> GRInsert(T entity)
+        public IGRUpdatable<T> GREnqueueInsert(T entity)
         {
-            return GRInsert<T>(entity);
+            return GREnqueueInsert<T>(entity);
         }
 
-        public IGRUpdatable<R> GRInsert<R>(R entity)
+        public IGRUpdatable<R> GREnqueueInsert<R>(R entity)
         {
             GRUpdatable<R> updatable = new GRUpdatable<R>(context, entity, this);
-            context.Insert(updatable);
+            context.EnqueueInsert(updatable);
             return updatable;
         }
 
-        public IGRDeletable<T> GRDelete(T entity)
+        public IGRDeletable<T> GREnqueueDelete(T entity)
         {
             GRDeletable<T> deletable = new GRDeletable<T>(context, entity, this);
             var whereList = GetGRDeleteLambdas(entity);
@@ -217,11 +235,11 @@ namespace GenericRepository.Repositories
                 deletable.GRWhere(whereItem);
             }
 
-            context.Delete(deletable);
+            context.EnqueueDelete(deletable);
             return deletable;
         }
 
-        public IGRDeletable<R> GRDelete<R>(R entity)
+        public IGRDeletable<R> GREnqueueDelete<R>(R entity)
         {
             GRDeletable<R> deletable = new GRDeletable<R>(context, entity, this);
             var whereList = GetGRDeleteLambdas(entity);
@@ -231,17 +249,17 @@ namespace GenericRepository.Repositories
                 deletable.GRWhere(whereItem);
             }
 
-            context.Delete(deletable);
+            context.EnqueueDelete(deletable);
             return deletable;
         }
 
-        public IGRDeletable<T> GRDelete()
+        public IGRDeletable<T> GREnqueueDelete()
         {
             GRDeletable<T> queryBuilder = new GRDeletable<T>(context, default(T), this);
             return queryBuilder;
         }
 
-        public IGRDeletable<R> GRDelete<R>()
+        public IGRDeletable<R> GREnqueueDelete<R>()
         {
             GRDeletable<R> queryBuilder = new GRDeletable<R>(context, default(R), this);
             return queryBuilder;
@@ -255,13 +273,10 @@ namespace GenericRepository.Repositories
 
         }
 
-#pragma warning disable CS1998 // It's OK because this method don't have to be overwritten - Async method lacks 'await' operators and will run synchronously
-        public async virtual Task PrepareForSaveAsync()
+        public virtual Task PrepareForSaveAsync()
         {
-
+            return Task.FromResult(default(object));
         }
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-
         #endregion
     }
 }

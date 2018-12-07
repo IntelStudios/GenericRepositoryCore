@@ -10,10 +10,10 @@ using System.Text;
 using System.Threading.Tasks;
 using GenericRepository.Helpers;
 
-namespace GenericRepository.Test
+namespace GenericRepository.Test.CRUD
 {
     [TestClass]
-    public class EntityReadTest
+    public class Read
     {
         static string dbBaseName = "xeelo-tests-gr-read";
         static string dbName = null;
@@ -29,7 +29,6 @@ namespace GenericRepository.Test
         {
             TestUtils.DeleteDatabase(dbName);
         }
-
 
         [TestMethod]
         public async Task Get_Entities_All()
@@ -204,6 +203,8 @@ namespace GenericRepository.Test
             Assert.IsTrue(testEntities.Count == 1, "Exactly single instance should be returned instead of {0} entities.", testEntities.Count);
 
             Assert.IsTrue(testEntities.Single().TestEntityAutoPropertiesID == 10, "Entity with ID = 10 should be returned instead of entitity with ID = {0}", testEntities.Single().TestEntityAutoPropertiesID);
+
+            Assert.IsTrue(testEntities.Single().ID == 10, "Autoproperty [GRIDProperty] was not applied correctly.");
         }
 
         [TestMethod]
@@ -336,297 +337,6 @@ namespace GenericRepository.Test
             for (int i = 1; i < entities.Count; i++)
             {
                 Assert.IsTrue(String.Compare(entities[i].Name, entities[i - 1].Name) != 0, "Wrong sort order");
-            }
-        }
-
-        [TestMethod]
-        public async Task Get_Entities_Join()
-        {
-            IGRRepository<TestEntityAutoProperties> grEntities = TestUtils.GetTestEntityAutoPropertiesRepository(dbName);
-            GRJoinedList list = null;
-
-            try
-            {
-                list = await grEntities
-                    .GRLeftJoin<TestEntityJoining>(e1 => e1.TestEntityAutoPropertiesID, e2 => e2.TestEntityAutoPropertiesID)
-                    .GRToJoinedListAsync();
-            }
-            catch (Exception exc)
-            {
-                Assert.Fail("Unable to get joined entities - {0}.", GRStringHelpers.GetExceptionString(exc));
-            }
-
-            Assert.IsTrue(list.Count == TestUtils.TestCollectionSize, "Returned {0} entities instead of {1}.", list.Count, TestUtils.TestCollectionSize);
-
-            foreach (var item in list)
-            {
-                TestEntityAutoProperties e1 = item.Get<TestEntityAutoProperties>();
-                TestEntityJoining e2 = item.Get<TestEntityJoining>();
-
-                Assert.IsTrue(e1.TestEntityAutoPropertiesID != 0, "ID was not loaded.");
-                Assert.IsTrue(e1.TestEntityAutoPropertiesOrder != 0, "Order was not loaded.");
-                Assert.IsTrue(!string.IsNullOrEmpty(e1.Name), "Name was not loaded.");
-                Assert.IsTrue(string.IsNullOrEmpty(e1.TestEntityAutoPropertiesDescription), "Description was loaded.");
-
-                Assert.IsTrue(e1.CreatedDate == TestUtils.DefaultCreatedDate, "CreatedDate was not loaded");
-                Assert.IsTrue(e1.ModifiedDate == TestUtils.DefaultCreatedDate, "ModifiedDate was not loaded");
-                Assert.IsTrue(e1.CreatedBy == -1, "CreatedBy was not loaded");
-                Assert.IsTrue(e1.ModifiedBy == -1, "ModifiedBy was not loaded");
-                Assert.IsTrue(e1.IsActive, "IsActive was not loaded");
-
-                Assert.IsTrue(e2.TestEntityJoiningID != 0, "TestEntity2ID was not loaded.");
-                Assert.IsTrue(e2.TestEntityAutoPropertiesID != 0, "TestEntity1ID was not loaded.");
-                Assert.IsTrue(!string.IsNullOrEmpty(e2.Description), "Description was not loaded.");
-
-                Assert.IsTrue(e1.TestEntityAutoPropertiesID == e2.TestEntityAutoPropertiesID, "TestEntity1ID != TestEntity1ID");
-
-                Assert.IsTrue(e1.Name == string.Format(TestUtils.NameFormatString, e1.TestEntityAutoPropertiesID), "Entity was not loaded properly.");
-                Assert.IsTrue(e2.Description == string.Format("Description {0}", e2.TestEntityJoiningID), "Entity was not loaded properly.");
-            }
-        }
-
-        [TestMethod]
-        public async Task Get_Entities_Join_Exclude_E1_All()
-        {
-            IGRRepository<TestEntityAutoProperties> grEntities = TestUtils.GetTestEntityAutoPropertiesRepository(dbName);
-            GRJoinedList list = null;
-
-            try
-            {
-                list = await grEntities
-                    .GRAll()
-                    .GRExcludeAll()
-                    .GRLeftJoin<TestEntityJoining>(e1 => e1.TestEntityAutoPropertiesID, e2 => e2.TestEntityAutoPropertiesID)
-                    .GRToJoinedListAsync();
-            }
-            catch (Exception exc)
-            {
-                Assert.Fail("Unable to get joined entities with excluded entity - {0}.", GRStringHelpers.GetExceptionString(exc));
-            }
-
-            Assert.IsTrue(list.Count == TestUtils.TestCollectionSize, "Returned {0} entities instead of {1}.", list.Count, TestUtils.TestCollectionSize);
-
-            foreach (var item in list)
-            {
-                TestEntityAutoProperties e1 = item.Get<TestEntityAutoProperties>();
-                TestEntityJoining e2 = item.Get<TestEntityJoining>();
-
-                Assert.IsTrue(e1 == null, "Entity was loaded.");
-
-                Assert.IsTrue(e2.TestEntityJoiningID != 0, "ID was not loaded.");
-                Assert.IsTrue(e2.TestEntityAutoPropertiesID != 0, "ID was not loaded.");
-                Assert.IsTrue(!string.IsNullOrEmpty(e2.Description), "Description was not loaded.");
-            }
-        }
-
-        [TestMethod]
-        public async Task Get_Entities_Join_Exclude_E2_All()
-        {
-            IGRRepository<TestEntityAutoProperties> grEntities = TestUtils.GetTestEntityAutoPropertiesRepository(dbName);
-            GRJoinedList list = null;
-
-            try
-            {
-                list = await grEntities
-                    .GRAll()
-                    .GRLeftJoin<TestEntityJoining>(e1 => e1.TestEntityAutoPropertiesID, e2 => e2.TestEntityAutoPropertiesID)
-                    .GRExcludeAll()
-                    .GRToJoinedListAsync();
-            }
-            catch (Exception exc)
-            {
-                Assert.Fail("Unable to get joined entities with excluded entity - {0}.", GRStringHelpers.GetExceptionString(exc));
-            }
-
-            Assert.IsTrue(list.Count == TestUtils.TestCollectionSize, "Returned {0} entities instead of {1}.", list.Count, TestUtils.TestCollectionSize);
-
-            foreach (var item in list)
-            {
-                TestEntityAutoProperties e1 = item.Get<TestEntityAutoProperties>();
-                TestEntityJoining e2 = item.Get<TestEntityJoining>();
-
-                Assert.IsTrue(e1.TestEntityAutoPropertiesID != 0, "ID was not loaded.");
-                Assert.IsTrue(e1.TestEntityAutoPropertiesOrder != 0, "Order was not loaded.");
-                Assert.IsTrue(!string.IsNullOrEmpty(e1.Name), "Name was not loaded.");
-                Assert.IsTrue(string.IsNullOrEmpty(e1.TestEntityAutoPropertiesDescription), "Description was loaded.");
-
-                Assert.IsTrue(e1.CreatedDate == TestUtils.DefaultCreatedDate, "CreatedDate was not loaded");
-                Assert.IsTrue(e1.ModifiedDate == TestUtils.DefaultCreatedDate, "ModifiedDate was not loaded");
-                Assert.IsTrue(e1.CreatedBy == -1, "CreatedBy was not loaded");
-                Assert.IsTrue(e1.ModifiedBy == -1, "ModifiedBy was not loaded");
-                Assert.IsTrue(e1.IsActive, "IsActive was not loaded");
-
-                Assert.IsTrue(e2 == null, "Entity was loaded.");
-            }
-        }
-
-        [TestMethod]
-        public async Task Get_Entities_Join_Exclude_E1_Name()
-        {
-            IGRRepository<TestEntityAutoProperties> grEntities = TestUtils.GetTestEntityAutoPropertiesRepository(dbName);
-            GRJoinedList list = null;
-
-            try
-            {
-                list = await grEntities
-                    .GRAll()
-                    .GRExclude(e1 => e1.Name)
-                    .GRLeftJoin<TestEntityJoining>(e1 => e1.TestEntityAutoPropertiesID, e2 => e2.TestEntityAutoPropertiesID)
-                    .GRToJoinedListAsync();
-            }
-            catch (Exception exc)
-            {
-                Assert.Fail("Unable to get joined entities with excluded Entity1.Name - {0}.", GRStringHelpers.GetExceptionString(exc));
-            }
-
-            Assert.IsTrue(list.Count == TestUtils.TestCollectionSize, "Returned {0} entities instead of {1}.", list.Count, TestUtils.TestCollectionSize);
-
-            foreach (var item in list)
-            {
-                TestEntityAutoProperties e1 = item.Get<TestEntityAutoProperties>();
-                TestEntityJoining e2 = item.Get<TestEntityJoining>();
-
-                Assert.IsTrue(e1.TestEntityAutoPropertiesID != 0, "ID was not loaded.");
-                Assert.IsTrue(e1.TestEntityAutoPropertiesOrder != 0, "Order was not loaded.");
-                Assert.IsTrue(string.IsNullOrEmpty(e1.Name), "Name was loaded.");
-                Assert.IsTrue(string.IsNullOrEmpty(e1.TestEntityAutoPropertiesDescription), "Description was loaded.");
-
-                Assert.IsTrue(e1.CreatedDate == TestUtils.DefaultCreatedDate, "CreatedDate was loaded");
-                Assert.IsTrue(e1.ModifiedDate == TestUtils.DefaultCreatedDate, "ModifiedDate was loaded");
-                Assert.IsTrue(e1.CreatedBy == -1, "CreatedBy was loaded");
-                Assert.IsTrue(e1.ModifiedBy == -1, "ModifiedBy was loaded");
-                Assert.IsTrue(e1.IsActive, "IsActive was loaded");
-
-                Assert.IsTrue(e2.TestEntityJoiningID != 0, "ID was not loaded.");
-                Assert.IsTrue(e2.TestEntityAutoPropertiesID != 0, "ID was not loaded.");
-                Assert.IsTrue(!string.IsNullOrEmpty(e2.Description), "Description was not loaded.");
-            }
-        }
-
-        [TestMethod]
-        public async Task Get_Entities_Join_Exclude_E2_Description()
-        {
-            IGRRepository<TestEntityAutoProperties> grEntities = TestUtils.GetTestEntityAutoPropertiesRepository(dbName);
-            GRJoinedList list = null;
-
-            try
-            {
-                list = await grEntities
-                    .GRAll()
-                    .GRLeftJoin<TestEntityJoining>(e1 => e1.TestEntityAutoPropertiesID, e2 => e2.TestEntityAutoPropertiesID)
-                    .GRExclude(e2 => e2.Description)
-                    .GRToJoinedListAsync();
-            }
-            catch (Exception exc)
-            {
-                Assert.Fail("Unable to get joined entities with excluded Description - {0}.", GRStringHelpers.GetExceptionString(exc));
-            }
-
-            Assert.IsTrue(list.Count == TestUtils.TestCollectionSize, "Returned {0} entities instead of {1}.", list.Count, TestUtils.TestCollectionSize);
-
-            foreach (var item in list)
-            {
-                TestEntityAutoProperties e1 = item.Get<TestEntityAutoProperties>();
-                TestEntityJoining e2 = item.Get<TestEntityJoining>();
-
-                Assert.IsTrue(e1.TestEntityAutoPropertiesID != 0, "ID was not loaded.");
-                Assert.IsTrue(e1.TestEntityAutoPropertiesOrder != 0, "Order was not loaded.");
-                Assert.IsTrue(!string.IsNullOrEmpty(e1.Name), "Name was not loaded.");
-                Assert.IsTrue(string.IsNullOrEmpty(e1.TestEntityAutoPropertiesDescription), "Description was loaded.");
-
-                Assert.IsTrue(e2.TestEntityJoiningID != 0, "ID was not loaded.");
-                Assert.IsTrue(e2.TestEntityAutoPropertiesID != 0, "ID was not loaded.");
-                Assert.IsTrue(string.IsNullOrEmpty(e2.Description), "Description was loaded.");
-            }
-        }
-
-        [TestMethod]
-        public async Task Get_Entities_Join_Where_E1_ID_EQ_10()
-        {
-            IGRRepository<TestEntityAutoProperties> grEntities = TestUtils.GetTestEntityAutoPropertiesRepository(dbName);
-            GRJoinedList list = null;
-
-            try
-            {
-                list = await grEntities
-                    .GRAll()
-                    .GRWhere(e1 => e1.TestEntityAutoPropertiesID == 10)
-                    .GRLeftJoin<TestEntityJoining>(e1 => e1.TestEntityAutoPropertiesID, e2 => e2.TestEntityAutoPropertiesID)
-                    .GRToJoinedListAsync();
-            }
-            catch (Exception exc)
-            {
-                Assert.Fail("Unable to get joined entities with where clause ID = {0}.", GRStringHelpers.GetExceptionString(exc));
-            }
-
-            Assert.IsTrue(list.Count == 1, "Returned {0} entities instead of 1.", list.Count);
-
-            foreach (var item in list)
-            {
-                TestEntityAutoProperties e1 = item.Get<TestEntityAutoProperties>();
-                TestEntityJoining e2 = item.Get<TestEntityJoining>();
-
-                Assert.IsTrue(e1.TestEntityAutoPropertiesID == 10, "ID was not loaded correctly.");
-
-                Assert.IsTrue(e1.TestEntityAutoPropertiesID != 0, "ID was not loaded.");
-                Assert.IsTrue(e1.TestEntityAutoPropertiesOrder != 0, "Order was not loaded.");
-                Assert.IsTrue(!string.IsNullOrEmpty(e1.Name), "Name was not loaded.");
-                Assert.IsTrue(string.IsNullOrEmpty(e1.TestEntityAutoPropertiesDescription), "Description was loaded.");
-
-                Assert.IsTrue(e1.CreatedDate == TestUtils.DefaultCreatedDate, "CreatedDate was loaded");
-                Assert.IsTrue(e1.ModifiedDate == TestUtils.DefaultCreatedDate, "ModifiedDate was loaded");
-                Assert.IsTrue(e1.CreatedBy == -1, "CreatedBy was loaded");
-                Assert.IsTrue(e1.ModifiedBy == -1, "ModifiedBy was loaded");
-                Assert.IsTrue(e1.IsActive, "IsActive was loaded");
-
-                Assert.IsTrue(e2.TestEntityJoiningID != 0, "ID was not loaded.");
-                Assert.IsTrue(e2.TestEntityAutoPropertiesID != 0, "ID was not loaded.");
-                Assert.IsTrue(!string.IsNullOrEmpty(e2.Description), "Description was not loaded.");
-            }
-        }
-
-        [TestMethod]
-        public async Task Get_Entities_Join_Where_E2_ID_EQ_10()
-        {
-            IGRRepository<TestEntityAutoProperties> grEntities = TestUtils.GetTestEntityAutoPropertiesRepository(dbName);
-            GRJoinedList list = null;
-
-            try
-            {
-                list = await grEntities
-                    .GRAll()
-                    .GRLeftJoin<TestEntityJoining>(e1 => e1.TestEntityAutoPropertiesID, e2 => e2.TestEntityAutoPropertiesID)
-                    .GRWhere(e2 => e2.TestEntityJoiningID == 10)
-                    .GRToJoinedListAsync();
-            }
-            catch (Exception exc)
-            {
-                Assert.Fail("Unable to get joined entities with where clause ID = {0}.", GRStringHelpers.GetExceptionString(exc));
-            }
-
-            Assert.IsTrue(list.Count == 1, "Returned {0} entities instead of 1.", list.Count);
-
-            foreach (var item in list)
-            {
-                TestEntityAutoProperties e1 = item.Get<TestEntityAutoProperties>();
-                TestEntityJoining e2 = item.Get<TestEntityJoining>();
-
-                Assert.IsTrue(e2.TestEntityJoiningID == 10, "ID was not loaded correctly.");
-
-                Assert.IsTrue(e1.TestEntityAutoPropertiesID != 0, "ID was not loaded.");
-                Assert.IsTrue(e1.TestEntityAutoPropertiesOrder != 0, "Order was not loaded.");
-                Assert.IsTrue(!string.IsNullOrEmpty(e1.Name), "Name was not loaded.");
-                Assert.IsTrue(string.IsNullOrEmpty(e1.TestEntityAutoPropertiesDescription), "Description was loaded.");
-
-                Assert.IsTrue(e1.CreatedDate == TestUtils.DefaultCreatedDate, "CreatedDate was not loaded");
-                Assert.IsTrue(e1.ModifiedDate == TestUtils.DefaultCreatedDate, "ModifiedDate was not loaded");
-                Assert.IsTrue(e1.CreatedBy == -1, "CreatedBy was not loaded");
-                Assert.IsTrue(e1.ModifiedBy == -1, "ModifiedBy was not loaded");
-                Assert.IsTrue(e1.IsActive, "IsActive was not loaded");
-
-                Assert.IsTrue(e2.TestEntityJoiningID != 0, "TestEntity2ID was not loaded.");
-                Assert.IsTrue(e2.TestEntityAutoPropertiesID != 0, "TestEntity1ID was not loaded.");
-                Assert.IsTrue(!string.IsNullOrEmpty(e2.Description), "Description was not loaded.");
             }
         }
 

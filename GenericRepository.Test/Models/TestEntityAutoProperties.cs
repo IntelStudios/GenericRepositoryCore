@@ -6,6 +6,10 @@ namespace GenericRepository.Test.Models
     [GRTableName(TableName = "TestEntityAutoPropertiesTable")]
     public class TestEntityAutoProperties
     {
+        [GRIgnore]
+        [GRIDProperty(Apply = GRAutoValueApply.AfterSelect | GRAutoValueApply.AfterInsert, Direction = GRAutoValueDirection.In)]
+        public int? ID { get; set; }
+
         [GRAIPrimaryKey]
         public int TestEntityAutoPropertiesID { get; set; }
         [GRColumnName(ColumnName = "TestEntityAutoPropertiesName")]

@@ -7,5 +7,9 @@ namespace GenericRepository.Exceptions
         public GRInvalidOperationException(string message) : base(message)
         {
         }
+
+        public GRInvalidOperationException(string message, params object[] args) : this(string.Format(message, args))
+        {
+        }
     }
 }
