@@ -57,14 +57,17 @@
   <ItemGroup>
     <Compile Include="Models\TestEntityBinaryStream.cs" />
     <Compile Include="Models\TestEntityBinaryArray.cs" />
+    <Compile Include="Models\TestEntityMultiID.cs" />
     <Compile Include="Models\TestEntityPrimaryKeys.cs" />
     <Compile Include="Models\TestEntityPrimitiveNull.cs" />
     <Compile Include="Models\TestEntitySP4.cs" />
     <Compile Include="Repositories\TestEntityBinaryStreamRepository.cs" />
     <Compile Include="Repositories\TestEntityBinaryArrayRepository.cs" />
     <Compile Include="Repositories\TestEntityJoiningRepository.cs" />
+    <Compile Include="Repositories\TestEntityMultiIDRepositories.cs" />
     <Compile Include="Repositories\TestEntityPKRepositories.cs" />
     <Compile Include="Repositories\TestEntityPrimitiveNullRepository.cs" />
+    <Compile Include="Tests\Autoproperties\Autoproperties.cs" />
     <Compile Include="Tests\Repositories\CrossModel.cs" />
     <Compile Include="Tests\CRUD\Join.cs" />
     <Compile Include="Tests\CRUD\PrimaryKeys.cs" />

@@ -42,12 +42,47 @@ namespace GenericRepository.Test
                 InitializeTableBinary(connection);
                 InitializeTableStoredProcedures(connection);
                 InitializeTablePrimitive(connection);
+                InitializeTableMultiID(connection);
 
                 CreateStoredProcedures(connection);
                 CreateFunctions(connection);
             }
 
             return dbName;
+        }
+
+        private static void InitializeTableMultiID(SqlConnection connection)
+        {
+            string cmdStr = @"CREATE TABLE [TestEntityMultiID] (
+                                                      [TestEntityMulti1ID]  [int] IDENTITY(1, 1) NOT NULL,
+                                                      [TestEntityMulti2ID] [int] NULL
+                                                        CONSTRAINT PK_TestEntityMultiID PRIMARY KEY (TestEntityMulti1ID) );";
+
+            SqlCommand cmd = new SqlCommand(cmdStr, connection);
+
+            try
+            {
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception exc)
+            {
+                Assert.Fail("Could not create table - {0}.", GRStringHelpers.GetExceptionString(exc));
+            }
+
+            // populate with test data
+            try
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    string insStr = string.Format($"INSERT INTO [TestEntityMultiID] (TestEntityMulti2ID) VALUES ({i + 101})");
+                    new SqlCommand(insStr, connection).ExecuteNonQuery();
+
+                }
+            }
+            catch (Exception exc)
+            {
+                Assert.Fail("Could not insert data into table - {0}.", GRStringHelpers.GetExceptionString(exc));
+            }
         }
 
         private static void InitializeTablePrimitive(SqlConnection connection)
@@ -800,5 +835,45 @@ namespace GenericRepository.Test
                 return ms.ToArray();
             }
         }
+
+        public static TestEntityMultiID_1Repository GetTestEntityMultiID_1Repository(string dbName)
+        {
+            string repoConnectionString = string.Format("{0};initial catalog={1};", TestUtils.ConnectionString, dbName);
+
+            IGRContext repoContext = new GRMSSQLContext(repoConnectionString);
+
+            repoContext.RegisterLogger(new TraceLogger(), Enums.GRContextLogLevel.Debug | Enums.GRContextLogLevel.Error | Enums.GRContextLogLevel.Warning);
+
+            TestEntityMultiID_1Repository grEntities = new TestEntityMultiID_1Repository(repoContext);
+
+            return grEntities;
+        }
+
+        public static TestEntityMultiID_2Repository GetTestEntityMultiID_2Repository(string dbName)
+        {
+            string repoConnectionString = string.Format("{0};initial catalog={1};", TestUtils.ConnectionString, dbName);
+
+            IGRContext repoContext = new GRMSSQLContext(repoConnectionString);
+
+            repoContext.RegisterLogger(new TraceLogger(), Enums.GRContextLogLevel.Debug | Enums.GRContextLogLevel.Error | Enums.GRContextLogLevel.Warning);
+
+            TestEntityMultiID_2Repository grEntities = new TestEntityMultiID_2Repository(repoContext);
+
+            return grEntities;
+        }
+
+        public static TestEntityMultiID_3Repository GetTestEntityMultiID_3Repository(string dbName)
+        {
+            string repoConnectionString = string.Format("{0};initial catalog={1};", TestUtils.ConnectionString, dbName);
+
+            IGRContext repoContext = new GRMSSQLContext(repoConnectionString);
+
+            repoContext.RegisterLogger(new TraceLogger(), Enums.GRContextLogLevel.Debug | Enums.GRContextLogLevel.Error | Enums.GRContextLogLevel.Warning);
+
+            TestEntityMultiID_3Repository grEntities = new TestEntityMultiID_3Repository(repoContext);
+
+            return grEntities;
+        }
+
     }
 }

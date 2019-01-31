@@ -170,9 +170,22 @@ namespace GenericRepository.Helpers
                     {
                         idProperty = structure.IdentityProperty.PropertyInfo;
                     }
+                    else if (structure.KeyProperties.Any())
+                    {
+                        if (structure.KeyProperties.Count == 1)
+                        {
+                            idProperty = structure.KeyProperties.First().PropertyInfo;
+                        }
+                        else
+                        {
+
+                            string columnNames = string.Join(", ", structure.KeyProperties.Select(p => p.PropertyInfo.Name));
+                            throw new GRAttributeApplicationFailedException(autoAttr, $"Auto ID property cannot be applied, because too many key columns were found - {columnNames}.");
+                        }
+                    }
                     else
                     {
-                        var idProps = structure.Type
+                        IEnumerable<PropertyInfo> idProps = structure.Type
                             .GetProperties()
                             .Where(p => p.Name != autoSelectProperty.PropertyInfo.Name && (p.Name.EndsWith("Id") || p.Name.EndsWith("ID")));
 
@@ -183,7 +196,8 @@ namespace GenericRepository.Helpers
 
                         if (idProps.Count() > 1)
                         {
-                            throw new GRAttributeApplicationFailedException(autoAttr, "Too many ID columns were found.");
+                            string columnNames = string.Join(", ", idProps.Select(p => p.Name));
+                            throw new GRAttributeApplicationFailedException(autoAttr, $"Auto ID property cannot be applied, because no key properties were found in entity declaration and many properties with ID suffix were found - {columnNames}.");
                         }
 
                         idProperty = idProps.First();
