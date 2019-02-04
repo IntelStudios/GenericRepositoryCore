@@ -909,6 +909,25 @@ namespace GenericRepository.Test.DBProgrammability
         }
 
         [TestMethod]
+        public async Task Get_ValueFromSP()
+        {
+            IGRContext context = TestUtils.GetContext(dbName);
+
+            int result = -1;
+
+            try
+            {
+                result = await context.GetValueFromSPAsync<int>("spGetTestEntityAutoPropertiesPrefixed");
+            }
+            catch (Exception exc)
+            {
+                Assert.Fail("Unable to get value from sp5 - {0}.", GRStringHelpers.GetExceptionString(exc));
+            }
+
+            Assert.IsTrue(result == 1, $"Parsed value {result} does not correspond to expected value 1.");
+        }
+
+        [TestMethod]
         public async Task Get_ValuesFromSP_FirstColumn()
         {
             IGRContext context = TestUtils.GetContext(dbName);

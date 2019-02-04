@@ -73,6 +73,11 @@ namespace GenericRepository.Contexts
 
                     using (SqlDataReader reader = await command.ExecuteReaderAsync())
                     {
+                        if (!reader.Read())
+                        {
+                            return default(T);
+                        }
+
                         ret = ParseValue<T>(reader, columnName);
                         stats = ParseFnSpStatistics(connection, spCommandStatementReadable);
                     }
