@@ -2,7 +2,7 @@
 
 namespace GenericRepository.Exceptions
 {
-    class GRInvalidOperationException : ApplicationException
+    public class GRInvalidOperationException : ApplicationException
     {
         public GRInvalidOperationException(string message) : base(message)
         {

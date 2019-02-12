@@ -23,12 +23,12 @@ namespace GenericRepository.Contexts
         {
             if (string.IsNullOrEmpty(columnName))
             {
-                T ret = (T)reader[0];
+                T ret = (T)Convert.ChangeType(reader[0], typeof(T));
                 return ret;
             }
             else
             {
-                T ret = (T)reader[columnName];
+                T ret = (T)Convert.ChangeType(reader[columnName], typeof(T));
                 return ret;
             }
         }

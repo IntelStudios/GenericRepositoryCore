@@ -26,6 +26,11 @@ namespace GenericRepository.Contexts
         {
             GRQueryStatement queryStatement = BuildQueryStatement(queriable, forceIdentityColumn: false);
 
+            if (!queryStatement.Columns.Any())
+            {
+                throw new GRInvalidOperationException(Constants.Exceptions.NoColumnsSelected);
+            }
+
             List<T> ret = null;
 
             SqlConnection connection = null;
@@ -65,6 +70,11 @@ namespace GenericRepository.Contexts
         public override async Task<List<T>> ExecuteQueryAsync<T>(IGRQueriable<T> queriable)
         {
             GRQueryStatement queryStatement = BuildQueryStatement(queriable, isCountQuery: false, forceIdentityColumn: false);
+
+            if (!queryStatement.Columns.Any())
+            {
+                throw new GRInvalidOperationException(Constants.Exceptions.NoColumnsSelected);
+            }
 
             List<T> ret = null;
 

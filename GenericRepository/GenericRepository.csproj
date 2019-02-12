@@ -52,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\GRBeforeSaveAttributes.cs" />
+    <Compile Include="Constants.cs" />
     <Compile Include="Contexts\GRContext.StoredProcedures.cs" />
     <Compile Include="Contexts\MSSQL\GRMSSQLContext.Execution.cs" />
     <Compile Include="Contexts\MSSQL\GRMSSQLContext.Parsing.cs" />

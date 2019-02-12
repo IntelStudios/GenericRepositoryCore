@@ -69,7 +69,6 @@ namespace GenericRepository.Contexts
                 {
                     selectColumns = GetQueryColumns(GRDataTypeHelper.GetDBStructure(typeof(T)), queriable, forceIdentityColumn, queriable.HasExcludedAllProperties);
 
-                    //string selectColumnList = string.Join(", ", selectColumns.Select(c => GRDataTypeHelper.GetDBPrefixedSelectColumnName(queriable.Prefix, c.Property.DBColumnName)));
                     string selectColumnList = string.Join(", ", selectColumns.Select(c => GRDataTypeHelper.GetDBPrefixedSelectColumnName(queriable.Prefix, c.Value.Property.DBColumnName)));
 
                     queryCommand.ColumnsString = selectColumnList;

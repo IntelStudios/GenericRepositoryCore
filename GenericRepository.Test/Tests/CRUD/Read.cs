@@ -9,6 +9,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using GenericRepository.Helpers;
+using GenericRepository.Exceptions;
 
 namespace GenericRepository.Test.CRUD
 {
@@ -93,6 +94,92 @@ namespace GenericRepository.Test.CRUD
 
             Assert.IsTrue(allIds.Distinct().Count() == testEntities.Count, "Entity IDs are not unique!");
             Assert.IsTrue(allNames.Distinct().Count() == testEntities.Count, "Entity names are not unique!");
+        }
+
+        [TestMethod]
+        public async Task Get_Entities_GRAll()
+        {
+            IGRRepository<TestEntityAutoProperties> grEntities = TestUtils.GetTestEntityAutoPropertiesRepository(dbName);
+
+            List<TestEntityAutoProperties> testEntities = null;
+
+            try
+            {
+                testEntities = await grEntities.GRAll().GRToListAsync();
+            }
+            catch (Exception exc)
+            {
+                Assert.Fail("Unable to get all entitites - {0}.", GRStringHelpers.GetExceptionString(exc));
+            }
+
+            Assert.IsTrue(testEntities.Count == TestUtils.TestCollectionSize, "Returned {0} entities instead of {1}.", testEntities.Count, TestUtils.TestCollectionSize);
+
+            foreach (var item in testEntities)
+            {
+                Assert.IsTrue(item.TestEntityAutoPropertiesID > 0, "Entity was not loaded!");
+
+                Assert.IsTrue(item.TestEntityAutoPropertiesDescription == null, "Entity description was loaded, it should be ignored!");
+
+                Assert.IsTrue(item.Name == string.Format(TestUtils.NameFormatString, item.TestEntityAutoPropertiesID),
+                    "Entity name was loaded incorrectly! Entity with ID = {0} should have Name = '{1}' instead of Name = '{2}'.",
+                    item.TestEntityAutoPropertiesID,
+                    string.Format(TestUtils.NameFormatString, item.TestEntityAutoPropertiesID),
+                    item.Name
+                    );
+
+                Assert.IsTrue(item.TestEntityAutoPropertiesOrder == (item.TestEntityAutoPropertiesID + 49) % 100 + 1,
+                    "Entity name was loaded incorrectly! Entity with ID = {0} should have Order = '{1}' instead of Order = '{2}'.",
+                    item.TestEntityAutoPropertiesID,
+                    (item.TestEntityAutoPropertiesID + 49) % 100 + 1,
+                    item.TestEntityAutoPropertiesOrder
+                    );
+
+                Assert.IsTrue(item.CreatedDate == TestUtils.DefaultCreatedDate,
+                    "Entity name was loaded incorrectly! Entity CreatedDate should be '{0}' instead of '{1}'.",
+                    TestUtils.DefaultCreatedDate, item.CreatedDate);
+
+                Assert.IsTrue(item.ModifiedDate == TestUtils.DefaultCreatedDate,
+                    "Entity name was loaded incorrectly! Entity ModifiedDate should be '{0}' instead of '{1}'.",
+                    TestUtils.DefaultCreatedDate, item.ModifiedDate);
+
+                Assert.IsTrue(item.ModifiedBy == -1,
+                    "Entity name was loaded incorrectly! Entity ModifiedBy should be '{0}' instead of '{1}'.",
+                    -1, item.ModifiedBy);
+
+                Assert.IsTrue(item.CreatedBy == -1,
+                    "Entity name was loaded incorrectly! Entity CreatedBy should be '{0}' instead of '{1}'.",
+                    -1, item.CreatedBy);
+
+                Assert.IsTrue(item.IsActive,
+                    "Entity name was loaded incorrectly! Entity IsActive should be TRUE instead of FALSE.");
+            }
+
+            List<int> allIds = testEntities.Select(e => e.TestEntityAutoPropertiesID).ToList();
+            List<string> allNames = testEntities.Select(e => e.Name).ToList();
+
+            Assert.IsTrue(allIds.Distinct().Count() == testEntities.Count, "Entity IDs are not unique!");
+            Assert.IsTrue(allNames.Distinct().Count() == testEntities.Count, "Entity names are not unique!");
+        }
+
+        [TestMethod]
+        public async Task Get_Entities_GRExcludeAll()
+        {
+            IGRRepository<TestEntityAutoProperties> grEntities = TestUtils.GetTestEntityAutoPropertiesRepository(dbName);
+
+            List<TestEntityAutoProperties> testEntities = null;
+
+            try
+            {
+                testEntities = await grEntities.GRAll().GRExcludeAll().GRToListAsync();
+                Assert.Fail("Entities without resulting columns should not be get.");
+            }
+            catch (GRInvalidOperationException)
+            {
+            }
+            catch (Exception exc)
+            {
+                Assert.Fail("Unable to get all excluded entitites - {0}.", GRStringHelpers.GetExceptionString(exc));
+            }
         }
 
         [TestMethod]
