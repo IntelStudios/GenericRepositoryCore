@@ -20,7 +20,7 @@ namespace GenericRepository.Models
 
         public void AddType(Type type)
         {
-            AddType(string.Empty, type);
+            AddType(null, type);
         }
 
         public void AddType(string prefix, Type type)
@@ -35,7 +35,7 @@ namespace GenericRepository.Models
 
         public void AddType<T>()
         {
-            AddType<T>(string.Empty);
+            AddType<T>(null);
         }
 
         public void AddType<T>(string prefix)
@@ -50,7 +50,7 @@ namespace GenericRepository.Models
 
         public void AddProperty<T>(params Expression<Func<T, object>>[] propExps)
         {
-            AddProperty(string.Empty, propExps);
+            AddProperty(null, propExps);
         }
 
         public void AddProperty<T>(string prefix, params Expression<Func<T, object>>[] propExps)
@@ -80,7 +80,7 @@ namespace GenericRepository.Models
 
         public void RemoveType(Type type)
         {
-            RemoveType(string.Empty, type);
+            RemoveType(null, type);
         }
 
         public void RemoveType(string prefix, Type type)
@@ -197,6 +197,21 @@ namespace GenericRepository.Models
         public GRPropertyCollection()
         {
 
+        }
+
+        public static GRPropertyCollection Without<T>(params Expression<Func<T, object>>[] propExps)
+        {
+            GRPropertyCollection col = new GRPropertyCollection();
+            col.AddType(typeof(T));
+            col.RemoveProperty(propExps);
+            return col;
+        }
+
+        public static GRPropertyCollection With<T>(params Expression<Func<T, object>>[] propExps)
+        {
+            GRPropertyCollection col = new GRPropertyCollection();
+            col.AddProperty(propExps);
+            return col;
         }
     }
 }

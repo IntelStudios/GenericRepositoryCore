@@ -68,6 +68,8 @@
     <Compile Include="Repositories\TestEntityPKRepositories.cs" />
     <Compile Include="Repositories\TestEntityPrimitiveNullRepository.cs" />
     <Compile Include="Tests\Autoproperties\Autoproperties.cs" />
+    <Compile Include="Tests\PropertyCollection\PrefixedPropertyCollections.cs" />
+    <Compile Include="Tests\PropertyCollection\PropertyCollections.cs" />
     <Compile Include="Tests\Repositories\CrossModel.cs" />
     <Compile Include="Tests\CRUD\Join.cs" />
     <Compile Include="Tests\CRUD\PrimaryKeys.cs" />
