@@ -64,9 +64,9 @@ namespace GenericRepository.Models
 
         void AddProperty(string prefix, GRDBQueryProperty property)
         {
-            Type propertyType = property.Property.PropertyInfo.DeclaringType;
+            Type propertyType = property.Property.PropertyInfo.ReflectedType;
 
-            GRPropertyCollectionKey key = new GRPropertyCollectionKey(prefix, property.Property.PropertyInfo.DeclaringType);
+            GRPropertyCollectionKey key = new GRPropertyCollectionKey(prefix, property.Property.PropertyInfo.ReflectedType);
 
             if (!collection.ContainsKey(key))
             {

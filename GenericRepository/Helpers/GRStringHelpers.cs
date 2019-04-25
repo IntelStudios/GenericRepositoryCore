@@ -63,7 +63,7 @@ namespace GenericRepository.Helpers
 
             StackTrace stackTrace = new StackTrace();
             MethodBase methodBase = stackTrace.GetFrame(2).GetMethod();
-            return string.Format("{0}>{1}: ", methodBase.DeclaringType.Name, methodBase.Name);
+            return string.Format("{0}>{1}: ", methodBase.ReflectedType.Name, methodBase.Name);
         }
     }
 }

@@ -308,7 +308,7 @@ namespace GenericRepository.Helpers
         }
         public static GRDBProperty GetDBProperty(PropertyInfo prop)
         {
-            GRDBStructure structure = GetDBStructure(prop.DeclaringType);
+            GRDBStructure structure = GetDBStructure(prop.ReflectedType);
             GRDBProperty property = structure.Properties.Where(p => p.PropertyInfo.Name == prop.Name).FirstOrDefault();
             return property;
         }
@@ -420,7 +420,7 @@ namespace GenericRepository.Helpers
             if (value is PropertyInfo)
             {
                 MemberInfo member = value as MemberInfo;
-                string columnName = GetDBColumnName(member.Name, member.DeclaringType);
+                string columnName = GetDBColumnName(member.Name, member.ReflectedType);
                 return columnName;
             }
 
