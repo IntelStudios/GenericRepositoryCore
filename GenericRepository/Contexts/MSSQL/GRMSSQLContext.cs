@@ -101,12 +101,7 @@ namespace GenericRepository.Contexts
                     SqlConnection nonTransConn = new SqlConnection(connectionString);
                     nonTransConn.StatisticsEnabled = true;
                     nonTransConn.Open();
-
-                    nonTransConn.InfoMessage += (sender, e) =>
-                    {
-                        LogDebug(e.Message);
-                    };
-
+                  
                     return nonTransConn;
                 }
                 else
@@ -132,11 +127,6 @@ namespace GenericRepository.Contexts
                     SqlConnection nonTransConn = new SqlConnection(connectionString);
                     nonTransConn.StatisticsEnabled = true;
                     await nonTransConn.OpenAsync();
-
-                    nonTransConn.InfoMessage += (sender, e) =>
-                    {
-                        LogDebug(e.Message);
-                    };
 
                     return nonTransConn;
                 }

@@ -17,7 +17,7 @@ namespace GenericRepository.Contexts
 {
     public partial class GRMSSQLContext : GRContext, IGRContext, IDisposable
     {
-        public override async Task ExecuteSPAsync(string storedProcedureName, List<SqlParameter> parameters, int timeout)
+        public override async Task ExecuteSPAsync(string storedProcedureName, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler)
         {
             string spCommandStatementReadable = string.Empty;
             GRExecutionStatistics stats = null;
@@ -26,6 +26,11 @@ namespace GenericRepository.Contexts
             try
             {
                 connection = await GetSqlConnectionAsync();
+
+                if (infoMessageHandler != null)
+                {
+                    connection.InfoMessage += infoMessageHandler;
+                }
 
                 using (SqlCommand command = CreateSPCommand(connection, storedProcedureName, parameters, sqlTransaction, timeout))
                 {
@@ -50,11 +55,16 @@ namespace GenericRepository.Contexts
             }
             finally
             {
+                if (infoMessageHandler != null)
+                {
+                    connection.InfoMessage -= infoMessageHandler;
+                }
+
                 DisposeConnection(connection);
             }
         }
 
-        public override async Task<T> GetValueFromSPAsync<T>(string storedProcedureName, string columnName, List<SqlParameter> parameters, int timeout)
+        public override async Task<T> GetValueFromSPAsync<T>(string storedProcedureName, string columnName, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler)
         {
             string spCommandStatementReadable = string.Empty;
             GRExecutionStatistics stats = null;
@@ -66,6 +76,11 @@ namespace GenericRepository.Contexts
             try
             {
                 connection = await GetSqlConnectionAsync();
+
+                if (infoMessageHandler != null)
+                {
+                    connection.InfoMessage += infoMessageHandler;
+                }
 
                 using (SqlCommand command = CreateSPCommand(connection, storedProcedureName, parameters, sqlTransaction, timeout))
                 {
@@ -80,6 +95,8 @@ namespace GenericRepository.Contexts
 
                         ret = ParseValue<T>(reader, columnName);
                         stats = ParseFnSpStatistics(connection, spCommandStatementReadable);
+
+                        await reader.NextResultAsync();
                     }
                 }
                 LogSuccessfulQueryStats(stats);
@@ -98,13 +115,18 @@ namespace GenericRepository.Contexts
             }
             finally
             {
+                if (infoMessageHandler != null)
+                {
+                    connection.InfoMessage -= infoMessageHandler;
+                }
+
                 DisposeConnection(connection);
             }
 
             return ret;
         }
 
-        public override async Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, string columnName, List<SqlParameter> parameters, int timeout)
+        public override async Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, string columnName, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler)
         {
             string spCommandStatementReadable = string.Empty;
             GRExecutionStatistics stats = null;
@@ -117,6 +139,11 @@ namespace GenericRepository.Contexts
             {
                 connection = GetSqlConnection();
 
+                if (infoMessageHandler != null)
+                {
+                    connection.InfoMessage += infoMessageHandler;
+                }
+
                 using (SqlCommand command = CreateSPCommand(connection, storedProcedureName, parameters, sqlTransaction, timeout))
                 {
                     spCommandStatementReadable = GetSPCommandStatement(command);
@@ -125,6 +152,8 @@ namespace GenericRepository.Contexts
                     {
                         ret = ParseListOfValues<T>(reader, columnName);
                         stats = ParseFnSpStatistics(connection, spCommandStatementReadable);
+
+                        await reader.NextResultAsync();
                     }
                 }
                 LogSuccessfulQueryStats(stats);
@@ -144,13 +173,18 @@ namespace GenericRepository.Contexts
             }
             finally
             {
+                if (infoMessageHandler != null)
+                {
+                    connection.InfoMessage -= infoMessageHandler;
+                }
+
                 DisposeConnection(connection);
             }
 
             return ret;
         }
 
-        public override async Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, string prefix, List<SqlParameter> parameters, int timeout)
+        public override async Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, string prefix, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler)
         {
             string spCommandStatementReadable = string.Empty;
             GRExecutionStatistics stats = null;
@@ -162,6 +196,11 @@ namespace GenericRepository.Contexts
             try
             {
                 connection = await GetSqlConnectionAsync();
+
+                if (infoMessageHandler != null)
+                {
+                    connection.InfoMessage += infoMessageHandler;
+                }
 
                 using (SqlCommand command = CreateSPCommand(connection, storedProcedureName, parameters, sqlTransaction, timeout))
                 {
@@ -176,6 +215,8 @@ namespace GenericRepository.Contexts
 
                         ret = ParseEntity<T>(reader, prefix, null, false);
                         stats = ParseFnSpStatistics(connection, spCommandStatementReadable);
+
+                        await reader.NextResultAsync();
                     }
                 }
                 LogSuccessfulQueryStats(stats);
@@ -194,13 +235,18 @@ namespace GenericRepository.Contexts
             }
             finally
             {
+                if (infoMessageHandler != null)
+                {
+                    connection.InfoMessage -= infoMessageHandler;
+                }
+
                 DisposeConnection(connection);
             }
 
             return ret;
         }
 
-        public override async Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, string prefix, List<SqlParameter> parameters, int timeout)
+        public override async Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, string prefix, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler)
         {
             string spCommandStatementReadable = string.Empty;
             GRExecutionStatistics stats = null;
@@ -213,16 +259,26 @@ namespace GenericRepository.Contexts
             {
                 connection = await GetSqlConnectionAsync();
 
+                if (infoMessageHandler != null)
+                {
+                    connection.InfoMessage += infoMessageHandler;
+                }
+
                 using (SqlCommand command = CreateSPCommand(connection, storedProcedureName, parameters, sqlTransaction, timeout))
                 {
+                    command.CommandType = CommandType.StoredProcedure;
+
                     spCommandStatementReadable = GetSPCommandStatement(command);
 
                     using (SqlDataReader reader = await command.ExecuteReaderAsync())
                     {
                         ret = ParseListOfEntities<T>(reader, prefix, null, false);
                         stats = ParseFnSpStatistics(connection, spCommandStatementReadable);
+
+                        await reader.NextResultAsync();
                     }
                 }
+
                 LogSuccessfulQueryStats(stats);
             }
             catch (SqlException exc)
@@ -240,13 +296,18 @@ namespace GenericRepository.Contexts
             }
             finally
             {
+                if (infoMessageHandler != null)
+                {
+                    connection.InfoMessage -= infoMessageHandler;
+                }
+
                 DisposeConnection(connection);
             }
 
             return ret;
         }
 
-        public override async Task<GRTable> GetEntitiesFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, GRPropertyCollection properties, int timeout)
+        public override async Task<GRTable> GetEntitiesFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, GRPropertyCollection properties, int timeout, SqlInfoMessageEventHandler infoMessageHandler)
         {
             string spCommandStatementReadable = string.Empty;
             GRExecutionStatistics stats = null;
@@ -261,6 +322,11 @@ namespace GenericRepository.Contexts
             try
             {
                 connection = GetSqlConnection();
+
+                if (infoMessageHandler != null)
+                {
+                    connection.InfoMessage += infoMessageHandler;
+                }
 
                 using (SqlCommand command = CreateSPCommand(connection, storedProcedureName, parameters, sqlTransaction, timeout))
                 {
@@ -287,6 +353,8 @@ namespace GenericRepository.Contexts
                             ret.Rows.Add(row);
                         }
                         stats = ParseFnSpStatistics(connection, spCommandStatementReadable);
+
+                        await reader.NextResultAsync();
                     }
                 }
                 LogSuccessfulQueryStats(stats);
@@ -306,13 +374,18 @@ namespace GenericRepository.Contexts
             }
             finally
             {
+                if (infoMessageHandler != null)
+                {
+                    connection.InfoMessage -= infoMessageHandler;
+                }
+
                 DisposeConnection(connection);
             }
 
             return ret;
         }
 
-        public override async Task<List<SqlParameter>> ExecuteSPWithOutParamsAsync(string storedProcedureName, List<SqlParameter> parameters, int timeout)
+        public override async Task<List<SqlParameter>> ExecuteSPWithOutParamsAsync(string storedProcedureName, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler)
         {
             string spCommandStatementReadable = string.Empty;
             GRExecutionStatistics stats = null;
@@ -324,6 +397,11 @@ namespace GenericRepository.Contexts
             try
             {
                 connection = await GetSqlConnectionAsync();
+
+                if (infoMessageHandler != null)
+                {
+                    connection.InfoMessage += infoMessageHandler;
+                }
 
                 using (SqlCommand command = CreateSPCommand(connection, storedProcedureName, parameters, sqlTransaction, timeout))
                 {
@@ -360,23 +438,18 @@ namespace GenericRepository.Contexts
             }
             finally
             {
+                if (infoMessageHandler != null)
+                {
+                    connection.InfoMessage -= infoMessageHandler;
+                }
+
                 DisposeConnection(connection);
             }
 
             return ret;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        List<string> GetColumnNames(SqlDataReader reader)
-        {
-            List<string> columnNames = new List<string>();
-            for (int i = 0; i < reader.FieldCount; i++)
-            {
-                columnNames.Add(reader.GetName(i));
-            }
-            return columnNames;
-        }
-
+     
         #region Data sets and tables
         public override GRDataSet GetDataSetFromCommand(string commandString, bool returnMessage, int timeout)
         {
@@ -614,6 +687,7 @@ namespace GenericRepository.Contexts
         }
         #endregion
 
+        #region Streams
         public override async Task<MemoryStream> GetMemoryStreamFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, CommandBehavior? commandBehavior = null)
         {
             string spCommandStatementReadable = string.Empty;
@@ -737,7 +811,9 @@ namespace GenericRepository.Contexts
                 DisposeConnection(connection);
             }
         }
+        #endregion
 
+        #region Helper methods
         private SqlCommand CreateSPCommand(SqlConnection connection, string storedProcedureName, List<SqlParameter> parameters, SqlTransaction trans, int timeout)
         {
             SqlCommand command = new SqlCommand();
@@ -769,5 +845,17 @@ namespace GenericRepository.Contexts
 
             return ret;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        List<string> GetColumnNames(SqlDataReader reader)
+        {
+            List<string> columnNames = new List<string>();
+            for (int i = 0; i < reader.FieldCount; i++)
+            {
+                columnNames.Add(reader.GetName(i));
+            }
+            return columnNames;
+        }
+        #endregion
     }
 }

@@ -96,59 +96,126 @@ namespace GenericRepository.Interfaces
         #endregion
 
         #region Stored procedures methods
+        #region Executing SP without parsing result
         Task ExecuteSPAsync(string storedProcedureName);
+        Task ExecuteSPAsync(string storedProcedureName, SqlInfoMessageEventHandler infoMessageHandler);
         Task ExecuteSPAsync(string storedProcedureName, int timeout);
+        Task ExecuteSPAsync(string storedProcedureName, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
         Task ExecuteSPAsync(string storedProcedureName, List<SqlParameter> parameters);
+        Task ExecuteSPAsync(string storedProcedureName, List<SqlParameter> parameters, SqlInfoMessageEventHandler infoMessageHandler);
         Task ExecuteSPAsync(string storedProcedureName, List<SqlParameter> parameters, int timeout);
+        Task ExecuteSPAsync(string storedProcedureName, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
+        #endregion
 
+        #region Executing SP with output params
         Task<List<SqlParameter>> ExecuteSPWithOutParamsAsync(string storedProcedureName);
         Task<List<SqlParameter>> ExecuteSPWithOutParamsAsync(string storedProcedureName, int timeout);
         Task<List<SqlParameter>> ExecuteSPWithOutParamsAsync(string storedProcedureName, List<SqlParameter> parameters);
         Task<List<SqlParameter>> ExecuteSPWithOutParamsAsync(string storedProcedureName, List<SqlParameter> parameters, int timeout);
 
+        Task<List<SqlParameter>> ExecuteSPWithOutParamsAsync(string storedProcedureName, SqlInfoMessageEventHandler infoMessageHandler);
+        Task<List<SqlParameter>> ExecuteSPWithOutParamsAsync(string storedProcedureName, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
+        Task<List<SqlParameter>> ExecuteSPWithOutParamsAsync(string storedProcedureName, List<SqlParameter> parameters, SqlInfoMessageEventHandler infoMessageHandler);
+        Task<List<SqlParameter>> ExecuteSPWithOutParamsAsync(string storedProcedureName, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
+
+        #endregion
+
+        #region Getting single value from SP
         Task<T> GetValueFromSPAsync<T>(string storedProcedureName);
         Task<T> GetValueFromSPAsync<T>(string storedProcedureName, int timeout);
         Task<T> GetValueFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters);
         Task<T> GetValueFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout);
+
+        Task<T> GetValueFromSPAsync<T>(string storedProcedureName, SqlInfoMessageEventHandler infoMessageHandler);
+        Task<T> GetValueFromSPAsync<T>(string storedProcedureName, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
+        Task<T> GetValueFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, SqlInfoMessageEventHandler infoMessageHandler);
+        Task<T> GetValueFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
 
         Task<T> GetValueFromSPAsync<T>(string storedProcedureName, string columnName);
         Task<T> GetValueFromSPAsync<T>(string storedProcedureName, string columnName, int timeout);
         Task<T> GetValueFromSPAsync<T>(string storedProcedureName, string columnName, List<SqlParameter> parameters);
         Task<T> GetValueFromSPAsync<T>(string storedProcedureName, string columnName, List<SqlParameter> parameters, int timeout);
 
+        Task<T> GetValueFromSPAsync<T>(string storedProcedureName, string columnName, SqlInfoMessageEventHandler infoMessageHandler);
+        Task<T> GetValueFromSPAsync<T>(string storedProcedureName, string columnName, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
+        Task<T> GetValueFromSPAsync<T>(string storedProcedureName, string columnName, List<SqlParameter> parameters, SqlInfoMessageEventHandler infoMessageHandler);
+        Task<T> GetValueFromSPAsync<T>(string storedProcedureName, string columnName, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
+        #endregion
+
+        #region Getting list of values from SP
         Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName);
         Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, int timeout);
         Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters);
         Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout);
+
+        Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, SqlInfoMessageEventHandler infoMessageHandler);
+        Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
+        Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, SqlInfoMessageEventHandler infoMessageHandler);
+        Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
 
         Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, string columnName);
         Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, string columnName, int timeout);
         Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, string columnName, List<SqlParameter> parameters);
         Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, string columnName, List<SqlParameter> parameters, int timeout);
 
+        Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, string columnName, SqlInfoMessageEventHandler infoMessageHandler);
+        Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, string columnName, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
+        Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, string columnName, List<SqlParameter> parameters, SqlInfoMessageEventHandler infoMessageHandler);
+        Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, string columnName, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
+        #endregion
+
+        #region Getting single entity from SP
         Task<T> GetEntityFromSPAsync<T>(string storedProcedureName);
         Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, int timeout);
         Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters);
         Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout);
+
+        Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, SqlInfoMessageEventHandler infoMessageHandler);
+        Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
+        Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, SqlInfoMessageEventHandler infoMessageHandler);
+        Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
 
         Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, string prefix);
         Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, string prefix, int timeout);
         Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, string prefix, List<SqlParameter> parameters);
         Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, string prefix, List<SqlParameter> parameters, int timeout);
 
+        Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, string prefix, SqlInfoMessageEventHandler infoMessageHandler);
+        Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, string prefix, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
+        Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, string prefix, List<SqlParameter> parameters, SqlInfoMessageEventHandler infoMessageHandler);
+        Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, string prefix, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
+        #endregion
+
+        #region Getting list of entities from SP
         Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName);
         Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, int timeout);
         Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters);
         Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout);
+
+        Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, SqlInfoMessageEventHandler infoMessageHandler);
+        Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
+        Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, SqlInfoMessageEventHandler infoMessageHandler);
+        Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
 
         Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, string prefix);
         Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, string prefix, int timeout);
         Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, string prefix, List<SqlParameter> parameters);
         Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, string prefix, List<SqlParameter> parameters, int timeout);
 
-        Task<GRTable> GetEntitiesFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, GRPropertyCollection properties);
-        Task<GRTable> GetEntitiesFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, GRPropertyCollection properties, int timeout);
+        Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, string prefix, SqlInfoMessageEventHandler infoMessageHandler);
+        Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, string prefix, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
+        Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, string prefix, List<SqlParameter> parameters, SqlInfoMessageEventHandler infoMessageHandler);
+        Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, string prefix, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
 
+
+        Task<GRTable> GetEntitiesFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, GRPropertyCollection properties);
+        Task<GRTable> GetEntitiesFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, GRPropertyCollection properties, SqlInfoMessageEventHandler infoMessageHandler);
+
+        Task<GRTable> GetEntitiesFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, GRPropertyCollection properties, int timeout);
+        Task<GRTable> GetEntitiesFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, GRPropertyCollection properties, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
+        #endregion
+
+        #region Data sets and data tables
         DataSet GetDataSetFromSP(string storedProcedureName, List<SqlParameter> parameters);
         DataSet GetDataSetFromSP(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
 
@@ -158,12 +225,15 @@ namespace GenericRepository.Interfaces
         Task<DataTable> GetDataTableFromSPAsync(string storedProcedureName, int timeout = -1);
         Task<DataTable> GetDataTableFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, int timeout = -1);
         Task<DataTable> GetDataTableFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, List<SqlParameter> returnParameters, int timeout = -1);
-
-        Task<MemoryStream> GetMemoryStreamFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, CommandBehavior? commandBehavior = null);
-        Task<Stream> GetZipStreamFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, CommandBehavior? commandBehavior = null, string fileName = "default");
         #endregion
 
-        # region Scalar functions methods
+        #region Streams
+        Task<MemoryStream> GetMemoryStreamFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, CommandBehavior? commandBehavior = null);
+        Task<Stream> GetZipStreamFromSPAsync(string storedProcedureName, List<SqlParameter> parameters, CommandBehavior? commandBehavior = null, string fileName = "default"); 
+        #endregion
+        #endregion
+
+        #region Scalar functions methods
         T ExecuteScalarFunction<T>(string functionName, List<SqlParameter> parameters);
         Task<T> ExecuteScalarFunctionAsync<T>(string functionName, List<SqlParameter> parameters);
         #endregion

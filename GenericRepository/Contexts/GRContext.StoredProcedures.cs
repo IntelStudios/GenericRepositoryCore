@@ -18,167 +18,339 @@ namespace GenericRepository.Contexts
         #region Executing SP without parsing result
         public virtual Task ExecuteSPAsync(string storedProcedureName)
         {
-            return ExecuteSPAsync(storedProcedureName, null, defaultTimeout);
+            return ExecuteSPAsync(storedProcedureName, null, defaultTimeout, null);
+        }
+        public virtual Task ExecuteSPAsync(string storedProcedureName, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return ExecuteSPAsync(storedProcedureName, null, defaultTimeout, infoMessageHandler);
         }
         public virtual Task ExecuteSPAsync(string storedProcedureName, int timeout)
         {
-            return ExecuteSPAsync(storedProcedureName, null, timeout);
+            return ExecuteSPAsync(storedProcedureName, null, timeout, null);
+        }
+        public virtual Task ExecuteSPAsync(string storedProcedureName, int timeout, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return ExecuteSPAsync(storedProcedureName, null, timeout, infoMessageHandler);
         }
         public virtual Task ExecuteSPAsync(string storedProcedureName, List<SqlParameter> parameters)
         {
-            return ExecuteSPAsync(storedProcedureName, parameters, defaultTimeout);
+            return ExecuteSPAsync(storedProcedureName, parameters, defaultTimeout, null);
         }
-        public abstract Task ExecuteSPAsync(string storedProcedureName, List<SqlParameter> parameters, int timeout);
+        public virtual Task ExecuteSPAsync(string storedProcedureName, List<SqlParameter> parameters, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return ExecuteSPAsync(storedProcedureName, parameters, defaultTimeout, infoMessageHandler);
+        }
+        public virtual Task ExecuteSPAsync(string storedProcedureName, List<SqlParameter> parameters, int timeout)
+        {
+            return ExecuteSPAsync(storedProcedureName, parameters, timeout, null);
+        }
+        public abstract Task ExecuteSPAsync(string storedProcedureName, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
         #endregion
 
         #region Executing SP with output params
         public virtual Task<List<SqlParameter>> ExecuteSPWithOutParamsAsync(string storedProcedureName)
         {
-            return ExecuteSPWithOutParamsAsync(storedProcedureName, null, defaultTimeout);
+            return ExecuteSPWithOutParamsAsync(storedProcedureName, null, defaultTimeout, null);
+        }
+        public virtual Task<List<SqlParameter>> ExecuteSPWithOutParamsAsync(string storedProcedureName, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return ExecuteSPWithOutParamsAsync(storedProcedureName, null, defaultTimeout, infoMessageHandler);
         }
         public virtual Task<List<SqlParameter>> ExecuteSPWithOutParamsAsync(string storedProcedureName, int timeout)
         {
-            return ExecuteSPWithOutParamsAsync(storedProcedureName, null, timeout);
+            return ExecuteSPWithOutParamsAsync(storedProcedureName, null, timeout, null);
+        }
+        public virtual Task<List<SqlParameter>> ExecuteSPWithOutParamsAsync(string storedProcedureName, int timeout, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return ExecuteSPWithOutParamsAsync(storedProcedureName, null, timeout, infoMessageHandler);
         }
         public virtual Task<List<SqlParameter>> ExecuteSPWithOutParamsAsync(string storedProcedureName, List<SqlParameter> parameters)
         {
-            return ExecuteSPWithOutParamsAsync(storedProcedureName, parameters, defaultTimeout);
+            return ExecuteSPWithOutParamsAsync(storedProcedureName, parameters, defaultTimeout, null);
         }
-        public abstract Task<List<SqlParameter>> ExecuteSPWithOutParamsAsync(string storedProcedureName, List<SqlParameter> parameters, int timeout);
+        public virtual Task<List<SqlParameter>> ExecuteSPWithOutParamsAsync(string storedProcedureName, List<SqlParameter> parameters, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return ExecuteSPWithOutParamsAsync(storedProcedureName, parameters, defaultTimeout, infoMessageHandler);
+        }
+        public virtual Task<List<SqlParameter>> ExecuteSPWithOutParamsAsync(string storedProcedureName, List<SqlParameter> parameters, int timeout)
+        {
+            return ExecuteSPWithOutParamsAsync(storedProcedureName, parameters, timeout, null);
+        }
+        public abstract Task<List<SqlParameter>> ExecuteSPWithOutParamsAsync(string storedProcedureName, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
         #endregion
 
         #region Getting single value from SP
         public virtual Task<T> GetValueFromSPAsync<T>(string storedProcedureName)
         {
-            return GetValueFromSPAsync<T>(storedProcedureName, null, null, defaultTimeout);
+            return GetValueFromSPAsync<T>(storedProcedureName, null, null, defaultTimeout, null);
+        }
+        public virtual Task<T> GetValueFromSPAsync<T>(string storedProcedureName, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return GetValueFromSPAsync<T>(storedProcedureName, null, null, defaultTimeout, infoMessageHandler);
         }
         public virtual Task<T> GetValueFromSPAsync<T>(string storedProcedureName, int timeout)
         {
-            return GetValueFromSPAsync<T>(storedProcedureName, null, null, timeout);
+            return GetValueFromSPAsync<T>(storedProcedureName, null, null, timeout, null);
+        }
+        public virtual Task<T> GetValueFromSPAsync<T>(string storedProcedureName, int timeout, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return GetValueFromSPAsync<T>(storedProcedureName, null, null, timeout, infoMessageHandler);
         }
         public virtual Task<T> GetValueFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters)
         {
-            return GetValueFromSPAsync<T>(storedProcedureName, null, parameters, defaultTimeout);
+            return GetValueFromSPAsync<T>(storedProcedureName, null, parameters, defaultTimeout, null);
+        }
+        public virtual Task<T> GetValueFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return GetValueFromSPAsync<T>(storedProcedureName, null, parameters, defaultTimeout, infoMessageHandler);
         }
         public virtual Task<T> GetValueFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout)
         {
-            return GetValueFromSPAsync<T>(storedProcedureName, null, parameters, timeout);
+            return GetValueFromSPAsync<T>(storedProcedureName, null, parameters, timeout, null);
         }
+        public virtual Task<T> GetValueFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return GetValueFromSPAsync<T>(storedProcedureName, null, parameters, timeout, infoMessageHandler);
+        }
+
         public virtual Task<T> GetValueFromSPAsync<T>(string storedProcedureName, string columnName)
         {
-            return GetValueFromSPAsync<T>(storedProcedureName, columnName, null, defaultTimeout);
+            return GetValueFromSPAsync<T>(storedProcedureName, columnName, null, defaultTimeout, null);
+        }
+        public virtual Task<T> GetValueFromSPAsync<T>(string storedProcedureName, string columnName, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return GetValueFromSPAsync<T>(storedProcedureName, columnName, null, defaultTimeout, infoMessageHandler);
         }
         public virtual Task<T> GetValueFromSPAsync<T>(string storedProcedureName, string columnName, int timeout)
         {
-            return GetValueFromSPAsync<T>(storedProcedureName, columnName, null, timeout);
+            return GetValueFromSPAsync<T>(storedProcedureName, columnName, null, timeout, null);
+        }
+        public virtual Task<T> GetValueFromSPAsync<T>(string storedProcedureName, string columnName, int timeout, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return GetValueFromSPAsync<T>(storedProcedureName, columnName, null, timeout, infoMessageHandler);
         }
         public virtual Task<T> GetValueFromSPAsync<T>(string storedProcedureName, string columnName, List<SqlParameter> parameters)
         {
-            return GetValueFromSPAsync<T>(storedProcedureName, columnName, parameters, defaultTimeout);
+            return GetValueFromSPAsync<T>(storedProcedureName, columnName, parameters, defaultTimeout, null);
         }
-        public abstract Task<T> GetValueFromSPAsync<T>(string storedProcedureName, string columnName, List<SqlParameter> parameters, int timeout);
+        public virtual Task<T> GetValueFromSPAsync<T>(string storedProcedureName, string columnName, List<SqlParameter> parameters, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return GetValueFromSPAsync<T>(storedProcedureName, columnName, parameters, defaultTimeout, infoMessageHandler);
+        }
+        public virtual Task<T> GetValueFromSPAsync<T>(string storedProcedureName, string columnName, List<SqlParameter> parameters, int timeout)
+        {
+            return GetValueFromSPAsync<T>(storedProcedureName, columnName, parameters, timeout, null);
+        }
+        public abstract Task<T> GetValueFromSPAsync<T>(string storedProcedureName, string columnName, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
         #endregion
 
         #region Getting list of values from SP
         public virtual Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName)
         {
-            return GetValuesFromSPAsync<T>(storedProcedureName, null, null, defaultTimeout);
+            return GetValuesFromSPAsync<T>(storedProcedureName, null, null, defaultTimeout, null);
+        }
+        public virtual Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return GetValuesFromSPAsync<T>(storedProcedureName, null, null, defaultTimeout, infoMessageHandler);
         }
         public virtual Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, int timeout)
         {
-            return GetValuesFromSPAsync<T>(storedProcedureName, null, null, timeout);
+            return GetValuesFromSPAsync<T>(storedProcedureName, null, null, timeout, null);
+        }
+        public virtual Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, int timeout, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return GetValuesFromSPAsync<T>(storedProcedureName, null, null, timeout, infoMessageHandler);
         }
         public virtual Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters)
         {
-            return GetValuesFromSPAsync<T>(storedProcedureName, null, parameters, defaultTimeout);
+            return GetValuesFromSPAsync<T>(storedProcedureName, null, parameters, defaultTimeout, null);
+        }
+        public virtual Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return GetValuesFromSPAsync<T>(storedProcedureName, null, parameters, defaultTimeout, infoMessageHandler);
         }
         public virtual Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout)
         {
-            return GetValuesFromSPAsync<T>(storedProcedureName, null, parameters, timeout);
+            return GetValuesFromSPAsync<T>(storedProcedureName, null, parameters, timeout, null);
         }
+        public virtual Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return GetValuesFromSPAsync<T>(storedProcedureName, null, parameters, timeout, infoMessageHandler);
+        }
+
         public virtual Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, string columnName)
         {
-            return GetValuesFromSPAsync<T>(storedProcedureName, columnName, null, defaultTimeout);
+            return GetValuesFromSPAsync<T>(storedProcedureName, columnName, null, defaultTimeout, null);
+        }
+        public virtual Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, string columnName, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return GetValuesFromSPAsync<T>(storedProcedureName, columnName, null, defaultTimeout, infoMessageHandler);
         }
         public virtual Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, string columnName, int timeout)
         {
-            return GetValuesFromSPAsync<T>(storedProcedureName, columnName, null, timeout);
+            return GetValuesFromSPAsync<T>(storedProcedureName, columnName, null, timeout, null);
+        }
+        public virtual Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, string columnName, int timeout, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return GetValuesFromSPAsync<T>(storedProcedureName, columnName, null, timeout, infoMessageHandler);
         }
         public virtual Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, string columnName, List<SqlParameter> parameters)
         {
-            return GetValuesFromSPAsync<T>(storedProcedureName, columnName, parameters, defaultTimeout);
+            return GetValuesFromSPAsync<T>(storedProcedureName, columnName, parameters, defaultTimeout, null);
         }
-        public abstract Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, string columnName, List<SqlParameter> parameters, int timeout);
+        public virtual Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, string columnName, List<SqlParameter> parameters, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return GetValuesFromSPAsync<T>(storedProcedureName, columnName, parameters, defaultTimeout, infoMessageHandler);
+        }
+        public virtual Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, string columnName, List<SqlParameter> parameters, int timeout)
+        {
+            return GetValuesFromSPAsync<T>(storedProcedureName, columnName, parameters, timeout, null);
+        }
+        public abstract Task<List<T>> GetValuesFromSPAsync<T>(string storedProcedureName, string columnName, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
         #endregion
 
         #region Getting single entity from SP
         public virtual Task<T> GetEntityFromSPAsync<T>(string storedProcedureName)
         {
-            return GetEntityFromSPAsync<T>(storedProcedureName, null, null, defaultTimeout);
+            return GetEntityFromSPAsync<T>(storedProcedureName, null, null, defaultTimeout, null);
+        }
+        public virtual Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return GetEntityFromSPAsync<T>(storedProcedureName, null, null, defaultTimeout, infoMessageHandler);
         }
         public virtual Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, int timeout)
         {
-            return GetEntityFromSPAsync<T>(storedProcedureName, null, null, timeout);
+            return GetEntityFromSPAsync<T>(storedProcedureName, null, null, timeout, null);
+        }
+        public virtual Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, int timeout, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return GetEntityFromSPAsync<T>(storedProcedureName, null, null, timeout, infoMessageHandler);
         }
         public virtual Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters)
         {
-            return GetEntityFromSPAsync<T>(storedProcedureName, null, parameters, defaultTimeout);
+            return GetEntityFromSPAsync<T>(storedProcedureName, null, parameters, defaultTimeout, null);
+        }
+        public virtual Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return GetEntityFromSPAsync<T>(storedProcedureName, null, parameters, defaultTimeout, infoMessageHandler);
         }
         public virtual Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout)
         {
-            return GetEntityFromSPAsync<T>(storedProcedureName, null, parameters, timeout);
+            return GetEntityFromSPAsync<T>(storedProcedureName, null, parameters, timeout, null);
+        }
+        public virtual Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return GetEntityFromSPAsync<T>(storedProcedureName, null, parameters, timeout, infoMessageHandler);
         }
         public virtual Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, string prefix)
         {
-            return GetEntityFromSPAsync<T>(storedProcedureName, prefix, null, defaultTimeout);
+            return GetEntityFromSPAsync<T>(storedProcedureName, prefix, null, defaultTimeout, null);
+        }
+        public virtual Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, string prefix, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return GetEntityFromSPAsync<T>(storedProcedureName, prefix, null, defaultTimeout, infoMessageHandler);
         }
         public virtual Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, string prefix, int timeout)
         {
-            return GetEntityFromSPAsync<T>(storedProcedureName, prefix, null, timeout);
+            return GetEntityFromSPAsync<T>(storedProcedureName, prefix, null, timeout, null);
+        }
+        public virtual Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, string prefix, int timeout, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return GetEntityFromSPAsync<T>(storedProcedureName, prefix, null, timeout, infoMessageHandler);
         }
         public virtual Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, string prefix, List<SqlParameter> parameters)
         {
-            return GetEntityFromSPAsync<T>(storedProcedureName, prefix, parameters, defaultTimeout);
+            return GetEntityFromSPAsync<T>(storedProcedureName, prefix, parameters, defaultTimeout, null);
         }
-        public abstract Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, string prefix, List<SqlParameter> parameters, int timeout);
+        public virtual Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, string prefix, List<SqlParameter> parameters, int timeout)
+        {
+            return GetEntityFromSPAsync<T>(storedProcedureName, prefix, parameters, timeout, null);
+        }
+        public virtual Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, string prefix, List<SqlParameter> parameters, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return GetEntityFromSPAsync<T>(storedProcedureName, prefix, parameters, defaultTimeout, infoMessageHandler);
+        }
+        public abstract Task<T> GetEntityFromSPAsync<T>(string storedProcedureName, string prefix, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
         #endregion
 
         #region Getting list of entities from SP
         public virtual Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName)
         {
-            return GetEntitiesFromSPAsync<T>(storedProcedureName, null, null, defaultTimeout);
+            return GetEntitiesFromSPAsync<T>(storedProcedureName, null, null, defaultTimeout, null);
+        }
+        public virtual Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return GetEntitiesFromSPAsync<T>(storedProcedureName, null, null, defaultTimeout, infoMessageHandler);
         }
         public virtual Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, int timeout)
         {
-            return GetEntitiesFromSPAsync<T>(storedProcedureName, null, null, timeout);
+            return GetEntitiesFromSPAsync<T>(storedProcedureName, null, null, timeout, null);
+        }
+        public virtual Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, int timeout, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return GetEntitiesFromSPAsync<T>(storedProcedureName, null, null, timeout, infoMessageHandler);
         }
         public virtual Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters)
         {
-            return GetEntitiesFromSPAsync<T>(storedProcedureName, null, parameters, defaultTimeout);
+            return GetEntitiesFromSPAsync<T>(storedProcedureName, null, parameters, defaultTimeout, null);
+        }
+        public virtual Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return GetEntitiesFromSPAsync<T>(storedProcedureName, null, parameters, defaultTimeout, infoMessageHandler);
         }
         public virtual Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout)
         {
-            return GetEntitiesFromSPAsync<T>(storedProcedureName, null, parameters, timeout);
+            return GetEntitiesFromSPAsync<T>(storedProcedureName, null, parameters, timeout, null);
+        }
+        public virtual Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return GetEntitiesFromSPAsync<T>(storedProcedureName, null, parameters, timeout, null);
         }
         public virtual Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, string prefix)
         {
-            return GetEntitiesFromSPAsync<T>(storedProcedureName, prefix, null, defaultTimeout);
+            return GetEntitiesFromSPAsync<T>(storedProcedureName, prefix, null, defaultTimeout, null);
+        }
+        public virtual Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, string prefix, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return GetEntitiesFromSPAsync<T>(storedProcedureName, prefix, null, defaultTimeout, null);
         }
         public virtual Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, string prefix, int timeout)
         {
-            return GetEntitiesFromSPAsync<T>(storedProcedureName, prefix, null, timeout);
+            return GetEntitiesFromSPAsync<T>(storedProcedureName, prefix, null, timeout, null);
+        }
+        public virtual Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, string prefix, int timeout, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return GetEntitiesFromSPAsync<T>(storedProcedureName, prefix, null, timeout, null);
         }
         public virtual Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, string prefix, List<SqlParameter> parameters)
         {
-            return GetEntitiesFromSPAsync<T>(storedProcedureName, prefix, parameters, defaultTimeout);
+            return GetEntitiesFromSPAsync<T>(storedProcedureName, prefix, parameters, defaultTimeout, null);
         }
-        public abstract Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, string prefix, List<SqlParameter> parameters, int timeout);
+        public virtual Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, string prefix, List<SqlParameter> parameters, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return GetEntitiesFromSPAsync<T>(storedProcedureName, prefix, parameters, defaultTimeout, infoMessageHandler);
+        }
+        public virtual Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, string prefix, List<SqlParameter> parameters, int timeout)
+        {
+            return GetEntitiesFromSPAsync<T>(storedProcedureName, prefix, parameters, timeout, null);
+        }
+        public abstract Task<List<T>> GetEntitiesFromSPAsync<T>(string storedProcedureName, string prefix, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
+        #endregion 
 
+        #region Getting GRTable of entities from SP
         public virtual Task<GRTable> GetEntitiesFromSPAsync(string storedProcedureName, List<SqlParameter> spParams, GRPropertyCollection properties)
         {
-            return GetEntitiesFromSPAsync(storedProcedureName, spParams, properties, defaultTimeout);
+            return GetEntitiesFromSPAsync(storedProcedureName, spParams, properties, defaultTimeout, null);
         }
-        public abstract Task<GRTable> GetEntitiesFromSPAsync(string storedProcedureName, List<SqlParameter> spParams, GRPropertyCollection properties, int timeout);
+        public virtual Task<GRTable> GetEntitiesFromSPAsync(string storedProcedureName, List<SqlParameter> spParams, GRPropertyCollection properties, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return GetEntitiesFromSPAsync(storedProcedureName, spParams, properties, defaultTimeout, infoMessageHandler);
+        }
+        public virtual Task<GRTable> GetEntitiesFromSPAsync(string storedProcedureName, List<SqlParameter> spParams, GRPropertyCollection properties, int timeout)
+        {
+            return GetEntitiesFromSPAsync(storedProcedureName, spParams, properties, timeout, null);
+        }
+        public abstract Task<GRTable> GetEntitiesFromSPAsync(string storedProcedureName, List<SqlParameter> spParams, GRPropertyCollection properties, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
         #endregion
 
         #region Getting data sets and tables from SP
