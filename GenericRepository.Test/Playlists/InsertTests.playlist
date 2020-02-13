@@ -1,1 +1,0 @@
-<Playlist Version="1.0"><Add Test="GenericRepository.Test.DataInsertTest.Insert_Entitity_Direct" /><Add Test="GenericRepository.Test.DataInsertTest.Insert_Entitity_Queue" /></Playlist>
