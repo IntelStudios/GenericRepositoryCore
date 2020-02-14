@@ -16,7 +16,8 @@ namespace GenericRepositoryCore.ScaffoldDb
 
 
         
-        public static void CreateClasses(string connectionString, string databaseName) {
+        public static void CreateClasses(string connectionString, string databaseName) 
+        {
             try
             {
                 using (SqlConnection conn = new SqlConnection(connectionString))

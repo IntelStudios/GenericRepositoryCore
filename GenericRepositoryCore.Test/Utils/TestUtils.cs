@@ -17,7 +17,7 @@ namespace GenericRepository.Test
         public const int TestCollectionSize = 100;
         public const string TestSPVarbinaryData = "1234567890";
         public const string NameFormatString = "Name {0}";
-        public static string ConnectionString = Environment.GetEnvironmentVariable(conStringEnvVariableName);
+        public static string ConnectionString = Environment.GetEnvironmentVariable(conStringEnvVariableName, EnvironmentVariableTarget.Machine);
         public static DateTime DefaultCreatedDate = new DateTime(2018, 1, 1);
 
         public static string InitializeDatabase(string dbBaseName)

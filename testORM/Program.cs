@@ -7,9 +7,12 @@ namespace testORM
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("Testing class and repository generation");
 
-            MsSqlClassGenerator.CreateClasses("Server=DESKTOP-E8EIH4G\\SQLEXPRESS;Database=AsarkHome;Trusted_Connection=True;", "AsarkHome");
+            string databaseName = "xeelo-tests-gr-autoproperties-2020-02-14-08-30-36-1651";
+            MsSqlClassGenerator.CreateClasses($"Server=(localdb)\\mssqllocaldb;database={databaseName};Trusted_Connection=True;", databaseName);
+
+            Console.WriteLine("Generation completed");
         }
     }
 }

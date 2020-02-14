@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "GenericRepositoryCore.Test": {
+      "commandName": "Project"
+    }
+  }
+}

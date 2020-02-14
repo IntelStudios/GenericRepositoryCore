@@ -79,9 +79,9 @@ namespace GenericRepository.Helpers
         {
             
             string entityName = GRDataTypeHelper.GetDisplayName(type);
-            string plural = Inflector.Inflector.Pluralize(entityName);
-            //string plural = System.Data.Entity.Design.PluralizationServices.PluralizationService.CreateService(CultureInfo.GetCultureInfo("en")).Pluralize(entityName);
-            return entityName;
+            var pluralizer = new Inflector.Inflector(CultureInfo.GetCultureInfo("en"));
+            string plural = pluralizer.Pluralize(entityName);
+            return plural;
         }
         #endregion
 
