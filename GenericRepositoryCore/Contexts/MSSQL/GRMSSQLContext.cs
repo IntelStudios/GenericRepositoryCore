@@ -34,6 +34,7 @@ namespace GenericRepository.Contexts
 
         #region Fields
         string connectionString;
+        private readonly bool statisticsEnabled;
 
         // queue of entyties to insert/update/delete
         List<GRContextQueueItem> contextQueue;
@@ -46,10 +47,11 @@ namespace GenericRepository.Contexts
         #endregion
 
         #region Constructors & Lifecycle methods
-        public GRMSSQLContext(string connectionString)
+        public GRMSSQLContext(string connectionString, bool statisticsEnabled = true)
         {
             this.connectionString = connectionString;
             contextQueue = new List<GRContextQueueItem>();
+            this.statisticsEnabled = statisticsEnabled;
         }
 
         public override void Dispose()
@@ -99,7 +101,7 @@ namespace GenericRepository.Contexts
                 if (sqlTransaction == null)
                 {
                     SqlConnection nonTransConn = new SqlConnection(connectionString);
-                    nonTransConn.StatisticsEnabled = true;
+                    nonTransConn.StatisticsEnabled = statisticsEnabled;
                     nonTransConn.Open();
                   
                     return nonTransConn;
@@ -125,7 +127,7 @@ namespace GenericRepository.Contexts
                 if (sqlTransaction == null)
                 {
                     SqlConnection nonTransConn = new SqlConnection(connectionString);
-                    nonTransConn.StatisticsEnabled = true;
+                    nonTransConn.StatisticsEnabled = statisticsEnabled;
                     await nonTransConn.OpenAsync();
 
                     return nonTransConn;
