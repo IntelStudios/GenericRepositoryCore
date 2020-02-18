@@ -1,5 +1,6 @@
 ﻿using GenericRepository.Enums;
 using GenericRepository.Models;
+using GenericRepositoryCore.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -117,9 +118,16 @@ namespace GenericRepository.Interfaces
         Task<List<SqlParameter>> ExecuteSPWithOutParamsAsync(string storedProcedureName, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
         Task<List<SqlParameter>> ExecuteSPWithOutParamsAsync(string storedProcedureName, List<SqlParameter> parameters, SqlInfoMessageEventHandler infoMessageHandler);
         Task<List<SqlParameter>> ExecuteSPWithOutParamsAsync(string storedProcedureName, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
-
         #endregion
 
+        #region Getting single entity from SP with single JSON output param
+        Task<T> GetEntityFromJsonSPWithSingleOutputParamAsync<T>(string storedProcedureName, List<SqlParameter> parameters);
+        #endregion
+
+        #region Getting entities from SP with single JSON output param
+        Task<List<T>> GetEntitiesFromJsonSPWithSingleOutputParamAsync<T>(string storedProcedureName, List<SqlParameter> parameters);
+        #endregion
+               
         #region Getting single value from SP
         Task<T> GetValueFromSPAsync<T>(string storedProcedureName);
         Task<T> GetValueFromSPAsync<T>(string storedProcedureName, int timeout);

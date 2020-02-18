@@ -318,6 +318,24 @@ namespace GenericRepository.Test
             {
                 Assert.Fail("Could not create stored procedure - {0}.", GRStringHelpers.GetExceptionString(exc));
             }
+            
+            // create test procedure sp7
+            string crSP8 = @"CREATE PROCEDURE [dbo].[spGetJsonTestEntityAutoPropertiesPrefixed] @jsonOutput NVARCHAR(MAX) OUTPUT
+                                AS
+                                BEGIN
+                                    SET @jsonOutput = (select * from [dbo].[TestEntityAutoPropertiesTable] for json path)
+                                END";
+
+            SqlCommand crSP8Command = new SqlCommand(crSP8, connection);
+
+            try
+            {
+                crSP8Command.ExecuteNonQuery();
+            }
+            catch (Exception exc)
+            {
+                Assert.Fail("Could not create stored procedure - {0}.", GRStringHelpers.GetExceptionString(exc));
+            }
         }
 
         private static void CreateFunctions(SqlConnection connection)

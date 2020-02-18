@@ -1,18 +1,18 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Data.SqlClient;
-using GenericRepository.Test.Models;
-using GenericRepository.Interfaces;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Data;
-using System.IO;
-using System.Text;
-using GenericRepository.Exceptions;
+﻿using GenericRepository.Exceptions;
 using GenericRepository.Helpers;
-using Ionic.Zip;
+using GenericRepository.Interfaces;
 using GenericRepository.Models;
+using GenericRepository.Test.Models;
+using Ionic.Zip;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace GenericRepository.Test.DBProgrammability
 {
@@ -975,6 +975,21 @@ namespace GenericRepository.Test.DBProgrammability
                 int exp = (50 + i) % 100 + 1;
                 Assert.IsTrue(res == exp, $"Parsed value {exp} on row {i+1} does not correspond to expected value {res}.");
             }
+        }
+
+        [TestMethod]
+        public async Task Test_ExecuteSPWithJsonOutParamsAsync()
+        {
+            IGRContext context = TestUtils.GetContext(dbName);
+            Type type = typeof(List<TestEntityAutoProperties>);
+
+
+            var result = await context.GetEntitiesFromJsonSPWithSingleOutputParamAsync<TestEntityAutoProperties>("spGetJsonTestEntityAutoPropertiesPrefixed", new List<SqlParameter>
+            {
+                new SqlParameter("@jsonOutput", SqlDbType.NVarChar, -1){ Direction = ParameterDirection.Output }
+            });
+
+            Assert.IsTrue(result.Count == 100);
         }
     }
 }

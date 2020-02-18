@@ -3,6 +3,7 @@ using GenericRepository.Helpers;
 using GenericRepository.Interfaces;
 using GenericRepository.Models;
 using Ionic.Zip;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -449,7 +450,75 @@ namespace GenericRepository.Contexts
             return ret;
         }
 
-     
+        public override async Task<T> ExecuteSPWithSingleJsonOutParamAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            string spCommandStatementReadable = string.Empty;
+            GRExecutionStatistics stats = null;
+
+            T ret = default;
+
+            SqlConnection connection = null;
+
+            try
+            {
+                connection = await GetSqlConnectionAsync();
+
+                if (infoMessageHandler != null)
+                {
+                    connection.InfoMessage += infoMessageHandler;
+                }
+
+                using (SqlCommand command = CreateSPCommand(connection, storedProcedureName, parameters, sqlTransaction, timeout))
+                {
+                    spCommandStatementReadable = GetSPCommandStatement(command);
+
+                    await command.ExecuteNonQueryAsync();
+
+                    if (parameters != null)
+                    {
+                        List<SqlParameter> outParams = parameters.Where(x => x.Direction == ParameterDirection.Output || x.Direction == ParameterDirection.InputOutput).ToList();
+
+                        if (outParams.Count > 1)
+                        {
+                            throw new GRUnsupportedMultipleJsonOutputParameterException(storedProcedureName);
+                        }
+
+                        if (outParams.Count > 0)
+                        {
+                            ret = JsonConvert.DeserializeObject<T>(outParams.First().Value.ToString());
+                        }
+                    }
+                }
+                stats = ParseFnSpStatistics(connection, spCommandStatementReadable);
+
+                LogSuccessfulQueryStats(stats);
+            }
+            catch (SqlException exc)
+            {
+                LogFailedQueryStats(stats, exc.Message, exc);
+
+                throw new GRQueryExecutionFailedException(exc, new GRExecutionStatistics(null, spCommandStatementReadable, null), exc.Message);
+            }
+            catch (Exception exc)
+            {
+                string errMessage = string.Format("An unknown error occured while executing asynchronous stored procedure '{0}'.", storedProcedureName);
+                LogFailedQueryStats(stats, errMessage, exc);
+
+                throw new GRQueryExecutionFailedException(exc, new GRExecutionStatistics(null, spCommandStatementReadable, null), errMessage);
+            }
+            finally
+            {
+                if (infoMessageHandler != null)
+                {
+                    connection.InfoMessage -= infoMessageHandler;
+                }
+
+                DisposeConnection(connection);
+            }
+
+            return ret;
+        }
+        
         #region Data sets and tables
         public override GRDataSet GetDataSetFromCommand(string commandString, bool returnMessage, int timeout)
         {
