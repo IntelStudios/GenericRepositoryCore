@@ -981,10 +981,8 @@ namespace GenericRepository.Test.DBProgrammability
         public async Task Test_ExecuteSPWithJsonOutParamsAsync()
         {
             IGRContext context = TestUtils.GetContext(dbName);
-            Type type = typeof(List<TestEntityAutoProperties>);
 
-
-            var result = await context.GetEntitiesFromJsonSPWithSingleOutputParamAsync<TestEntityAutoProperties>("spGetJsonTestEntityAutoPropertiesPrefixed", new List<SqlParameter>
+            var result = await context.GetEntitiesFromSPWithSingleJsonOutParamAsync<TestEntityAutoProperties>("spGetJsonTestEntityAutoPropertiesPrefixed", new List<SqlParameter>
             {
                 new SqlParameter("@jsonOutput", SqlDbType.NVarChar, -1){ Direction = ParameterDirection.Output }
             });

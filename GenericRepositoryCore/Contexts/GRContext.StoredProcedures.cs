@@ -1,13 +1,9 @@
 ﻿using GenericRepository.Interfaces;
 using GenericRepository.Models;
-using GenericRepositoryCore.Models;
-using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace GenericRepository.Contexts
@@ -82,14 +78,14 @@ namespace GenericRepository.Contexts
 
         #region Getting single entity from SP with single JSON output param
 
-        public virtual Task<T> GetEntityFromJsonSPWithSingleOutputParamAsync<T>(string storedProcedureName, List<SqlParameter> parameters)
+        public virtual Task<T> GetEntityFromSPWithSingleJsonOutParamAsync<T>(string storedProcedureName, List<SqlParameter> parameters)
         {
             return ExecuteSPWithSingleJsonOutParamAsync<T>(storedProcedureName, parameters, defaultTimeout, null);
         }
         #endregion
 
         #region Getting entities from SP with single JSON output param
-        public virtual Task<List<T>> GetEntitiesFromJsonSPWithSingleOutputParamAsync<T>(string storedProcedureName, List<SqlParameter> parameters)
+        public virtual Task<List<T>> GetEntitiesFromSPWithSingleJsonOutParamAsync<T>(string storedProcedureName, List<SqlParameter> parameters)
         {
             return ExecuteSPWithSingleJsonOutParamAsync<List<T>>(storedProcedureName, parameters, defaultTimeout, null);
         }
