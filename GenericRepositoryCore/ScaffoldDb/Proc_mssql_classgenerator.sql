@@ -45,7 +45,11 @@ end
 
 GO
 
-Create or alter function AddClassHeader(@p_tableName varchar(100))
+IF object_id(N'AddClassHeader', N'FN') IS NOT NULL
+    DROP FUNCTION AddClassHeader
+GO
+
+Create function AddClassHeader(@p_tableName varchar(100))
 returns varchar(max)
 as
 BEGIN
@@ -65,7 +69,12 @@ BEGIN
 	return @tmp;
 END
 GO
-Create or alter function AddClassRepositories(@p_tableName varchar(max))
+
+IF object_id(N'AddClassRepositories', N'FN') IS NOT NULL
+    DROP FUNCTION AddClassRepositories
+GO
+
+Create function AddClassRepositories(@p_tableName varchar(max))
 returns varchar(max)
 as
 BEGIN
@@ -93,10 +102,13 @@ BEGIN
 		
 	return @tmp;
 END
-
 GO
 
-Create or alter function IsPrimaryKey(@p_tableWithAttribute nvarchar(max))
+IF object_id(N'IsPrimaryKey', N'FN') IS NOT NULL
+    DROP FUNCTION IsPrimaryKey
+GO
+
+Create function IsPrimaryKey(@p_tableWithAttribute nvarchar(max))
 returns bit
 as
 BEGIN
@@ -122,9 +134,13 @@ select
 		
 	return @IsKey
 END
-
 GO
-create or alter  procedure PrintDtoForDatabase(
+
+IF object_id(N'PrintDtoForDatabase', N'P') IS NOT NULL
+    DROP PROCEDURE PrintDtoForDatabase
+GO
+
+create procedure PrintDtoForDatabase(
 	@p_DbName nvarchar(max)
 	)
 as
