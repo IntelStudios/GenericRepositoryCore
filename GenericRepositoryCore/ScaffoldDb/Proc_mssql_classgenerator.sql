@@ -27,6 +27,11 @@ BEGIN
 	DECLARE @typeName varchar(max);
 	SET @typeName =
 	CASE @typeId
+		WHEN 48 THEN 'int'
+		WHEN 108 THEN 'decimal'
+		WHEN 175 THEN 'decimal'
+		WHEN 127 THEN 'int'
+		WHEN 99 THEN 'string'
 		WHEN 56 THEN 'int'
 		WHEN 40 THEN 'DateTime'
 		WHEN 61 THEN 'DateTime'
@@ -38,7 +43,7 @@ BEGIN
 		WHEN 241 THEN 'XElement'
 		ELSE 'unknown (' + CAST(@typeId AS NVARCHAR) + ')'
 	END;
-	IF @isNullable = 1 AND @typeId != 231 AND @typeId != 239 AND @typeId != 241 AND @typeId != 167
+	IF @isNullable = 1 AND @typeId != 231 AND @typeId != 239 AND @typeId != 241 AND @typeId != 167 AND @typeId != 99
 		SET @typeName = @typeName + '?'
 	return @typeName + ' ';
 end
@@ -63,7 +68,7 @@ BEGIN
 		set @tmp = @tmp + @br + '%namespace%';
 		set @tmp = @tmp + @br + '{';
 		set @tmp = @tmp + @br;
-		set @tmp = @tmp + @br + '[GRTableName(TableName = "' + @p_tableName + '")]';
+		--set @tmp = @tmp + @br + '[GRTableName(TableName = "' + @p_tableName + '")]';
 		set @tmp = @tmp + @br + 'public class ' + @p_tableName;
         set @tmp = @tmp + @br + '{';
 	return @tmp;
@@ -179,11 +184,12 @@ begin
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
 			
-			if(dbo.IsPrimaryKey(Concat(@name, '.',  @a_name)) = 1)
-				set @out = @out + @br + '[GRAIPrimaryKey]';
+			--if(dbo.IsPrimaryKey(Concat(@name, '.',  @a_name)) = 1)
+			--	set @out = @out + @br + '[GRAIPrimaryKey]';
 			set @out = @out + @br;
-			set @out = @out + @br + '[GRColumnName(ColumnName = "' + @a_name + '")]';
-			set @out = @out + @br + @tab + 'public ' + dbo.ConvertDataType(@a_type,@a_nullable) + dbo.Initcap(@a_name) + ' { get; set;}';
+			--set @out = @out + @br + '[GRColumnName(ColumnName = "' + @a_name + '")]';
+			set @out = @out + @br + @tab + 'public ' + dbo.ConvertDataType(@a_type,@a_nullable) + @a_name + ' { get; set;}';
+			--set @out = @out + @br + @tab + 'public ' + dbo.ConvertDataType(@a_type,@a_nullable) + dbo.Initcap(@a_name) + ' { get; set;}';
 			FETCH NEXT FROM c_attr INTO @a_name,@a_type,@a_nullable
 
 		end
