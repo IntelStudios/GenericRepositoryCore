@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.SqlClient;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace GenericRepositoryCore.ScaffoldDb
 {
@@ -14,9 +11,7 @@ namespace GenericRepositoryCore.ScaffoldDb
         private static string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
         private static string actualProject = new DirectoryInfo(baseDirectory).Parent.Parent.Parent.FullName;
 
-
-        
-        public static void CreateClasses(string connectionString, string databaseName) 
+        public static void CreateClasses(string connectionString, string databaseName, string nameSpace = null) 
         {
             try
             {
@@ -29,11 +24,11 @@ namespace GenericRepositoryCore.ScaffoldDb
                     //create procedures
                     CreateOrDropProcedure(conn, procs);
 
-                    //Get DataTransferObjects
+                    //get DataTransferObjects
                     List<DbTable> orm = GetDto(conn, databaseName);
                     if (orm.Count != 0)
                     {
-                        AddNamespaces(orm);
+                        AddNamespaces(orm, nameSpace);
                         CreateFilesWithClases(orm);
                     }
 
@@ -52,9 +47,17 @@ namespace GenericRepositoryCore.ScaffoldDb
             }
         }
 
-        private static void AddNamespaces(List<DbTable> orm)
+        private static void AddNamespaces(List<DbTable> orm, string nameSpace = null)
         {
-            string assemblyName = Assembly.GetEntryAssembly().GetName().Name;
+            string assemblyName;
+            if (nameSpace is null)
+            {
+                assemblyName = Assembly.GetEntryAssembly().GetName().Name;
+            }else
+            {
+                assemblyName = nameSpace;
+            }
+
             string ModelNamespaces = "namespace " + assemblyName + ".Model";
             string RepositoriesNamespaces = "namespace " + assemblyName + ".Repositories";
             foreach (var x in orm)
@@ -62,28 +65,22 @@ namespace GenericRepositoryCore.ScaffoldDb
                 x.Class = x.Class.Replace("%namespace%", ModelNamespaces);
                 x.Repository = x.Repository.Replace("%namespace%", RepositoriesNamespaces);
                 x.Repository = x.Repository.Replace("%usingToModel%", "using " + assemblyName + ".Model;");
-            }
-            
-
-        
+            }        
         }
-
-        
 
         private static void CreateFilesWithClases(List<DbTable> orm)
         {
             DirectoryInfo Model = new DirectoryInfo(Path.Combine(actualProject, "Model"));
-            DirectoryInfo Repositories = new DirectoryInfo(Path.Combine(actualProject, "Repositories"));
+            //DirectoryInfo Repositories = new DirectoryInfo(Path.Combine(actualProject, "Repositories"));
             if (!Model.Exists) Model.Create();
-            if (!Repositories.Exists) Repositories.Create();
+            //if (!Repositories.Exists) Repositories.Create();
 
             foreach (DbTable item in orm)
             {
                 File.WriteAllText(Path.Combine(Model.FullName, item.TableName + ".cs"), item.Class);
-                File.WriteAllText(Path.Combine(Repositories.FullName, item.TableName + ".cs"), item.Repository);
+                //File.WriteAllText(Path.Combine(Repositories.FullName, item.TableName + ".cs"), item.Repository);
             }
         }
-
         private static List<DbTable> GetDto(SqlConnection conn, string databaseName)
         {
             List<DbTable> dto = new List<DbTable>();
@@ -118,7 +115,6 @@ namespace GenericRepositoryCore.ScaffoldDb
                     commCreateProc.ExecuteNonQuery();
                 }
             }
-           
         }
 
         private static string GetQuerry(Assembly assembly, string namespacePath)
@@ -132,9 +128,6 @@ namespace GenericRepositoryCore.ScaffoldDb
                 output = sr.ReadToEnd();
             }
             return output;
-        }
-
-
-       
+        }       
     }
 }

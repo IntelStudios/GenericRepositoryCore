@@ -1,5 +1,3 @@
-
-
 CREATE FUNCTION Initcap (@Str varchar(max))
 RETURNS varchar(max) AS
 BEGIN
@@ -50,29 +48,76 @@ end
 
 GO
 
-IF object_id(N'AddClassHeader', N'FN') IS NOT NULL
-    DROP FUNCTION AddClassHeader
+IF object_id(N'AddClassHeader', N'P') IS NOT NULL
+    DROP procedure AddClassHeader
 GO
 
-Create function AddClassHeader(@p_tableName varchar(100))
-returns varchar(max)
+Create procedure AddClassHeader(@p_tableName varchar(100), @a_out varchar(max) output)
 as
 BEGIN
 	Declare @tmp varchar(max)= '';
+
+	DECLARE @tableComment varchar(30);
+	SELECT @tableComment = convert(varchar(5000), sep.value) FROM sys.tables st
+	LEFT JOIN sys.extended_properties sep ON 
+		st.object_id = sep.major_id
+		and sep.name = 'MS_Description'
+		and sep.minor_id = 0
+	where st.name=@p_tableName
+	DECLARE @a_desc varchar(5000);
+
 	DECLARE @br char(1) = CHAR(10);
-	set @tmp = @tmp + @br + 'using GenericRepository.Attributes;';
-		set @tmp = @tmp + @br + 'using System;';
-		set @tmp = @tmp + @br + 'using System.Collections.Generic;';
-		set @tmp = @tmp + @br + 'using System.Text;';
-		set @tmp = @tmp + @br;
-		set @tmp = @tmp + @br + '%namespace%';
-		set @tmp = @tmp + @br + '{';
-		set @tmp = @tmp + @br;
-		--set @tmp = @tmp + @br + '[GRTableName(TableName = "' + @p_tableName + '")]';
-		set @tmp = @tmp + @br + 'public class ' + @p_tableName;
-        set @tmp = @tmp + @br + '{';
-	return @tmp;
+	DECLARE @tab char(1) = CHAR(9)
+	--set @tmp = @tmp + @br + 'using GenericRepository.Attributes;';
+	set @tmp = @tmp + 'using System;';
+	--	set @tmp = @tmp + @br + 'using System.Collections.Generic;';
+	set @tmp = @tmp + @br + 'using System.Text;';
+	set @tmp = @tmp + @br;
+	set @tmp = @tmp + @br + '%namespace%';
+	set @tmp = @tmp + @br + '{';
+
+	declare @before varchar(max) = CHAR(9);
+	exec dbo.GenerateComment @a_description = @tableComment, @before = @before, @a_out = @tmp output;
+			
+	--set @tmp = @tmp + @br + '[GRTableName(TableName = "' + @p_tableName + '")]';
+	set @tmp = @tmp + @br + @tab + '[Serializable]';
+	set @tmp = @tmp + @br + @tab + 'public class ' + @p_tableName;
+    set @tmp = @tmp + @br + @tab + '{';
+	
+	set @a_out = @a_out + @tmp;
 END
+GO
+
+IF object_id(N'GenerateComment', N'P') IS NOT NULL
+    drop procedure GenerateComment
+GO
+
+create procedure GenerateComment
+(
+	@a_description varchar(max),
+	@before varchar(max),
+	@a_out varchar(max) output	
+)
+as
+begin
+	declare @br char(1) = CHAR(10);
+	declare @a_desc varchar(5000);
+	if(@a_description is not null and @a_description != '')
+		begin
+			set @a_out = @a_out + @br + @before + '/// <summary>'
+			declare c_desc cursor local for select value from STRING_SPLIT(REPLACE(@a_description, char(13)+char(10), ';'), ';')
+			open c_desc
+			fetch next from c_desc into @a_desc
+			while @@FETCH_STATUS = 0
+			begin
+				set @a_out = @a_out + @br + @before + '/// ' + @a_desc;			
+				fetch next from c_desc into @a_desc
+			end
+			close c_desc
+			deallocate c_desc
+			set @a_out = @a_out + @br + @before + '/// </summary>'
+		end
+end
 GO
 
 IF object_id(N'AddClassRepositories', N'FN') IS NOT NULL
@@ -160,6 +205,9 @@ as
 	DECLARE @a_name varchar(1000);
 	DECLARE @a_type int;
 	DECLARE @a_nullable bit;
+	DECLARE @a_description varchar(5000);
+
+	DECLARE @a_desc varchar(5000);
 	
 	Declare @OutputTable Table(
 	TableName varchar(200),
@@ -174,40 +222,45 @@ begin
 	BEGIN
 		
 		if(@name != '') begin
-			set @out = @out + dbo.AddClassHeader(@name);
+			exec dbo.AddClassHeader @p_tableName = @name, @a_out = @out output;
 			set @repo = @repo + dbo.AddClassRepositories(@name);
 			end
 
-		DECLARE c_attr CURSOR LOCAL FOR SELECT cols.name, cols.system_type_id, cols.is_nullable FROM sys.columns cols JOIN sys.tables tbl ON cols.object_id = tbl.object_id where tbl.name=@name;
+		DECLARE c_attr CURSOR LOCAL FOR (SELECT sc.name, sc.system_type_id, sc.is_nullable, convert(varchar(5000), sep.value) FROM sys.columns sc 
+			JOIN sys.tables st on sc.object_id = st.object_id 
+			LEFT JOIN sys.extended_properties sep on 
+				st.object_id = sep.major_id
+                and sc.column_id = sep.minor_id
+                and sep.name = 'MS_Description'
+			where st.name=@name);
 		open c_attr
-		FETCH NEXT FROM c_attr INTO @a_name,@a_type,@a_nullable
+		FETCH NEXT FROM c_attr INTO @a_name,@a_type,@a_nullable,@a_description
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
 			
 			--if(dbo.IsPrimaryKey(Concat(@name, '.',  @a_name)) = 1)
 			--	set @out = @out + @br + '[GRAIPrimaryKey]';
-			set @out = @out + @br;
-			--set @out = @out + @br + '[GRColumnName(ColumnName = "' + @a_name + '")]';
-			set @out = @out + @br + @tab + 'public ' + dbo.ConvertDataType(@a_type,@a_nullable) + @a_name + ' { get; set;}';
-			--set @out = @out + @br + @tab + 'public ' + dbo.ConvertDataType(@a_type,@a_nullable) + dbo.Initcap(@a_name) + ' { get; set;}';
-			FETCH NEXT FROM c_attr INTO @a_name,@a_type,@a_nullable
 
+			declare @before varchar(max) = CHAR(9) + CHAR(9);
+			exec dbo.GenerateComment @a_description = @a_description, @before = @before, @a_out = @out output;
+
+			--set @out = @out + @br;
+			--set @out = @out + @br + '[GRColumnName(ColumnName = "' + @a_name + '")]';
+			set @out = @out + @br + @tab + @tab + 'public ' + dbo.ConvertDataType(@a_type,@a_nullable) + @a_name + ' { get; set; }';
+			--set @out = @out + @br + @tab + 'public ' + dbo.ConvertDataType(@a_type,@a_nullable) + dbo.Initcap(@a_name) + ' { get; set;}';
+			FETCH NEXT FROM c_attr INTO @a_name,@a_type,@a_nullable,@a_description
 		end
 		close c_attr
 		deallocate c_attr
-		set @out = @out + @br + '}' + @br;
-		set @out = @out + @br + '}' + @br;
+		set @out = @out + @br + @tab + '}';
+		set @out = @out + @br + '}';
 		insert into @OutputTable values (@name, @out, @repo);
 		set @repo = '';
 		set @out = '';--@out + '#endclass' + @br;
 		FETCH NEXT FROM c_tables INTO @name
-
 	END
 	close c_tables;
 	Select * from @OutputTable;
 	--print @out;
 	--print @repo;
 end
-
-
-
