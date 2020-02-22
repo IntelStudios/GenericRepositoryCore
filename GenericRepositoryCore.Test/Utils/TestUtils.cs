@@ -321,9 +321,10 @@ namespace GenericRepository.Test
             }
             
             // create test procedure sp7
-            string crSP8 = @"CREATE PROCEDURE [dbo].[spGetJsonTestEntityAutoPropertiesPrefixed] @jsonOutput NVARCHAR(MAX) OUTPUT
+            string crSP8 = @"CREATE PROCEDURE [dbo].[spGetJsonTestEntityAutoPropertiesPrefixed] @input VARCHAR(10), @jsonOutput NVARCHAR(MAX) OUTPUT
                                 AS
                                 BEGIN
+                                    print @input
                                     SET @jsonOutput = (select * from [dbo].[TestEntityAutoPropertiesTable] for json path)
                                 END";
 

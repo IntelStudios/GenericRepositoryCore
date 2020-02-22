@@ -984,6 +984,7 @@ namespace GenericRepository.Test.DBProgrammability
 
             var result = await context.GetEntitiesFromSPWithSingleJsonOutParamAsync<TestEntityAutoProperties>("spGetJsonTestEntityAutoPropertiesPrefixed", new List<SqlParameter>
             {
+                new SqlParameter("@input", "adssadasd"){ Direction = ParameterDirection.Input },
                 new SqlParameter("@jsonOutput", SqlDbType.NVarChar, -1){ Direction = ParameterDirection.Output }
             });
 
