@@ -21,63 +21,25 @@ echo GIT_BRANCH			%GIT_BRANCH%
 echo WORKSPACE			%WORKSPACE%
 echo GIT_LOCAL_BRANCH	%GIT_LOCAL_BRANCH%
 
-del /QS %WORKSPACE%\Build 
+del /q /s %WORKSPACE%\Build 
 
-set msbuild_location="C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsMSBuildCmd.bat"
-set mstest_location="C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\MSTest.exe"
-set GITDIR=%WORKSPACE%\git
-
-IF NOT EXIST %msbuild_location% (
-  echo %msbuild_location% does not exist. Please install Visual Studio
-  exit /b 1  
-)
-
-IF NOT EXIST %mstest_location% (
-  echo %mstest_location% does not exist. Please install Visual Studio
-  exit /b 1  
-)
-
-echo **** Update Library Version ***
-cd %WORKSPACE%/publish/
-powershell -File %WORKSPACE%/publish/Update-Version.ps1 -branch %GIT_LOCAL_BRANCH% 
-
-rem package already exists
-IF %ERRORLEVEL% == -1 (
-	echo exit /b 0
-)
-
-rem building package failed
-IF %ERRORLEVEL% NEQ 0 (
-	goto :error
-)
-
-echo **** Cleanup previous builds ****
+echo **** Cleanup previous builds from %WORKSPACE%\build\****
 rmdir "%WORKSPACE%\build\*.*" /q /s
 mkdir %WORKSPACE%\build
-call %msbuild_location%
 cd %WORKSPACE%
 
-echo ********* BUILD Library to folder **********
-MSbuild "%WORKSPACE%\GenericRepository.sln" /p:outdir="%WORKSPACE%\build\GenericRepository" /p:Configuration="Release" /p:Platform="Any CPU" /v:minimal /clp:Summary  || goto :error
+echo ********* BUILD Library to folder into %WORKSPACE%\build\GenericRepository **********
+dotnet build "%WORKSPACE%\GenericRepositoryCore.sln" -o "%WORKSPACE%\build\GenericRepository" -c Release  || goto :error
 
 echo ********* EXECUTE GenericRepository TESTS *************
 mkdir %WORKSPACE%\build\TestsResults
+dotnet test -r c:\tmp\test --logger "trx;LogFileName=%WORKSPACE%\build\TestsResults\TestResults.trx"
 
 del "%WORKSPACE%\build\TestsResults\GenericRepository.trx"
-%mstest_location% /testcontainer:"%WORKSPACE%\build\GenericRepository\GenericRepository.Test.dll" /resultsfile:"%WORKSPACE%\build\TestsResults\GenericRepository.trx"
+dotnet test -r "%WORKSPACE%\build\TestsResults"
 
-echo ********* BUILD GenericRepository NUGET PACKAGE *************
-echo Mounting NuGet repository as drive M:
-%SystemRoot%\System32\net.exe use M: %NUGET_STORAGE% /user:%NUGET_USERNAME% %NUGET_PASSWORD% /persistent:no
-
-IF "%GIT_LOCAL_BRANCH%"=="master" (
-  ECHO Deleting old master packages
-  del M:\*GenericRepository*master*
-)
-
-M:\nuget.exe pack %WORKSPACE%\publish\Package.nuspec -OutputDirectory M:\ || goto :error
-echo Unmounting drive M:
-%SystemRoot%\System32\net.exe use M: /delete /yes
+echo ********* Publishing NuGet package from %WORKSPACE%\build\GenericRepository\*.nupkg **********
+dotnet nuget push %WORKSPACE%\build\GenericRepository\*.nupkg -s "GenericRepositoryFeed" --api-key 3i4uktw3lsnvw43afksoqxiegn7yo52sorlsolhnqn7akhdao4ga
 
 endlocal
 exit /b 0

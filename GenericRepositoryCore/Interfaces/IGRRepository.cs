@@ -7,14 +7,35 @@ namespace GenericRepository.Interfaces
 {
     public interface IGRRepository
     {
-        int GRCount();
-        Task<int> GRCountAsync();
+        R GRGet<R>(object key);
+        Task<R> GRGetAsync<R>(object key);
+
+        IGRQueriable<R> GRWhere<R>(params Expression<Func<R, bool>>[] conditions);
+        public IGRQueriable<R> GRAll<R>();
+
+        #region Insert/Update/Delete methods
+        IGRUpdatable<R> GREnqueueUpdate<R>(R entity);
+        IGRUpdatable<R> GREnqueueInsert<R>(R entity);
+        IGRDeletable<R> GREnqueueDelete<R>(R entity);
+        IGRDeletable<R> GREnqueueDelete<R>();
+        #endregion
+
+        #region Save events
         void PrepareForSave();
         Task PrepareForSaveAsync();
+        #endregion
+
+        #region Count sync/async methods
+        int GRCount<R>();
+        Task<int> GRCountAsync<R>();
+        #endregion
     }
 
     public interface IGRRepository<T> : IGRRepository
     {
+        int GRCount();
+        Task<int> GRCountAsync();
+
         T GRGet(object key);
         Task<T> GRGetAsync(object key);
 
@@ -24,7 +45,6 @@ namespace GenericRepository.Interfaces
 
         IGRDeletable<T> GREnqueueDelete(T entity);
         IGRDeletable<T> GREnqueueDelete();
-        IGRDeletable<R> GREnqueueDelete<R>();
 
         IGRQueriable<T> GRWhere(params Expression<Func<T, bool>>[] conditions);
 

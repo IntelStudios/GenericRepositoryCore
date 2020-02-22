@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenericRepositoryCore", "Ge
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenericRepositoryCore.Test", "GenericRepositoryCore.Test\GenericRepositoryCore.Test.csproj", "{F65DC3B5-DC7D-4B30-B631-BA355C45EF3F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "testORM", "testORM\testORM.csproj", "{FD296BC0-48C0-4C86-AC4F-DC64A44835DC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "testORM", "testORM\testORM.csproj", "{FD296BC0-48C0-4C86-AC4F-DC64A44835DC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

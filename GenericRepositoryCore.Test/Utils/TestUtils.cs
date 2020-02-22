@@ -1,6 +1,7 @@
 ﻿using GenericRepository.Contexts;
 using GenericRepository.Helpers;
 using GenericRepository.Interfaces;
+using GenericRepository.Repositories;
 using GenericRepository.Test.Loggers;
 using GenericRepository.Test.Models;
 using GenericRepository.Test.Repositories;
@@ -736,6 +737,17 @@ namespace GenericRepository.Test
             TestEntityAutoPropertiesRepository grEntities = new TestEntityAutoPropertiesRepository(repoContext);
 
             return grEntities;
+        }
+
+        public static IGRRepository GetNontGenericRepository(string dbName)
+        {
+            string repoConnectionString = string.Format("{0};initial catalog={1};", TestUtils.ConnectionString, dbName);
+
+            IGRContext repoContext = new GRMSSQLContext(repoConnectionString);
+            repoContext.RegisterLogger(new TraceLogger(), Enums.GRContextLogLevel.Debug | Enums.GRContextLogLevel.Error | Enums.GRContextLogLevel.Warning);
+
+            GRRepository repo = new GRRepository(repoContext);
+            return repo;
         }
 
         public static TestEntityBinaryStreamRepository GetTestEntityBinaryStreamRepository(string dbName)

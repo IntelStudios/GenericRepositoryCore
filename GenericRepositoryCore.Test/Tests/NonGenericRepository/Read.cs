@@ -1,22 +1,22 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using GenericRepository.Test.Models;
+﻿using GenericRepository.Exceptions;
+using GenericRepository.Helpers;
 using GenericRepository.Interfaces;
+using GenericRepository.Repositories;
+using GenericRepository.Test.Models;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using GenericRepository.Models;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using GenericRepository.Helpers;
-using GenericRepository.Exceptions;
 
-namespace GenericRepository.Test.CRUD
+namespace GenericRepository.Test.NonGenericRepository.CRUD
 {
     [TestClass]
     public class Read
     {
-        static string dbBaseName = "xeelo-tests-gr-read";
+        static string dbBaseName = "xeelo-tests-gr-ng-read";
         static string dbName = null;
 
         [ClassInitialize]
@@ -34,13 +34,13 @@ namespace GenericRepository.Test.CRUD
         [TestMethod]
         public async Task Get_Entities_All()
         {
-            IGRRepository<TestEntityAutoProperties> grEntities = TestUtils.GetTestEntityAutoPropertiesRepository(dbName);
+            IGRRepository repo = TestUtils.GetNontGenericRepository(dbName);
 
             List<TestEntityAutoProperties> testEntities = null;
 
             try
             {
-                testEntities = await grEntities.GRAll().GRToListAsync();
+                testEntities = await repo.GRAll<TestEntityAutoProperties>().GRToListAsync();
             }
             catch (Exception exc)
             {
@@ -99,13 +99,13 @@ namespace GenericRepository.Test.CRUD
         [TestMethod]
         public async Task Get_Entities_GRAll()
         {
-            IGRRepository<TestEntityAutoProperties> grEntities = TestUtils.GetTestEntityAutoPropertiesRepository(dbName);
+            IGRRepository repo = TestUtils.GetNontGenericRepository(dbName);
 
             List<TestEntityAutoProperties> testEntities = null;
 
             try
             {
-                testEntities = await grEntities.GRAll().GRToListAsync();
+                testEntities = await repo.GRAll<TestEntityAutoProperties>().GRToListAsync();
             }
             catch (Exception exc)
             {
@@ -164,13 +164,13 @@ namespace GenericRepository.Test.CRUD
         [TestMethod]
         public async Task Get_Entities_GRExcludeAll()
         {
-            IGRRepository<TestEntityAutoProperties> grEntities = TestUtils.GetTestEntityAutoPropertiesRepository(dbName);
+            IGRRepository repo = TestUtils.GetNontGenericRepository(dbName);
 
             List<TestEntityAutoProperties> testEntities;
 
             try
             {
-                testEntities = await grEntities.GRAll().GRExcludeAll().GRToListAsync();
+                testEntities = await repo.GRAll<TestEntityAutoProperties>().GRExcludeAll().GRToListAsync();
                 Assert.Fail("Entities without resulting columns should not be get.");
             }
             catch (GRInvalidOperationException)
@@ -185,13 +185,13 @@ namespace GenericRepository.Test.CRUD
         [TestMethod]
         public async Task Get_Entities_Id_GT_50()
         {
-            IGRRepository<TestEntityAutoProperties> grEntities = TestUtils.GetTestEntityAutoPropertiesRepository(dbName);
+            IGRRepository repo = TestUtils.GetNontGenericRepository(dbName);
 
             List<TestEntityAutoProperties> testEntities = null;
 
             try
             {
-                testEntities = await grEntities.GRWhere(e => e.TestEntityAutoPropertiesID > 50).GRToListAsync();
+                testEntities = await repo.GRWhere<TestEntityAutoProperties>(e => e.TestEntityAutoPropertiesID > 50).GRToListAsync();
             }
             catch (Exception exc)
             {
@@ -211,13 +211,13 @@ namespace GenericRepository.Test.CRUD
         [TestMethod]
         public void Get_Entities_Id_GT_50_Count()
         {
-            IGRRepository<TestEntityAutoProperties> grEntities = TestUtils.GetTestEntityAutoPropertiesRepository(dbName);
+            IGRRepository repo = TestUtils.GetNontGenericRepository(dbName);
 
             int count = 0;
 
             try
             {
-                count = grEntities.GRWhere(e => e.TestEntityAutoPropertiesID > 50).GRCountAsync().GetAwaiter().GetResult();
+                count = repo.GRWhere<TestEntityAutoProperties>(e => e.TestEntityAutoPropertiesID > 50).GRCountAsync().GetAwaiter().GetResult();
             }
             catch (Exception exc)
             {
@@ -232,13 +232,13 @@ namespace GenericRepository.Test.CRUD
         [TestMethod]
         public void Get_Entities_All_Count()
         {
-            IGRRepository<TestEntityAutoProperties> grEntities = TestUtils.GetTestEntityAutoPropertiesRepository(dbName);
+            IGRRepository repo = TestUtils.GetNontGenericRepository(dbName);
 
             int count = 0;
 
             try
             {
-                count = grEntities.GRCount();
+                count = repo.GRCount<TestEntityAutoProperties>();
             }
             catch (Exception exc)
             {
@@ -252,13 +252,13 @@ namespace GenericRepository.Test.CRUD
         [TestMethod]
         public async Task Get_Entities_Id_GT_10_LT_15()
         {
-            IGRRepository<TestEntityAutoProperties> grEntities = TestUtils.GetTestEntityAutoPropertiesRepository(dbName);
+            IGRRepository repo = TestUtils.GetNontGenericRepository(dbName);
 
             List<TestEntityAutoProperties> testEntities = null;
 
             try
             {
-                testEntities = await grEntities.GRWhere(e => e.TestEntityAutoPropertiesID > 10 && e.TestEntityAutoPropertiesID < 15).GRToListAsync();
+                testEntities = await repo.GRWhere<TestEntityAutoProperties>(e => e.TestEntityAutoPropertiesID > 10 && e.TestEntityAutoPropertiesID < 15).GRToListAsync();
             }
             catch (Exception exc)
             {
@@ -274,13 +274,13 @@ namespace GenericRepository.Test.CRUD
         [TestMethod]
         public async Task Get_Entities_Id_EQ_10()
         {
-            IGRRepository<TestEntityAutoProperties> grEntities = TestUtils.GetTestEntityAutoPropertiesRepository(dbName);
+            IGRRepository repo = TestUtils.GetNontGenericRepository(dbName);
 
             List<TestEntityAutoProperties> testEntities = null;
 
             try
             {
-                testEntities = await grEntities.GRWhere(e => e.TestEntityAutoPropertiesID == 10).GRToListAsync();
+                testEntities = await repo.GRWhere<TestEntityAutoProperties>(e => e.TestEntityAutoPropertiesID == 10).GRToListAsync();
             }
             catch (Exception exc)
             {
@@ -297,13 +297,13 @@ namespace GenericRepository.Test.CRUD
         [TestMethod]
         public void Get_Entities_Id_GT_10_FirstOrDefault()
         {
-            IGRRepository<TestEntityAutoProperties> grEntities = TestUtils.GetTestEntityAutoPropertiesRepository(dbName);
+            IGRRepository repo = TestUtils.GetNontGenericRepository(dbName);
 
             TestEntityAutoProperties testEntity = null;
 
             try
             {
-                testEntity = grEntities.GRWhere(e => e.TestEntityAutoPropertiesID > 10).GRFirstOrDefaultAsync().GetAwaiter().GetResult();
+                testEntity = repo.GRWhere<TestEntityAutoProperties>(e => e.TestEntityAutoPropertiesID > 10).GRFirstOrDefaultAsync().GetAwaiter().GetResult();
             }
             catch (Exception exc)
             {
@@ -316,13 +316,13 @@ namespace GenericRepository.Test.CRUD
         [TestMethod]
         public void Get_Entities_Name_Include()
         {
-            IGRRepository<TestEntityAutoProperties> grEntities = TestUtils.GetTestEntityAutoPropertiesRepository(dbName);
+            IGRRepository repo = TestUtils.GetNontGenericRepository(dbName);
             TestEntityAutoProperties testEntity = null;
 
             try
             {
-                testEntity = grEntities
-                    .GRWhere(e => e.TestEntityAutoPropertiesID == 10)
+                testEntity = repo
+                    .GRWhere<TestEntityAutoProperties>(e => e.TestEntityAutoPropertiesID == 10)
                     .GRInclude(e => e.Name)
                     .GRFirstOrDefaultAsync()
                     .GetAwaiter()
@@ -347,13 +347,13 @@ namespace GenericRepository.Test.CRUD
         [TestMethod]
         public void Get_Entities_Name_Excluded()
         {
-            IGRRepository<TestEntityAutoProperties> grEntities = TestUtils.GetTestEntityAutoPropertiesRepository(dbName);
+            IGRRepository repo = TestUtils.GetNontGenericRepository(dbName);
             TestEntityAutoProperties testEntity = null;
 
             try
             {
-                testEntity = grEntities
-                    .GRWhere(e => e.TestEntityAutoPropertiesID == 10)
+                testEntity = repo
+                    .GRWhere<TestEntityAutoProperties>(e => e.TestEntityAutoPropertiesID == 10)
                     .GRExclude(e => e.Name)
                     .GRFirstOrDefaultAsync()
                     .GetAwaiter()
@@ -377,65 +377,14 @@ namespace GenericRepository.Test.CRUD
         }
 
         [TestMethod]
-        public async Task Get_Entities_Name_Ordered()
-        {
-            IGRRepository<TestEntityAutoProperties> grEntities = TestUtils.GetTestEntityAutoPropertiesRepository(dbName);
-            List<TestEntityAutoProperties> entities = null;
-
-            try
-            {
-                entities = await grEntities
-                    .GROrderBy(e => e.Name)
-                    .GRToListAsync();
-            }
-            catch (Exception exc)
-            {
-                Assert.Fail("Unable to get ordered entities - {0}.", GRStringHelpers.GetExceptionString(exc));
-            }
-
-            Assert.IsTrue(entities.Count == TestUtils.TestCollectionSize, "Returned {0} entities instead of {1}.", entities.Count, TestUtils.TestCollectionSize);
-
-            for (int i = 1; i < entities.Count; i++)
-            {
-                Assert.IsTrue(String.Compare(entities[i].Name, entities[i - 1].Name) != 2, "Wrong sort order");
-            }
-        }
-
-        [TestMethod]
-        public async Task Get_Entities_Name_Ordered_Desc()
-        {
-            IGRRepository<TestEntityAutoProperties> grEntities = TestUtils.GetTestEntityAutoPropertiesRepository(dbName);
-
-            List<TestEntityAutoProperties> entities = null;
-
-            try
-            {
-                entities = await grEntities
-                    .GROrderByDescending(e => e.Name)
-                    .GRToListAsync();
-            }
-            catch (Exception exc)
-            {
-                Assert.Fail("Unable to get ordered (descending) entities - {0}.", GRStringHelpers.GetExceptionString(exc));
-            }
-
-            Assert.IsTrue(entities.Count == TestUtils.TestCollectionSize, "Returned {0} entities instead of {1}.", entities.Count, TestUtils.TestCollectionSize);
-
-            for (int i = 1; i < entities.Count; i++)
-            {
-                Assert.IsTrue(String.Compare(entities[i].Name, entities[i - 1].Name) != 0, "Wrong sort order");
-            }
-        }
-
-        [TestMethod]
         public void Get_Entities_Binary_Stream()
         {
-            IGRRepository<TestEntityBinaryStream> grEntities = TestUtils.GetTestEntityBinaryStreamRepository(dbName);
+            IGRRepository repo = TestUtils.GetNontGenericRepository(dbName);
             TestEntityBinaryStream entity = null;
 
             try
             {
-                entity = grEntities.GRGet(1);
+                entity = repo.GRGet<TestEntityBinaryStream>(1);
             }
             catch (Exception exc)
             {
@@ -454,12 +403,12 @@ namespace GenericRepository.Test.CRUD
         [TestMethod]
         public void Get_Entities_Binary_Array_Stream()
         {
-            IGRRepository<TestEntityBinaryArray> grEntities = TestUtils.GetTestEntityBinaryArrayRepository(dbName);
+            IGRRepository repo = TestUtils.GetNontGenericRepository(dbName);
             TestEntityBinaryArray entity = null;
 
             try
             {
-                entity = grEntities.GRGet(1);
+                entity = repo.GRGet<TestEntityBinaryArray>(1);
             }
             catch (Exception exc)
             {
@@ -478,12 +427,12 @@ namespace GenericRepository.Test.CRUD
         [TestMethod]
         public async Task Get_Entities_Binary_Stream_Null_Condition()
         {
-            IGRRepository<TestEntityBinaryStream> grEntities = TestUtils.GetTestEntityBinaryStreamRepository(dbName);
+            IGRRepository repo = TestUtils.GetNontGenericRepository(dbName);
             TestEntityBinaryStream entity = null;
 
             try
             {
-                entity = await grEntities.GRWhere(e => e.TestEntityBinaryData == null).GRFirstOrDefaultAsync();
+                entity = await repo.GRWhere<TestEntityBinaryStream>(e => e.TestEntityBinaryData == null).GRFirstOrDefaultAsync();
             }
             catch (Exception exc)
             {
@@ -494,55 +443,18 @@ namespace GenericRepository.Test.CRUD
         [TestMethod]
         public async Task Get_Entities_Binary_Array_Null_Condition()
         {
-            IGRRepository<TestEntityBinaryArray> grEntities = TestUtils.GetTestEntityBinaryArrayRepository(dbName);
+            IGRRepository repo = TestUtils.GetNontGenericRepository(dbName);
             TestEntityBinaryArray entity = null;
 
             try
             {
-                entity = await grEntities.GRWhere(e => e.TestEntityBinaryData == null).GRFirstOrDefaultAsync();
+                entity = await repo.GRWhere<TestEntityBinaryArray>(e => e.TestEntityBinaryData == null).GRFirstOrDefaultAsync();
             }
             catch (Exception exc)
             {
                 Assert.Fail("Unable to get entity with binary data - {0}.", GRStringHelpers.GetExceptionString(exc));
             }
         }
-
-        [TestMethod]
-        public async Task Get_Entities_Binary_Array_Only_With_Condition()
-        {
-            IGRRepository<TestEntityBinaryArray> grEntities = TestUtils.GetTestEntityBinaryArrayRepository(dbName);
-            TestEntityBinaryArray entity = null;
-
-            try
-            {
-                entity = await grEntities.GRInclude(e => e.TestEntityBinaryData).GRWhere(e => e.TestEntityBinaryID == 1).GRFirstOrDefaultAsync();
-                Assert.IsTrue(entity.TestEntityBinaryData != null, "Binary data was not loaded.");
-
-            }
-            catch (Exception exc)
-            {
-                Assert.Fail("Unable to get entity with binary data - {0}.", GRStringHelpers.GetExceptionString(exc));
-            }
-        }
-
-        [TestMethod]
-        public async Task Get_Entities_Binary_Array_Only()
-        {
-            IGRRepository<TestEntityBinaryArray> grEntities = TestUtils.GetTestEntityBinaryArrayRepository(dbName);
-            TestEntityBinaryArray entity = null;
-
-            try
-            {
-                entity = await grEntities.GRInclude(e => e.TestEntityBinaryData).GRFirstOrDefaultAsync();
-                Assert.IsTrue(entity.TestEntityBinaryData != null, "Binary data was not loaded.");
-
-            }
-            catch (Exception exc)
-            {
-                Assert.Fail("Unable to get entity with binary data - {0}.", GRStringHelpers.GetExceptionString(exc));
-            }
-        }
-
 
         public static byte[] ConvertToByteArray(Stream input)
         {
