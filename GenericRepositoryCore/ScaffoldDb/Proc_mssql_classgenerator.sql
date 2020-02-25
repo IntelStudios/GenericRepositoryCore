@@ -25,7 +25,7 @@ BEGIN
 	DECLARE @typeName varchar(max);
 	SET @typeName =
 	CASE @typeId
-		WHEN 48 THEN 'int'
+		WHEN 48 THEN 'bool'
 		WHEN 108 THEN 'decimal'
 		WHEN 175 THEN 'decimal'
 		WHEN 127 THEN 'int'
