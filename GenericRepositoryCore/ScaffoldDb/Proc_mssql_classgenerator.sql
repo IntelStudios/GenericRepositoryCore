@@ -25,23 +25,25 @@ BEGIN
 	DECLARE @typeName varchar(max);
 	SET @typeName =
 	CASE @typeId
-		WHEN 48 THEN 'int'
-		WHEN 108 THEN 'decimal'
-		WHEN 175 THEN 'decimal'
-		WHEN 127 THEN 'int'
-		WHEN 99 THEN 'string'
-		WHEN 56 THEN 'int'
-		WHEN 40 THEN 'DateTime'
-		WHEN 61 THEN 'DateTime'
-		WHEN 104 THEN 'bool'
-		WHEN 106 THEN 'decimal'
-		WHEN 231 THEN 'string'
-		WHEN 167 THEN 'string'
-		WHEN 239 THEN 'string'
+		WHEN 48 THEN 'int'		--tinyint
+		WHEN 165 THEN 'byte[]'	--varbinary(max)
+		WHEN 108 THEN 'decimal' --numeric(38,20) GPS
+		WHEN 175 THEN 'string'	--char(3)
+		WHEN 127 THEN 'int'		--bigint
+		WHEN 99 THEN 'string'	--ntext
+		WHEN 56 THEN 'int'		--int
+		WHEN 40 THEN 'DateTime' --date
+		WHEN 61 THEN 'DateTime' --datetime
+		WHEN 104 THEN 'bool'	--bit
+		WHEN 231 THEN 'string'	--varchar
+		WHEN 167 THEN 'string'	--varchar
+		WHEN 59 THEN 'float'	--real
+		--WHEN 106 THEN 'decimal'
+		--WHEN 239 THEN 'string'
 		WHEN 241 THEN 'XElement'
 		ELSE 'unknown (' + CAST(@typeId AS NVARCHAR) + ')'
 	END;
-	IF @isNullable = 1 AND @typeId != 231 AND @typeId != 239 AND @typeId != 241 AND @typeId != 167 AND @typeId != 99
+	IF @isNullable = 1 AND @typeId != 231 AND @typeId != 239 AND @typeId != 241 AND @typeId != 167 AND @typeId != 99 AND @typeId != 165 AND @typeId != 99 AND @typeId != 175
 		SET @typeName = @typeName + '?'
 	return @typeName + ' ';
 end
@@ -105,7 +107,7 @@ begin
 	if(@a_description is not null and @a_description != '')
 		begin
 			set @a_out = @a_out + @br + @before + '/// <summary>'
-			declare c_desc cursor local for select value from STRING_SPLIT(REPLACE(@a_description, char(13)+char(10), ';'), ';')
+			declare c_desc cursor local for select value from STRING_SPLIT(REPLACE(REPLACE(@a_description, char(13)+char(10), ';'), char(10), ';'), ';')	--split on crlf or lf line endings
 			open c_desc
 			fetch next from c_desc into @a_desc
 			while @@FETCH_STATUS = 0
