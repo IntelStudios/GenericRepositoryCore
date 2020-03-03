@@ -38,6 +38,7 @@ BEGIN
 		WHEN 231 THEN 'string'	--varchar
 		WHEN 167 THEN 'string'	--varchar
 		WHEN 59 THEN 'float'	--real
+		WHEN 41 THEN 'TimeSpan' --time(7)
 		--WHEN 106 THEN 'decimal'
 		--WHEN 239 THEN 'string'
 		WHEN 241 THEN 'XElement'
