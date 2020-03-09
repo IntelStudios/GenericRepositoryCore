@@ -75,19 +75,54 @@ namespace GenericRepository.Contexts
         }
         public abstract Task<List<SqlParameter>> ExecuteSPWithOutParamsAsync(string storedProcedureName, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
         #endregion
-
+        
         #region Getting single entity from SP with single JSON output param
-
         public virtual Task<T> GetEntityFromSPWithSingleJsonOutParamAsync<T>(string storedProcedureName, List<SqlParameter> parameters)
         {
             return ExecuteSPWithSingleJsonOutParamAsync<T>(storedProcedureName, parameters, defaultTimeout, null);
         }
+
+        public virtual Task<T> GetEntityFromSPWithSingleJsonOutParamAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout)
+        {
+            return ExecuteSPWithSingleJsonOutParamAsync<T>(storedProcedureName, parameters, timeout, null);
+        }
+
+        public virtual Task<T> GetEntityFromSPWithSingleJsonOutParamAsync<T>(string storedProcedureName, List<SqlParameter> parameters, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return ExecuteSPWithSingleJsonOutParamAsync<T>(storedProcedureName, parameters, defaultTimeout, infoMessageHandler);
+        }
+
+        public virtual Task<T> GetEntityFromSPWithSingleJsonOutParamAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return ExecuteSPWithSingleJsonOutParamAsync<T>(storedProcedureName, parameters, timeout, infoMessageHandler);
+        }
         #endregion
 
         #region Getting entities from SP with single JSON output param
-        public virtual Task<List<T>> GetEntitiesFromSPWithSingleJsonOutParamAsync<T>(string storedProcedureName, List<SqlParameter> parameters)
+        public virtual async Task<List<T>> GetEntitiesFromSPWithSingleJsonOutParamAsync<T>(string storedProcedureName, List<SqlParameter> parameters)
         {
-            return ExecuteSPWithSingleJsonOutParamAsync<List<T>>(storedProcedureName, parameters, defaultTimeout, null);
+            return await GetEntitiesFromSPWithSingleJsonOutParamAsync<T>(storedProcedureName, parameters, defaultTimeout, null);
+        }
+
+        public virtual async Task<List<T>> GetEntitiesFromSPWithSingleJsonOutParamAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout)
+        {
+            return await GetEntitiesFromSPWithSingleJsonOutParamAsync<T>(storedProcedureName, parameters, timeout, null);
+        }
+
+        public virtual async Task<List<T>> GetEntitiesFromSPWithSingleJsonOutParamAsync<T>(string storedProcedureName, List<SqlParameter> parameters, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            return await GetEntitiesFromSPWithSingleJsonOutParamAsync<T>(storedProcedureName, parameters, defaultTimeout, infoMessageHandler);
+        }
+        
+        public virtual async Task<List<T>> GetEntitiesFromSPWithSingleJsonOutParamAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler)
+        {
+            List<T> items = await ExecuteSPWithSingleJsonOutParamAsync<List<T>>(storedProcedureName, parameters, timeout, infoMessageHandler);
+            if (items == null) 
+            { 
+                items = new List<T>(); 
+            }
+
+            return items;
         }
 
         public abstract Task<T> ExecuteSPWithSingleJsonOutParamAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
