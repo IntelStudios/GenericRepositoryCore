@@ -29,7 +29,7 @@ BEGIN
 		WHEN 165 THEN 'byte[]'	--varbinary(max)
 		WHEN 108 THEN 'decimal' --numeric(38,20) GPS
 		WHEN 175 THEN 'string'	--char(3)
-		WHEN 127 THEN 'int'		--bigint
+		WHEN 127 THEN 'long'	--bigint
 		WHEN 99 THEN 'string'	--ntext
 		WHEN 56 THEN 'int'		--int
 		WHEN 40 THEN 'DateTime' --date
