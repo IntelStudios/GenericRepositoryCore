@@ -67,8 +67,10 @@ del "%WORKSPACE%\build\TestsResults\GenericRepository.trx"
 %mstest_location% /testcontainer:"%WORKSPACE%\build\GenericRepository\GenericRepository.Test.dll" /resultsfile:"%WORKSPACE%\build\TestsResults\GenericRepository.trx"
 
 echo ********* BUILD GenericRepository NUGET PACKAGE *************
-echo Mounting NuGet repository as drive M:
-%SystemRoot%\System32\net.exe use M: %NUGET_STORAGE% /user:%NUGET_USERNAME% %NUGET_PASSWORD% /persistent:no
+echo Mounting NuGet repository %NUGET_STORAGE% as drive M:
+%SystemRoot%\System32\net.exe use M: %NUGET_STORAGE% 
+
+rem /user:%NUGET_USERNAME% %NUGET_PASSWORD% /persistent:no
 
 IF "%GIT_LOCAL_BRANCH%"=="master" (
   ECHO Deleting old master packages
