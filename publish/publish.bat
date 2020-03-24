@@ -60,11 +60,11 @@ cd %WORKSPACE%
 echo ********* BUILD Library to folder **********
 MSbuild "%WORKSPACE%\GenericRepository.sln" /p:outdir="%WORKSPACE%\build\GenericRepository" /p:Configuration="Release" /p:Platform="Any CPU" /v:minimal /clp:Summary  || goto :error
 
-REM echo ********* EXECUTE GenericRepository TESTS *************
-REM mkdir %WORKSPACE%\build\TestsResults
-REM 
-REM del "%WORKSPACE%\build\TestsResults\GenericRepository.trx"
-REM %mstest_location% /testcontainer:"%WORKSPACE%\build\GenericRepository\GenericRepository.Test.dll" /resultsfile:"%WORKSPACE%\build\TestsResults\GenericRepository.trx"
+echo ********* EXECUTE GenericRepository TESTS *************
+mkdir %WORKSPACE%\build\TestsResults
+
+del "%WORKSPACE%\build\TestsResults\GenericRepository.trx"
+%mstest_location% /testcontainer:"%WORKSPACE%\build\GenericRepository\GenericRepository.Test.dll" /resultsfile:"%WORKSPACE%\build\TestsResults\GenericRepository.trx"
 
 echo ********* BUILD GenericRepository NUGET PACKAGE *************
 echo Mounting NuGet repository %NUGET_STORAGE% as drive M: for %NUGET_USERNAME%
