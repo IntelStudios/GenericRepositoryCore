@@ -148,9 +148,7 @@ namespace GenericRepository.Contexts
         #region Immediate saving of a single entity
         public override GRExecutionStatistics Execute<T>(IGRUpdatable<T> updatable)
         {
-            GRContextQueueItem item = contextQueue.Where(i => i.Item == updatable).Single();
-
-            contextQueue.Remove(item);
+            GRContextQueueItem item = DequeueItem(updatable);
 
             updatable.Repository.PrepareForSave();
 
@@ -163,11 +161,34 @@ namespace GenericRepository.Contexts
                 return UpdateEntity(updatable);
             }
         }
-        public override async Task<GRExecutionStatistics> ExecuteAsync<T>(IGRUpdatable<T> updatable)
+
+        private GRContextQueueItem DequeueItem<T>(IGRUpdatable<T> updatable)
         {
-            GRContextQueueItem item = contextQueue.Where(i => i.Item == updatable).Single();
+            GRContextQueueItem item = null;
+
+            string commonError = "Avoid reusing the same entity for multiple operations.";
+
+            try
+            {
+                item = contextQueue.Where(i => i.Item == updatable).SingleOrDefault();
+
+                if (item == null)
+                {
+                    throw new GRQueryExecutionFailedException("Entity is not presented in a context queue! " + commonError);
+                }
+            }
+            catch (Exception exc)
+            {
+                throw new GRQueryExecutionFailedException(exc, "Entity was presented in a context queue more than once! " + commonError);
+            }
 
             contextQueue.Remove(item);
+            return item;
+        }
+
+        public override async Task<GRExecutionStatistics> ExecuteAsync<T>(IGRUpdatable<T> updatable)
+        {
+            GRContextQueueItem item = DequeueItem(updatable);
 
             await updatable.Repository.PrepareForSaveAsync();
 

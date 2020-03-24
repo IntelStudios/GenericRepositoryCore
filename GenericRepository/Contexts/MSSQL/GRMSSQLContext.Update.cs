@@ -36,7 +36,12 @@ namespace GenericRepository.Contexts
             return updateResult;
         }
 
-        private async Task<GRExecutionStatistics> UpdateEntityAsync<T>(IGRUpdatable<T> updatable)
+        public override async Task UpdateAsync<T>(IGRUpdatable<T> updatable)
+        {
+            await UpdateEntityAsync(updatable);
+        }
+
+        internal async Task<GRExecutionStatistics> UpdateEntityAsync<T>(IGRUpdatable<T> updatable)
         {
             GRDataTypeHelper.ApplyAutoProperties(updatable.Entity, GRAutoValueApply.BeforeUpdate, updatable.Repository);
             string[] propertiesToStore = GetPropertiesToSave(updatable, GRContextQueueAction.Insert);

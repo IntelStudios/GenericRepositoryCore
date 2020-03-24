@@ -54,6 +54,10 @@ namespace GenericRepository.Interfaces
         /// <param name="updatable"></param>
         void EnqueueInsert<T>(IGRUpdatable<T> updatable);
 
+        Task UpdateAsync<T>(IGRUpdatable<T> updatable);
+
+        Task InsertAsync<T>(IGRUpdatable<T> updatable);
+
         /// <summary>
         /// Removes entity from queue and immediately inserts/updates it synchronously.
         /// </summary>

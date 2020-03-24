@@ -24,6 +24,9 @@ namespace GenericRepository.Interfaces
         GRExecutionStatistics GRExecute();
         Task<GRExecutionStatistics> GRExecuteAsync();
 
+        Task GRUpdateAsync();
+        Task GRInsertAsync();
+
         bool HasForceExcludedProperties { get; }
         bool HasIncludedProperties { get; }
         bool HasExcludedProperties { get; }

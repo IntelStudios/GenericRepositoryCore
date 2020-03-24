@@ -134,6 +134,10 @@ namespace GenericRepository.Contexts
         public abstract void EnqueueUpdate<T>(IGRUpdatable<T> updatable);
         public abstract void EnqueueDelete<T>(IGRDeletable<T> deletable);
         public abstract void EnqueueInsert<T>(IGRUpdatable<T> updatable);
+
+        public abstract Task UpdateAsync<T>(IGRUpdatable<T> updatable);
+        public abstract Task InsertAsync<T>(IGRUpdatable<T> updatable);
+
         public abstract GRExecutionStatistics Execute<T>(IGRUpdatable<T> updatable);
         public abstract Task<GRExecutionStatistics> ExecuteAsync<T>(IGRUpdatable<T> updatable);
         public abstract GRExecutionStatistics Execute<T>(IGRDeletable<T> deletable);
