@@ -62,17 +62,22 @@ MSbuild "%WORKSPACE%\GenericRepository.sln" /p:outdir="%WORKSPACE%\build\Generic
 
 REM echo ********* EXECUTE GenericRepository TESTS *************
 REM mkdir %WORKSPACE%\build\TestsResults
-
+REM 
 REM del "%WORKSPACE%\build\TestsResults\GenericRepository.trx"
 REM %mstest_location% /testcontainer:"%WORKSPACE%\build\GenericRepository\GenericRepository.Test.dll" /resultsfile:"%WORKSPACE%\build\TestsResults\GenericRepository.trx"
 
 echo ********* BUILD GenericRepository NUGET PACKAGE *************
+echo Mounting NuGet repository %NUGET_STORAGE% as drive M: for %NUGET_USERNAME%
+%SystemRoot%\System32\net.exe use M: %NUGET_STORAGE% /user:%NUGET_USERNAME% %NUGET_PASSWORD% /persistent:no
+
 IF "%GIT_LOCAL_BRANCH%"=="master" (
   ECHO Deleting old master packages
   del M:\*GenericRepository*master*
 )
 
 M:\nuget.exe pack %WORKSPACE%\publish\Package.nuspec -OutputDirectory M:\ || goto :error
+echo Unmounting drive M:
+%SystemRoot%\System32\net.exe use M: /delete /yes
 
 endlocal
 exit /b 0
