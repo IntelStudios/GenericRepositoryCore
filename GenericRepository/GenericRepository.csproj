@@ -67,6 +67,7 @@
     <Compile Include="Enums\GRPreSaveActionType.cs" />
     <Compile Include="Exceptions\GRPreSaveException.cs" />
     <Compile Include="Helpers\GRExtensions.cs" />
+    <Compile Include="Models\GRContextQueue.cs" />
     <Compile Include="Models\GRDataSet.cs" />
     <Compile Include="Models\GRDBQueryProperty.cs" />
     <Compile Include="Models\GRTable.cs" />

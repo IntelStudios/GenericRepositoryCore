@@ -83,15 +83,15 @@ namespace GenericRepository.Contexts
         {
             try
             {
-                List<GRContextQueueItem> currentContextQueue = new List<GRContextQueueItem>(contextQueue);
 
-                foreach (var item in currentContextQueue)
+                GRContextQueueItem item = null;
+
+                while ((item = contextQueue.Dequeue()) != null)
                 {
                     string methodName = GetSaveMethodName(item.Action, false);
                     MethodInfo method = typeof(GRMSSQLContext).GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
                     MethodInfo genericMethod = method.MakeGenericMethod(item.Item.Type);
                     genericMethod.Invoke(this, new object[] { item.Item });
-                    contextQueue.Remove(item);
                 }
             }
             catch (Exception exc)
@@ -104,16 +104,15 @@ namespace GenericRepository.Contexts
         {
             try
             {
-                List<GRContextQueueItem> currentContextQueue = new List<GRContextQueueItem>(contextQueue);
+                GRContextQueueItem item = null;
 
-                foreach (var item in currentContextQueue)
+                while ((item = contextQueue.Dequeue()) != null)
                 {
                     string methodName = GetSaveMethodName(item.Action, true);
                     MethodInfo method = typeof(GRMSSQLContext).GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
                     MethodInfo genericMethod = method.MakeGenericMethod(item.Item.Type);
                     Task task = (Task)genericMethod.Invoke(this, new object[] { item.Item });
                     await task;
-                    contextQueue.Remove(item);
                 }
             }
             catch (Exception exc)
@@ -148,7 +147,7 @@ namespace GenericRepository.Contexts
         #region Immediate saving of a single entity
         public override GRExecutionStatistics Execute<T>(IGRUpdatable<T> updatable)
         {
-            GRContextQueueItem item = DequeueItem(updatable);
+            GRContextQueueItem item = contextQueue.Dequeue(updatable);
 
             updatable.Repository.PrepareForSave();
 
@@ -162,33 +161,9 @@ namespace GenericRepository.Contexts
             }
         }
 
-        private GRContextQueueItem DequeueItem<T>(IGRUpdatable<T> updatable)
-        {
-            GRContextQueueItem item = null;
-
-            string commonError = "Avoid reusing the same entity for multiple operations.";
-
-            try
-            {
-                item = contextQueue.Where(i => i.Item == updatable).SingleOrDefault();
-
-                if (item == null)
-                {
-                    throw new GRQueryExecutionFailedException("Entity is not presented in a context queue! " + commonError);
-                }
-            }
-            catch (Exception exc)
-            {
-                throw new GRQueryExecutionFailedException(exc, "Entity was presented in a context queue more than once! " + commonError);
-            }
-
-            contextQueue.Remove(item);
-            return item;
-        }
-
         public override async Task<GRExecutionStatistics> ExecuteAsync<T>(IGRUpdatable<T> updatable)
         {
-            GRContextQueueItem item = DequeueItem(updatable);
+            GRContextQueueItem item = contextQueue.Dequeue(updatable);
 
             await updatable.Repository.PrepareForSaveAsync();
 

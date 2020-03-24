@@ -156,8 +156,7 @@ namespace GenericRepository.Contexts
         {
             if (deletable.Entity != null)
             {
-                GRContextQueueItem item = contextQueue.Where(i => i.Item == deletable).Single();
-                contextQueue.Remove(item);
+                contextQueue.Dequeue(deletable);
             }
             return DeleteEntity(deletable);
         }
@@ -166,8 +165,7 @@ namespace GenericRepository.Contexts
         {
             if (deletable.Entity != null)
             {
-                GRContextQueueItem item = contextQueue.Where(i => i.Item == deletable).Single();
-                contextQueue.Remove(item);
+                contextQueue.Dequeue(deletable);
             }
             return await DeleteEntityAsync(deletable);
         }
