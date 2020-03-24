@@ -22,6 +22,8 @@ namespace GenericRepository.Interfaces
 
         IGRUpdatable<T> GREnqueueInsert(T entity);
 
+        IGRUpdatable<T> GR(T entity);
+
         IGRDeletable<T> GREnqueueDelete(T entity);
         IGRDeletable<T> GREnqueueDelete();
         IGRDeletable<R> GREnqueueDelete<R>();

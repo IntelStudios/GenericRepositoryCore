@@ -70,6 +70,36 @@ namespace GenericRepository.Test.CRUD
         }
 
         [TestMethod]
+        public async Task Insert_Entitity_GR()
+        {
+            IGRRepository<TestEntityAutoProperties> grEntities = TestUtils.GetTestEntityAutoPropertiesRepository(dbName);
+
+            TestEntityAutoProperties entity = new TestEntityAutoProperties();
+            entity.Name = "NEW NAME";
+            entity.TestEntityAutoPropertiesDescription = "NEW DESCRIPTION";
+            entity.TestEntityAutoPropertiesOrder = 999;
+
+            try
+            {
+                await grEntities.GR(entity).GRInsertAsync();
+            }
+            catch (Exception exc)
+            {
+                Assert.Fail("Unable to insert entity - {0}.", GRStringHelpers.GetExceptionString(exc));
+            }
+
+            Assert.IsTrue(entity.TestEntityAutoPropertiesID > 0, "Entity does not have assigned ID.");
+
+            TestEntityAutoProperties entityDB = grEntities.GRGet(entity.TestEntityAutoPropertiesID);
+
+            Assert.IsTrue(entityDB != null, "Entity was not found.");
+
+            Assert.IsTrue(entity.Name == entityDB.Name, "Entity name was not saved.");
+            Assert.IsTrue(entity.TestEntityAutoPropertiesOrder == entityDB.TestEntityAutoPropertiesOrder, "Entity order was not saved.");
+
+        }
+
+        [TestMethod]
         public async Task Insert_Entitity_Direct()
         {
             TestEntityAutoPropertiesRepository grEntities = TestUtils.GetTestEntityAutoPropertiesRepository(dbName);
