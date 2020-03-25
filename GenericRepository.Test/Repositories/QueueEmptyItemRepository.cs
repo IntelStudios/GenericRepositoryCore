@@ -38,4 +38,19 @@ namespace GenericRepository.Test.Repositories
             }
         }
     }
+
+    public class QueueEmptyItemRepository3 : GRRepository<QueueEmptyItem3>
+    {
+        public QueueEmptyItemRepository3(IGRContext context) : base(context)
+        {
+        }
+
+        public IGRContext PublicContext
+        {
+            get
+            {
+                return context;
+            }
+        }
+    }
 }

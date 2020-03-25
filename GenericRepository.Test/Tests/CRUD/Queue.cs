@@ -126,5 +126,43 @@ namespace GenericRepository.Test.Tests.CRUD
                 Assert.IsTrue(item.Name == $"Name {item.ID }", $"Incorrect name of {item.ID }.");
             }
         }
+
+        [TestMethod]
+        public async Task Queue_Twice_Enqueued()
+        {
+            QueueEmptyItemRepository3 repo = TestUtils.GetQueueEmptyItemRepository3(dbName);
+
+            List<Task> tasks = new List<Task>();
+
+            for (int j = 0; j < 100; j++)
+            {
+                tasks.Add(Task.Run(async () =>
+                {
+                    for (int i = 0; i < 100; i++)
+                    {
+                        string originalDate = DateTime.Now.ToString();
+
+                        QueueEmptyItem3 item1 = new QueueEmptyItem3
+                        {
+                            Name = originalDate
+                        };
+
+                        await repo.GREnqueueInsert(item1).GRExecuteAsync();
+
+                        QueueEmptyItem3 dbItem1 = repo.GRGet(item1.ID);
+                        Assert.IsTrue(dbItem1.Name == originalDate);
+
+                        string modifiedDate = DateTime.Now.ToString();
+                        dbItem1.Name = modifiedDate;
+                        await repo.GREnqueueUpdate(dbItem1).GRExecuteAsync();
+
+                        QueueEmptyItem3 dbItem2 = repo.GRGet(dbItem1.ID);
+                        Assert.IsTrue(dbItem2.Name == modifiedDate);
+                    }
+                }));
+            }
+
+            await Task.WhenAll(tasks);
+        }
     }
 }

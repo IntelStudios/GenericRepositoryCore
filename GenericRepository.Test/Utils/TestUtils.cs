@@ -46,6 +46,7 @@ namespace GenericRepository.Test
 
                 InitializeIDNameTable(connection, "Queue_Empty", 0);
                 InitializeIDNameTable(connection, "Queue_Empty_2", 0);
+                InitializeIDNameTable(connection, "Queue_Empty_3", 0);
 
                 CreateStoredProcedures(connection);
                 CreateFunctions(connection);
@@ -844,6 +845,19 @@ namespace GenericRepository.Test
             repoContext.RegisterLogger(new TraceLogger(), Enums.GRContextLogLevel.Debug | Enums.GRContextLogLevel.Error | Enums.GRContextLogLevel.Warning);
 
             QueueEmptyItemRepository2 ret = new QueueEmptyItemRepository2(repoContext);
+
+            return ret;
+        }
+
+        public static QueueEmptyItemRepository3 GetQueueEmptyItemRepository3(string dbName)
+        {
+            string repoConnectionString = string.Format("{0};initial catalog={1};", TestUtils.ConnectionString, dbName);
+
+            IGRContext repoContext = new GRMSSQLContext(repoConnectionString);
+
+            repoContext.RegisterLogger(new TraceLogger(), Enums.GRContextLogLevel.Debug | Enums.GRContextLogLevel.Error | Enums.GRContextLogLevel.Warning);
+
+            QueueEmptyItemRepository3 ret = new QueueEmptyItemRepository3(repoContext);
 
             return ret;
         }

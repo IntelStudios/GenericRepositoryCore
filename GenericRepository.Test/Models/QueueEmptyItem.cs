@@ -22,4 +22,12 @@ namespace GenericRepository.Test.Models
         public int ID { get; set; }
         public string Name { get; set; }
     }
+
+    [GRTableName(TableName = "Queue_Empty_3")]
+    public class QueueEmptyItem3
+    {
+        [GRAIPrimaryKey]
+        public int ID { get; set; }
+        public string Name { get; set; }
+    }
 }
