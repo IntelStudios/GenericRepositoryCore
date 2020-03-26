@@ -9,10 +9,15 @@ namespace GenericRepositoryCore.ScaffoldDb
     public static class MsSqlClassGenerator
     {
         private static string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-        private static string actualProject = new DirectoryInfo(baseDirectory).Parent.Parent.Parent.FullName;
+        private static string outputFolder = Path.Combine(new DirectoryInfo(baseDirectory).Parent.Parent.Parent.FullName, "Model"); // Project.Model
 
-        public static void CreateClasses(string connectionString, string databaseName, string nameSpace = null) 
+        public static void CreateClasses(string connectionString, string databaseName, string nameSpace = null, string outputFolder = null) 
         {
+            if (!string.IsNullOrEmpty(outputFolder))
+            {
+                MsSqlClassGenerator.outputFolder = outputFolder;
+            }
+
             try
             {
                 using (SqlConnection conn = new SqlConnection(connectionString))
@@ -70,8 +75,8 @@ namespace GenericRepositoryCore.ScaffoldDb
 
         private static void CreateFilesWithClases(List<DbTable> orm)
         {
-            DirectoryInfo Model = new DirectoryInfo(Path.Combine(actualProject, "Model"));
-            //DirectoryInfo Repositories = new DirectoryInfo(Path.Combine(actualProject, "Repositories"));
+            DirectoryInfo Model = new DirectoryInfo(outputFolder);
+            //DirectoryInfo Repositories = new DirectoryInfo(outputFolder);
             if (!Model.Exists) Model.Create();
             //if (!Repositories.Exists) Repositories.Create();
 
