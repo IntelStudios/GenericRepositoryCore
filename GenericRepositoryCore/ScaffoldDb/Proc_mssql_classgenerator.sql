@@ -39,12 +39,13 @@ BEGIN
 		WHEN 167 THEN 'string'	--varchar
 		WHEN 59 THEN 'float'	--real
 		WHEN 41 THEN 'TimeSpan' --time(7)
+		WHEN 35 THEN 'string'	--ntext
 		--WHEN 106 THEN 'decimal'
 		--WHEN 239 THEN 'string'
 		WHEN 241 THEN 'XElement'
 		ELSE 'unknown (' + CAST(@typeId AS NVARCHAR) + ')'
 	END;
-	IF @isNullable = 1 AND @typeId != 231 AND @typeId != 239 AND @typeId != 241 AND @typeId != 167 AND @typeId != 99 AND @typeId != 165 AND @typeId != 99 AND @typeId != 175
+	IF @isNullable = 1 AND @typeId != 231 AND @typeId != 239 AND @typeId != 241 AND @typeId != 167 AND @typeId != 99 AND @typeId != 165 AND @typeId != 99 AND @typeId != 175 AND @typeId != 35
 		SET @typeName = @typeName + '?'
 	return @typeName + ' ';
 end
