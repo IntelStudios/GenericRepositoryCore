@@ -248,6 +248,9 @@ begin
 		FETCH NEXT FROM c_attr INTO @a_name,@a_type,@a_nullable,@a_description
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
+			declare @before varchar(max) = CHAR(9) + CHAR(9);
+			exec dbo.GenerateComment @a_description = @a_description, @before = @before, @a_out = @out output;
+
 			set @keyVersion = dbo.IsPrimaryKey(@name, @a_name);
 			
 			if(@keyVersion = 1) begin
@@ -257,10 +260,6 @@ begin
 			if(@keyVersion = 2) begin
 				set @out = @out + @br + @tab + @tab + '[GRAIPrimaryKey]';
 			end
-
-			declare @before varchar(max) = CHAR(9) + CHAR(9);
-			exec dbo.GenerateComment @a_description = @a_description, @before = @before, @a_out = @out output;
-
 			
 			--set @out = @out + @br + '[GRColumnName(ColumnName = "' + @a_name + '")]';
 			set @out = @out + @br + @tab + @tab + 'public ' + dbo.ConvertDataType(@a_type,@a_nullable) + @a_name + ' { get; set; }';
