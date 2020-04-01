@@ -72,8 +72,8 @@ BEGIN
 
 	DECLARE @br char(1) = CHAR(10);
 	DECLARE @tab char(1) = CHAR(9)
-	--set @tmp = @tmp + @br + 'using GenericRepository.Attributes;';
-	set @tmp = @tmp + 'using System;';
+	set @tmp = @tmp + 'using GenericRepository.Attributes;';
+	set @tmp = @tmp + @br + 'using System;';
 	--	set @tmp = @tmp + @br + 'using System.Collections.Generic;';
 	set @tmp = @tmp + @br + 'using System.Text;';
 	set @tmp = @tmp + @br;
@@ -83,7 +83,7 @@ BEGIN
 	declare @before varchar(max) = CHAR(9);
 	exec dbo.GenerateComment @a_description = @tableComment, @before = @before, @a_out = @tmp output;
 			
-	--set @tmp = @tmp + @br + '[GRTableName(TableName = "' + @p_tableName + '")]';
+	set @tmp = @tmp + @br + @tab + '[GRTableName(TableName = "' + @p_tableName + '")]';
 	set @tmp = @tmp + @br + @tab + '[Serializable]';
 	set @tmp = @tmp + @br + @tab + 'public class ' + @p_tableName;
     set @tmp = @tmp + @br + @tab + '{';
@@ -162,15 +162,17 @@ IF object_id(N'IsPrimaryKey', N'FN') IS NOT NULL
     DROP FUNCTION IsPrimaryKey
 GO
 
-Create function IsPrimaryKey(@p_tableWithAttribute nvarchar(max))
-returns bit
+Create function IsPrimaryKey(@p_table varchar(1000), @attribute varchar(1000))
+returns int
 as
 BEGIN
 	Declare @isKey bit = 0;
-	Declare @tmpPK nvarchar(max);
-
-select 
-	@tmpPK = Concat(t.name,'.', tc.name) 
+	Declare @isIdentity bit = 0;
+	Declare @keyOrdinal tinyint = 0;
+select
+	@isKey = i.is_primary_key,
+	@isIdentity = tc.is_identity,
+	@keyOrdinal = ic.key_ordinal
 	from 
 		sys.schemas s 
 		inner join sys.tables t   on s.schema_id=t.schema_id
@@ -179,14 +181,18 @@ select
 										and i.index_id=ic.index_id
 		inner join sys.columns tc on ic.object_id=tc.object_id 
 									and ic.column_id=tc.column_id
-	where i.is_primary_key=1 and  tc.is_identity = 1
-	and Concat(t.name,'.', tc.name) = @p_tableWithAttribute
+	where t.name = @p_table and tc.name = @attribute
 	order by t.name, ic.key_ordinal;
 
-	if(@tmpPK is not null)
-		set @IsKey = 1;
+	if @isIdentity = 1 begin
+		return 2;
+	end
+
+	if @isKey = 1 begin
+		return 1;
+	end
 		
-	return @IsKey
+	return 0;
 END
 GO
 
@@ -219,6 +225,7 @@ as
 	Repository nvarchar(max)
 	);
 
+	DECLARE @keyVersion int;
 begin
 	open c_tables
 	FETCH NEXT FROM c_tables INTO @name
@@ -241,14 +248,21 @@ begin
 		FETCH NEXT FROM c_attr INTO @a_name,@a_type,@a_nullable,@a_description
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
+			set @keyVersion = dbo.IsPrimaryKey(@name, @a_name);
 			
-			--if(dbo.IsPrimaryKey(Concat(@name, '.',  @a_name)) = 1)
-			--	set @out = @out + @br + '[GRAIPrimaryKey]';
+			if(@keyVersion = 1) begin
+				set @out = @out + @br + @tab + @tab + '[GRPrimaryKey]';
+			end
+
+			if(@keyVersion = 2) begin
+				set @out = @out + @br + @tab + @tab + '[GRAIPrimaryKey]';
+			end
+			
 
 			declare @before varchar(max) = CHAR(9) + CHAR(9);
 			exec dbo.GenerateComment @a_description = @a_description, @before = @before, @a_out = @out output;
 
-			--set @out = @out + @br;
+			
 			--set @out = @out + @br + '[GRColumnName(ColumnName = "' + @a_name + '")]';
 			set @out = @out + @br + @tab + @tab + 'public ' + dbo.ConvertDataType(@a_type,@a_nullable) + @a_name + ' { get; set; }';
 			--set @out = @out + @br + @tab + 'public ' + dbo.ConvertDataType(@a_type,@a_nullable) + dbo.Initcap(@a_name) + ' { get; set;}';
