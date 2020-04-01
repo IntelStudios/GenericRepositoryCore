@@ -45,6 +45,10 @@ namespace GenericRepository.Test
                 InitializeTablePrimitive(connection);
                 InitializeTableMultiID(connection);
 
+                InitializeIDNameTable(connection, "Queue_Empty", 0);
+                InitializeIDNameTable(connection, "Queue_Empty_2", 0);
+                InitializeIDNameTable(connection, "Queue_Empty_3", 0);
+
                 CreateStoredProcedures(connection);
                 CreateFunctions(connection);
             }
@@ -76,6 +80,40 @@ namespace GenericRepository.Test
                 for (int i = 0; i < 10; i++)
                 {
                     string insStr = string.Format($"INSERT INTO [TestEntityMultiID] (TestEntityMulti2ID) VALUES ({i + 101})");
+                    new SqlCommand(insStr, connection).ExecuteNonQuery();
+
+                }
+            }
+            catch (Exception exc)
+            {
+                Assert.Fail("Could not insert data into table - {0}.", GRStringHelpers.GetExceptionString(exc));
+            }
+        }
+
+        private static void InitializeIDNameTable(SqlConnection connection, string tableName, int count)
+        {
+            string cmdStr = $@"CREATE TABLE [{tableName}] (
+                                                      [ID]  [int] IDENTITY(1, 1) NOT NULL,
+                                                      [Name] [nvarchar](max) NULL
+                                                        CONSTRAINT PK_{tableName}ID PRIMARY KEY (ID) );";
+
+            SqlCommand cmd = new SqlCommand(cmdStr, connection);
+
+            try
+            {
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception exc)
+            {
+                Assert.Fail($"Could not create table - {tableName} - { GRStringHelpers.GetExceptionString(exc)}.");
+            }
+
+            // populate with test data
+            try
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    string insStr = string.Format($"INSERT INTO [ID] (Name) VALUES ('Name {i + 1}')");
                     new SqlCommand(insStr, connection).ExecuteNonQuery();
 
                 }
@@ -814,6 +852,45 @@ namespace GenericRepository.Test
             TestEntityPrimitiveNullRepository grEntities = new TestEntityPrimitiveNullRepository(repoContext);
 
             return grEntities;
+        }
+
+        public static QueueEmptyItemRepository GetQueueEmptyItemRepository(string dbName)
+        {
+            string repoConnectionString = string.Format("{0};initial catalog={1};", TestUtils.ConnectionString, dbName);
+
+            IGRContext repoContext = new GRMSSQLContext(repoConnectionString);
+
+            repoContext.RegisterLogger(new TraceLogger(), Enums.GRContextLogLevel.Debug | Enums.GRContextLogLevel.Error | Enums.GRContextLogLevel.Warning);
+
+            QueueEmptyItemRepository ret = new QueueEmptyItemRepository(repoContext);
+
+            return ret;
+        }
+
+        public static QueueEmptyItemRepository2 GetQueueEmptyItemRepository2(string dbName)
+        {
+            string repoConnectionString = string.Format("{0};initial catalog={1};", TestUtils.ConnectionString, dbName);
+
+            IGRContext repoContext = new GRMSSQLContext(repoConnectionString);
+
+            repoContext.RegisterLogger(new TraceLogger(), Enums.GRContextLogLevel.Debug | Enums.GRContextLogLevel.Error | Enums.GRContextLogLevel.Warning);
+
+            QueueEmptyItemRepository2 ret = new QueueEmptyItemRepository2(repoContext);
+
+            return ret;
+        }
+
+        public static QueueEmptyItemRepository3 GetQueueEmptyItemRepository3(string dbName)
+        {
+            string repoConnectionString = string.Format("{0};initial catalog={1};", TestUtils.ConnectionString, dbName);
+
+            IGRContext repoContext = new GRMSSQLContext(repoConnectionString);
+
+            repoContext.RegisterLogger(new TraceLogger(), Enums.GRContextLogLevel.Debug | Enums.GRContextLogLevel.Error | Enums.GRContextLogLevel.Warning);
+
+            QueueEmptyItemRepository3 ret = new QueueEmptyItemRepository3(repoContext);
+
+            return ret;
         }
 
         public static RepositoryCollection GetRepositories(string dbName)

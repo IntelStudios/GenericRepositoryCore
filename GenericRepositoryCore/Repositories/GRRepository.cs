@@ -282,6 +282,24 @@ namespace GenericRepository.Repositories
             return GREnqueueUpdate<T>(entity);
         }
 
+        public IGRUpdatable<R> GREnqueueUpdate<R>(R entity)
+        {
+            GRUpdatable<R> updatable = new GRUpdatable<R>(context, entity, this);
+            context.EnqueueUpdate(updatable);
+            return updatable;
+        }
+
+        public IGRUpdatable<T> GR(T entity)
+        {
+            return GR<T>(entity);
+        }
+
+        public IGRUpdatable<R> GR<R>(R entity)
+        {
+            GRUpdatable<R> updatable = new GRUpdatable<R>(context, entity, this);
+            return updatable;
+        }
+
         public IGRUpdatable<T> GREnqueueInsert(T entity)
         {
             return GREnqueueInsert<T>(entity);

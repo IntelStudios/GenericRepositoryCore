@@ -168,5 +168,15 @@ namespace GenericRepository.Models
             properties = properties.Where(p => p.Property.PropertyInfo.Name == propertyName).ToList();
             return properties.Count > 0;
         }
+
+        public async Task GRUpdateAsync()
+        {
+            await context.UpdateAsync(this);
+        }
+
+        public async Task GRInsertAsync()
+        {
+            await context.InsertAsync(this);
+        }
     }
 }

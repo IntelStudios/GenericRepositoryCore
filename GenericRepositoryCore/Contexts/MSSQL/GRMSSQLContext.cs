@@ -8,6 +8,7 @@ using Ionic.Zip;
 using Newtonsoft.Json;
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
@@ -37,7 +38,7 @@ namespace GenericRepository.Contexts
         private readonly bool statisticsEnabled;
 
         // queue of entyties to insert/update/delete
-        List<GRContextQueueItem> contextQueue;
+        GRContextQueue contextQueue;
 
         // shared connection and transaction used only for transactions
         SqlConnection sqlConnection = null;
@@ -50,7 +51,7 @@ namespace GenericRepository.Contexts
         public GRMSSQLContext(string connectionString, bool statisticsEnabled = true)
         {
             this.connectionString = connectionString;
-            contextQueue = new List<GRContextQueueItem>();
+            contextQueue = new GRContextQueue();
             this.statisticsEnabled = statisticsEnabled;
         }
 

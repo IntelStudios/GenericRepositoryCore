@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace GenericRepository.Test.CRUD
 {
@@ -51,6 +52,71 @@ namespace GenericRepository.Test.CRUD
             }
 
             Assert.IsTrue(updatable.ExecutionStats.AffectedRows == 1, "Only single entity should be inserted.");
+
+            Assert.IsTrue(entity.TestEntityAutoPropertiesID > 0, "Entity does not have assigned ID.");
+
+            TestEntityAutoProperties entityDB = grEntities.GRGet(entity.TestEntityAutoPropertiesID);
+
+            Assert.IsTrue(entityDB != null, "Entity was not found.");
+
+            Assert.IsTrue(entity.Name == entityDB.Name, "Entity name was not saved.");
+            Assert.IsTrue(entity.TestEntityAutoPropertiesOrder == entityDB.TestEntityAutoPropertiesOrder, "Entity order was not saved.");
+
+            Assert.IsTrue(grEntities.ServerTime == entityDB.ModifiedDate, "Entity ModifiedDate was not updated.");
+            Assert.IsTrue(grEntities.UserID == entityDB.ModifiedBy, "Entity ModifiedBy was not updated.");
+
+            Assert.IsTrue(grEntities.ServerTime == entityDB.CreatedDate, "Entity CreatedDate was not updated.");
+            Assert.IsTrue(grEntities.UserID == entityDB.CreatedBy, "Entity CreatedBy was not updated.");
+        }
+
+        [TestMethod]
+        public async Task Insert_Entitity_GR()
+        {
+            IGRRepository<TestEntityAutoProperties> grEntities = TestUtils.GetTestEntityAutoPropertiesRepository(dbName);
+
+            TestEntityAutoProperties entity = new TestEntityAutoProperties();
+            entity.Name = "NEW NAME";
+            entity.TestEntityAutoPropertiesDescription = "NEW DESCRIPTION";
+            entity.TestEntityAutoPropertiesOrder = 999;
+
+            try
+            {
+                await grEntities.GR(entity).GRInsertAsync();
+            }
+            catch (Exception exc)
+            {
+                Assert.Fail("Unable to insert entity - {0}.", GRStringHelpers.GetExceptionString(exc));
+            }
+
+            Assert.IsTrue(entity.TestEntityAutoPropertiesID > 0, "Entity does not have assigned ID.");
+
+            TestEntityAutoProperties entityDB = grEntities.GRGet(entity.TestEntityAutoPropertiesID);
+
+            Assert.IsTrue(entityDB != null, "Entity was not found.");
+
+            Assert.IsTrue(entity.Name == entityDB.Name, "Entity name was not saved.");
+            Assert.IsTrue(entity.TestEntityAutoPropertiesOrder == entityDB.TestEntityAutoPropertiesOrder, "Entity order was not saved.");
+
+        }
+
+        [TestMethod]
+        public async Task Insert_Entitity_Direct()
+        {
+            TestEntityAutoPropertiesRepository grEntities = TestUtils.GetTestEntityAutoPropertiesRepository(dbName);
+
+            TestEntityAutoProperties entity = new TestEntityAutoProperties();
+            entity.Name = "NEW NAME";
+            entity.TestEntityAutoPropertiesDescription = "NEW DESCRIPTION";
+            entity.TestEntityAutoPropertiesOrder = 999;
+
+            try
+            {
+                await grEntities.GR(entity).GRInsertAsync();
+            }
+            catch (Exception exc)
+            {
+                Assert.Fail("Unable to insert entity - {0}.", GRStringHelpers.GetExceptionString(exc));
+            }
 
             Assert.IsTrue(entity.TestEntityAutoPropertiesID > 0, "Entity does not have assigned ID.");
 

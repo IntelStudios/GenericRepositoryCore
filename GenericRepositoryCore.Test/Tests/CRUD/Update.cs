@@ -7,6 +7,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace GenericRepository.Test.CRUD
 {
@@ -51,6 +52,61 @@ namespace GenericRepository.Test.CRUD
 
             Assert.IsTrue(updatable.ExecutionStats.AffectedRows == 1, "Multiple lines ({0}) were affected.", updatable.ExecutionStats.AffectedRows);
             
+            Assert.IsTrue(entity.Name == updatedEntity.Name, "Entity name was not saved.");
+            Assert.IsTrue(entity.TestEntityAutoPropertiesOrder == updatedEntity.TestEntityAutoPropertiesOrder, "Entity order was not saved.");
+
+            Assert.IsTrue(grEntities.ServerTime == updatedEntity.ModifiedDate, "Entity ModifiedDate was not updated.");
+            Assert.IsTrue(grEntities.UserID == updatedEntity.ModifiedBy, "Entity ModifiedBy was not updated.");
+
+            Assert.IsTrue(TestUtils.DefaultCreatedDate == updatedEntity.CreatedDate, "Entity CreatedDate was updated.");
+            Assert.IsTrue(updatedEntity.CreatedBy == -1, "Entity CreatedBy was updated.");
+        }
+
+        [TestMethod]
+        public async Task Update_Entitity_GR()
+        {
+            IGRRepository<TestEntityAutoProperties> grEntities = TestUtils.GetTestEntityAutoPropertiesRepository(dbName);
+
+            TestEntityAutoProperties entity = grEntities.GRGet(2);
+            entity.Name += " (Modified)";
+
+            try
+            {
+                await grEntities.GR(entity).GRUpdateAsync();
+            }
+            catch (Exception exc)
+            {
+                Assert.Fail("Unable to update entity - {0}.", GRStringHelpers.GetExceptionString(exc));
+            }
+
+            TestEntityAutoProperties updatedEntity = grEntities.GRGet(2);
+
+            Assert.IsTrue(entity.Name == updatedEntity.Name, "Entity name was not saved.");
+            Assert.IsTrue(entity.TestEntityAutoPropertiesOrder == updatedEntity.TestEntityAutoPropertiesOrder, "Entity order was not saved.");
+
+            Assert.IsTrue(TestUtils.DefaultCreatedDate == updatedEntity.CreatedDate, "Entity CreatedDate was updated.");
+            Assert.IsTrue(updatedEntity.CreatedBy == -1, "Entity CreatedBy was updated.");
+        }
+
+        [TestMethod]
+        public async Task Update_Entitity_Direct()
+        {
+            TestEntityAutoPropertiesRepository grEntities = TestUtils.GetTestEntityAutoPropertiesRepository(dbName);
+
+            TestEntityAutoProperties entity = grEntities.GRGet(2);
+            entity.Name += " (Modified)";
+
+            try
+            {
+                await grEntities.GR(entity).GRUpdateAsync();
+            }
+            catch (Exception exc)
+            {
+                Assert.Fail("Unable to update entity - {0}.", GRStringHelpers.GetExceptionString(exc));
+            }
+
+            TestEntityAutoProperties updatedEntity = grEntities.GRGet(2);
+
             Assert.IsTrue(entity.Name == updatedEntity.Name, "Entity name was not saved.");
             Assert.IsTrue(entity.TestEntityAutoPropertiesOrder == updatedEntity.TestEntityAutoPropertiesOrder, "Entity order was not saved.");
 
