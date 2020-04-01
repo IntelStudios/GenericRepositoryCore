@@ -181,7 +181,7 @@ select
 										and i.index_id=ic.index_id
 		inner join sys.columns tc on ic.object_id=tc.object_id 
 									and ic.column_id=tc.column_id
-	where t.name = @p_table and tc.name = @attribute
+	where t.name = @p_table and tc.name = @attribute and i.is_primary_key = 1
 	order by t.name, ic.key_ordinal;
 
 	if @isIdentity = 1 begin
@@ -257,7 +257,6 @@ begin
 			if(@keyVersion = 2) begin
 				set @out = @out + @br + @tab + @tab + '[GRAIPrimaryKey]';
 			end
-			
 
 			declare @before varchar(max) = CHAR(9) + CHAR(9);
 			exec dbo.GenerateComment @a_description = @a_description, @before = @before, @a_out = @out output;
