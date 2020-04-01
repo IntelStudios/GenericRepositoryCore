@@ -50,4 +50,27 @@ namespace GenericRepository.Test.Repositories
         {
         }
     }
+
+    public class TestEntityPKsRepository : GRRepository<TestEntityPKs>, IGRRepository<TestEntityPKs>
+    {
+        public DateTime ServerTime
+        {
+            get
+            {
+                return new DateTime(2018, 2, 1); ;
+            }
+        }
+
+        public int UserID
+        {
+            get
+            {
+                return 999;
+            }
+        }
+
+        public TestEntityPKsRepository(IGRContext context) : base(context)
+        {
+        }
+    }
 }

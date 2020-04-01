@@ -20,4 +20,13 @@ namespace GenericRepository.Test.Models
         public int TestEntityAIPKID { get; set; }
         public string TestEntityAIPKName { get; set; }
     }
+
+    public class TestEntityPKs
+    {
+        [GRPrimaryKey]
+        public int TestEntityPKsID { get; set; }
+        [GRPrimaryKey]
+        public int TestEntityPKsID2 { get; set; }
+        public string TestEntityPKName { get; set; }
+    }
 }

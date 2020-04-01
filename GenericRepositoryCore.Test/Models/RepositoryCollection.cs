@@ -10,6 +10,7 @@ namespace GenericRepository.Test.Models
         public TestEntityBinaryArrayRepository TestEntityBinaryArrayRepository { get; set; }
         public TestEntityPKRepository TestEntityPKRepository { get; set; }
         public TestEntityAIPKRepository TestEntityAIPKRepository { get; set; }
+        public TestEntityPKsRepository TestEntityPKsRepository { get; set; }
         public TestEntityPrimitiveNullRepository TestEntityPrimitiveNullRepository { get; set; }
         public IGRContext Context { get; set; }
     }

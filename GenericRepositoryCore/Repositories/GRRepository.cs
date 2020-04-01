@@ -36,6 +36,18 @@ namespace GenericRepository.Repositories
             return await GRWhere<R>(lambda).GRTake(1).GRFirstOrDefaultAsync();
         }
 
+        public virtual R GRGet<R>(R key)
+        {
+            Expression<Func<R, bool>>[] lambdas = GetGRGetLambdaMultiKey<R>(key);
+            return GRWhere<R>(lambdas).GRTake(1).GRFirstOrDefault();
+        }
+
+        public virtual async Task<R> GRGetAsync<R>(R key)
+        {
+            Expression<Func<R, bool>>[] lambdas = GetGRGetLambdaMultiKey<R>(key);
+            return await GRWhere<R>(lambdas).GRTake(1).GRFirstOrDefaultAsync();
+        }
+
         public IGRQueriable<R> GRWhere<R>(params Expression<Func<R, bool>>[] conditions)
         {
             GRQueriable<R> queryBuilder = new GRQueriable<R>(context, this);
@@ -61,6 +73,29 @@ namespace GenericRepository.Repositories
             Expression exp = Expression.Equal(nameProperty, Expression.Constant(key));
             Expression<Func<R, bool>> lambda = Expression.Lambda<Func<R, bool>>(exp, argParam);
             return lambda;
+        }
+
+        protected Expression<Func<R, bool>>[] GetGRGetLambdaMultiKey<R>(R key)
+        {
+            List<GRDBProperty> keys = GRDataTypeHelper.GetDBStructure(typeof(R)).KeyProperties;
+
+            if (keys.Count == 0)
+            {
+                throw new GRQueryBuildFailedException("GET method cannot be used, type '{0}' has no defined primary keys!", typeof(R));
+            }
+
+            List<Expression<Func<R, bool>>> lambdas = new List<Expression<Func<R, bool>>>();
+
+            foreach (var keyParam in keys)
+            {
+                ParameterExpression argParam = Expression.Parameter(typeof(R), "key");
+                Expression nameProperty = Expression.Property(argParam, keyParam.PropertyInfo.Name);
+                Expression exp = Expression.Equal(nameProperty, Expression.Constant(keyParam.PropertyInfo.GetValue(key)));
+                Expression<Func<R, bool>> lambda = Expression.Lambda<Func<R, bool>>(exp, argParam);
+                lambdas.Add(lambda);
+            }
+
+            return lambdas.ToArray();
         }
 
         public IGRQueriable<R> GRAll<R>()
@@ -247,7 +282,7 @@ namespace GenericRepository.Repositories
         {
             GRQueriable<T> queryBuilder = new GRQueriable<T>(context, this);
             return queryBuilder.GRExclude(properties);
-        }        
+        }
         #endregion
 
         #region ToList sync/async methods

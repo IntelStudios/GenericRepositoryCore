@@ -501,6 +501,18 @@ namespace GenericRepository.Test
             {
                 Assert.Fail("Could not create table - {0}.", GRStringHelpers.GetExceptionString(exc));
             }
+
+            string crPKsTable = "CREATE TABLE [dbo].[TestEntityPKs]([TestEntityPKsID] [int] NOT NULL, [TestEntityPKsID2] [int] NOT NULL, [TestEntityPKName] [nvarchar](max) NULL, CONSTRAINT PK_TestEntityPKs PRIMARY KEY (TestEntityPKsID, TestEntityPKsID2))";
+            SqlCommand crPKsTableCommand = new SqlCommand(crPKsTable, connection);
+
+            try
+            {
+                crPKsTableCommand.ExecuteNonQuery();
+            }
+            catch (Exception exc)
+            {
+                Assert.Fail("Could not create table - {0}.", GRStringHelpers.GetExceptionString(exc));
+            }
         }
 
         private static void InitializeTableJoining(SqlConnection connection)
@@ -841,6 +853,19 @@ namespace GenericRepository.Test
             return grEntities;
         }
 
+        public static TestEntityPKsRepository GetTestEntityPKsRepository(string dbName)
+        {
+            string repoConnectionString = string.Format("{0};initial catalog={1};", TestUtils.ConnectionString, dbName);
+
+            IGRContext repoContext = new GRMSSQLContext(repoConnectionString);
+
+            repoContext.RegisterLogger(new TraceLogger(), Enums.GRContextLogLevel.Debug | Enums.GRContextLogLevel.Error | Enums.GRContextLogLevel.Warning);
+
+            TestEntityPKsRepository grEntities = new TestEntityPKsRepository(repoContext);
+
+            return grEntities;
+        }
+
         public static TestEntityPrimitiveNullRepository GetTestEntityPrimitiveNullRepository(string dbName)
         {
             string repoConnectionString = string.Format("{0};initial catalog={1};", TestUtils.ConnectionString, dbName);
@@ -906,6 +931,7 @@ namespace GenericRepository.Test
             TestEntityBinaryArrayRepository grEntityBinaryArrayRepository = new TestEntityBinaryArrayRepository(repoContext);
             TestEntityAIPKRepository grEntityAIPKRepository = new TestEntityAIPKRepository(repoContext);
             TestEntityPKRepository grEntityPKRepository = new TestEntityPKRepository(repoContext);
+            TestEntityPKsRepository grEntityPKsRepository = new TestEntityPKsRepository(repoContext);
             TestEntityPrimitiveNullRepository grEntityPrimitiveNullRepository = new TestEntityPrimitiveNullRepository(repoContext);
 
             return new RepositoryCollection()
@@ -916,6 +942,7 @@ namespace GenericRepository.Test
                 TestEntityBinaryArrayRepository = grEntityBinaryArrayRepository,
                 TestEntityAIPKRepository = grEntityAIPKRepository,
                 TestEntityPKRepository = grEntityPKRepository,
+                TestEntityPKsRepository = grEntityPKsRepository,
                 TestEntityPrimitiveNullRepository = grEntityPrimitiveNullRepository
             };
         }

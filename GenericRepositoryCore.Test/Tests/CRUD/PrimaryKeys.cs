@@ -122,5 +122,53 @@ namespace GenericRepository.Test.CRUD
             {
             }
         }
+
+        [TestMethod]
+        public void PrimaryKeyMulti_Insert_Get()
+        {
+            TestEntityPKsRepository grEntities = TestUtils.GetTestEntityPKsRepository(dbName);
+
+            int entityId = 99;
+
+            TestEntityPKs entity = new TestEntityPKs()
+            {
+                TestEntityPKsID = entityId,
+                TestEntityPKsID2 = entityId,
+                TestEntityPKName = "Entity " + entityId
+            };
+
+            IGRUpdatable<TestEntityPKs> updatable = null;
+
+            try
+            {
+                updatable = grEntities.GREnqueueInsert(entity);
+                updatable.GRExecute();
+            }
+            catch (Exception exc)
+            {
+                Assert.Fail("Unable to insert entity - {0}.", GRStringHelpers.GetExceptionString(exc));
+            }
+
+            Assert.IsTrue(updatable.ExecutionStats.AffectedRows == 1, "Only single entity should be inserted.");
+
+            Assert.IsTrue(entity.TestEntityPKsID == entityId, "Entity ID was changed.");
+
+            TestEntityPKs entityDB = grEntities.GRGet<TestEntityPKs>(entity);
+
+            Assert.IsTrue(entityDB != null, "Entity was not found.");
+
+            // trying to save the same entity
+            IGRUpdatable<TestEntityPKs> updatable2 = null;
+
+            try
+            {
+                updatable2 = grEntities.GREnqueueInsert(entity);
+                updatable2.GRExecute();
+                Assert.Fail("Duplicated entity was inserted - {0}.");
+            }
+            catch
+            {
+            }
+        }
     }
 }

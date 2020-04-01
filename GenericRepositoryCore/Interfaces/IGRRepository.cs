@@ -10,6 +10,9 @@ namespace GenericRepository.Interfaces
         R GRGet<R>(object key);
         Task<R> GRGetAsync<R>(object key);
 
+        R GRGet<R>(R key);
+        Task<R> GRGetAsync<R>(R key);
+
         IGRQueriable<R> GRWhere<R>(params Expression<Func<R, bool>>[] conditions);
         public IGRQueriable<R> GRAll<R>();
 
