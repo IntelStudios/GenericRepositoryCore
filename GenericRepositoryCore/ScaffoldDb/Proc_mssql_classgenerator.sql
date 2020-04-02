@@ -62,12 +62,15 @@ BEGIN
 	Declare @tmp varchar(max)= '';
 
 	DECLARE @tableComment varchar(30);
-	SELECT @tableComment = convert(varchar(5000), sep.value) FROM sys.tables st
-	LEFT JOIN sys.extended_properties sep ON 
-		st.object_id = sep.major_id
-		and sep.name = 'MS_Description'
-		and sep.minor_id = 0
-	where st.name=@p_tableName
+	SELECT @tableComment = convert(varchar(5000), sep.value) 
+	FROM 
+		sys.schemas s 
+		inner join sys.tables t on s.schema_id=t.schema_id
+		left join sys.extended_properties sep ON 
+			t.object_id = sep.major_id
+			and sep.name = 'MS_Description'
+			and sep.minor_id = 0
+	where t.name=@p_tableName and s.name = 'dbo'
 	DECLARE @a_desc varchar(5000);
 
 	DECLARE @br char(1) = CHAR(10);
@@ -181,7 +184,7 @@ select
 										and i.index_id=ic.index_id
 		inner join sys.columns tc on ic.object_id=tc.object_id 
 									and ic.column_id=tc.column_id
-	where t.name = @p_table and tc.name = @attribute and i.is_primary_key = 1
+	where t.name = @p_table and tc.name = @attribute and i.is_primary_key = 1 and s.name = 'dbo'
 	order by t.name, ic.key_ordinal;
 
 	if @isIdentity = 1 begin
@@ -204,7 +207,7 @@ create procedure PrintDtoForDatabase(
 	@p_DbName nvarchar(max)
 	)
 as
-	DECLARE c_tables CURSOR LOCAL FOR SELECT table_name FROM information_schema.tables WHERE table_catalog=@p_DbName;
+	DECLARE c_tables CURSOR LOCAL FOR SELECT t.TABLE_NAME FROM information_schema.tables t WHERE t.TABLE_CATALOG=@p_DbName and t.TABLE_SCHEMA = 'dbo';
 	Declare @counter int = -1;
 	DECLARE @name varchar(1000);
 	DECLARE @out nvarchar(max) = '';
@@ -237,13 +240,15 @@ begin
 			set @repo = @repo + dbo.AddClassRepositories(@name);
 			end
 
-		DECLARE c_attr CURSOR LOCAL FOR (SELECT sc.name, sc.system_type_id, sc.is_nullable, convert(varchar(5000), sep.value) FROM sys.columns sc 
-			JOIN sys.tables st on sc.object_id = st.object_id 
+		DECLARE c_attr CURSOR LOCAL FOR (SELECT sc.name, sc.system_type_id, sc.is_nullable, convert(varchar(5000), sep.value) FROM 
+			sys.schemas s 
+			inner join sys.tables t on s.schema_id = t.schema_id
+			inner join sys.columns sc on sc.object_id = t.object_id
 			LEFT JOIN sys.extended_properties sep on 
-				st.object_id = sep.major_id
+				t.object_id = sep.major_id
                 and sc.column_id = sep.minor_id
                 and sep.name = 'MS_Description'
-			where st.name=@name);
+			where t.name=@name and s.name = 'dbo');
 		open c_attr
 		FETCH NEXT FROM c_attr INTO @a_name,@a_type,@a_nullable,@a_description
 		WHILE @@FETCH_STATUS = 0
