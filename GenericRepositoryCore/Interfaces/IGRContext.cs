@@ -125,12 +125,18 @@ namespace GenericRepository.Interfaces
         
         #region Getting single entity from SP with single JSON output param
         Task<T> GetEntityFromSPWithSingleJsonOutParamAsync<T>(string storedProcedureName, List<SqlParameter> parameters);
+        Task<T> GetEntityFromSPWithSingleJsonOutParamAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout);
+        Task<T> GetEntityFromSPWithSingleJsonOutParamAsync<T>(string storedProcedureName, List<SqlParameter> parameters, SqlInfoMessageEventHandler infoMessageHandler);
+        Task<T> GetEntityFromSPWithSingleJsonOutParamAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
         #endregion
 
         #region Getting entities from SP with single JSON output param
         Task<List<T>> GetEntitiesFromSPWithSingleJsonOutParamAsync<T>(string storedProcedureName, List<SqlParameter> parameters);
+        Task<List<T>> GetEntitiesFromSPWithSingleJsonOutParamAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout);
+        Task<List<T>> GetEntitiesFromSPWithSingleJsonOutParamAsync<T>(string storedProcedureName, List<SqlParameter> parameters, SqlInfoMessageEventHandler infoMessageHandler);
+        Task<List<T>> GetEntitiesFromSPWithSingleJsonOutParamAsync<T>(string storedProcedureName, List<SqlParameter> parameters, int timeout, SqlInfoMessageEventHandler infoMessageHandler);
         #endregion
-               
+
         #region Getting single value from SP
         Task<T> GetValueFromSPAsync<T>(string storedProcedureName);
         Task<T> GetValueFromSPAsync<T>(string storedProcedureName, int timeout);
