@@ -485,11 +485,13 @@ namespace GenericRepository.Contexts
 
                         if (outParams.Count > 0)
                         {
-                            ret = JsonConvert.DeserializeObject<T>(outParams.First().Value.ToString());
+                            string outputJson = outParams.First().Value.ToString();
+                            ret = JsonConvert.DeserializeObject<T>(outputJson);
+                            stats = ParseJsonSpStatistics(connection, spCommandStatementReadable, outputJson);
                         }
                     }
                 }
-                stats = ParseFnSpStatistics(connection, spCommandStatementReadable);
+                
 
                 LogSuccessfulQueryStats(stats);
             }

@@ -1,5 +1,7 @@
 ﻿using GenericRepository.Interfaces;
 using GenericRepository.Models;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -60,6 +62,7 @@ namespace GenericRepository.Contexts
 
             return new GRExecutionStatistics(affectedRows, statement.ReadableStatement, executionTime);
         }
+
         public GRExecutionStatistics ParseFnSpStatistics(SqlConnection connection, string statement)
         {
             IDictionary dbStats = connection.RetrieveStatistics();
@@ -67,6 +70,27 @@ namespace GenericRepository.Contexts
 
             long executionTime = (long)dbStats[SqlKeyExecutionTime];
             long numberOfRows = (long)dbStats[SqlKeyNumberOfRows];
+
+            return new GRExecutionStatistics(numberOfRows, statement, executionTime);
+        }
+
+        public GRExecutionStatistics ParseJsonSpStatistics(SqlConnection connection, string statement, string outputJson)
+        {            
+            IDictionary dbStats = connection.RetrieveStatistics();
+            connection.ResetStatistics();
+
+            long executionTime = (long)dbStats[SqlKeyExecutionTime];
+            long numberOfRows = (long)dbStats[SqlKeyNumberOfRows];
+
+            if (statisticsEnabled)
+            {
+                object obj = JsonConvert.DeserializeObject(outputJson);
+
+                if (obj is JContainer jContainer)
+                {
+                    numberOfRows = jContainer.Count;
+                }
+            }
 
             return new GRExecutionStatistics(numberOfRows, statement, executionTime);
         }
