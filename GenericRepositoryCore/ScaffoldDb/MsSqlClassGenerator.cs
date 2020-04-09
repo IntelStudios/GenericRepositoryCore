@@ -10,12 +10,14 @@ namespace GenericRepositoryCore.ScaffoldDb
     {
         private static string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
         private static string outputFolder = Path.Combine(new DirectoryInfo(baseDirectory).Parent.Parent.Parent.FullName, "Model"); // Project.Model
+        private static string outputScripts = Path.Combine(new DirectoryInfo(baseDirectory).Parent.Parent.Parent.FullName, "Scripts"); // Project.Model
 
-        public static void CreateClasses(string connectionString, string databaseName, string nameSpace = null, string outputFolder = null) 
+        public static void CreateClasses(string connectionString, string databaseName, string nameSpace = null, string outputFolder = null, string outputScriptsFolder = null) 
         {
             if (!string.IsNullOrEmpty(outputFolder))
             {
                 MsSqlClassGenerator.outputFolder = outputFolder;
+                MsSqlClassGenerator.outputScripts = outputScriptsFolder;
             }
 
             try
@@ -75,14 +77,18 @@ namespace GenericRepositoryCore.ScaffoldDb
 
         private static void CreateFilesWithClases(List<DbTable> orm)
         {
-            DirectoryInfo Model = new DirectoryInfo(outputFolder);
+            DirectoryInfo entitiesDir = new DirectoryInfo(outputFolder);
+            DirectoryInfo scriptsDir = new DirectoryInfo(outputScripts);
             //DirectoryInfo Repositories = new DirectoryInfo(outputFolder);
-            if (!Model.Exists) Model.Create();
+
+            if (!entitiesDir.Exists) entitiesDir.Create();
+            if (!scriptsDir.Exists) scriptsDir.Create();
             //if (!Repositories.Exists) Repositories.Create();
 
             foreach (DbTable item in orm)
             {
-                File.WriteAllText(Path.Combine(Model.FullName, item.TableName + ".cs"), item.Class);
+                File.WriteAllText(Path.Combine(entitiesDir.FullName, item.TableName + ".cs"), item.Class);
+                File.WriteAllText(Path.Combine(scriptsDir.FullName, $"sp{item.TableName}Select.sql"), item.SelectProcedure);
                 //File.WriteAllText(Path.Combine(Repositories.FullName, item.TableName + ".cs"), item.Repository);
             }
         }
@@ -103,6 +109,7 @@ namespace GenericRepositoryCore.ScaffoldDb
                         tmp.TableName = reader.GetString(++i);
                         tmp.Class = reader.IsDBNull(++i) ? "non implemented" : reader.GetString(i);
                         tmp.Repository = reader.IsDBNull(++i) ? "non implemented" : reader.GetString(i);
+                        tmp.SelectProcedure = reader.IsDBNull(++i) ? "non implemented" : reader.GetString(i);
                         dto.Add(tmp);
                     }
                 }

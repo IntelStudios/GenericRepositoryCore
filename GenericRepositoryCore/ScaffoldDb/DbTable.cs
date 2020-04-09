@@ -10,5 +10,6 @@ namespace GenericRepositoryCore.ScaffoldDb
         
         public string Class { get; set; }
         public string Repository { get; set; }
+        public string SelectProcedure { get; set; }
     }
 }

@@ -199,6 +199,39 @@ select
 END
 GO
 
+IF object_id(N'GetSelectProcedure', N'FN') IS NOT NULL
+    DROP FUNCTION GetSelectProcedure
+GO
+
+Create function GetSelectProcedure(@p_table varchar(1000))
+returns nvarchar(max)
+as
+BEGIN
+	declare @StatementCols nvarchar(max) = ''
+	select
+        @StatementCols = @StatementCols + iif(@StatementCols != '', ', ' + char(13) + char(10), '') + '			' + c.COLUMN_NAME 
+	from INFORMATION_SCHEMA.COLUMNS as c
+	where c.TABLE_NAME = @p_table
+	order by c.ORDINAL_POSITION
+ 
+	declare @Statement nvarchar(max) = ''
+ 
+	set @Statement = 'create procedure [dbo].[sp' + @p_table + 'Select]
+(
+	@jsonOutput nvarchar(max) OUTPUT
+)
+as 
+set @jsonOutput = (
+	select	
+'+ @StatementCols + '
+	from [dbo].[' + @p_table + ']
+	for json path
+)
+'
+	return @Statement;
+END
+GO
+
 IF object_id(N'PrintDtoForDatabase', N'P') IS NOT NULL
     DROP PROCEDURE PrintDtoForDatabase
 GO
@@ -212,6 +245,7 @@ as
 	DECLARE @name varchar(1000);
 	DECLARE @out nvarchar(max) = '';
 	Declare @repo nvarchar(max) = '';
+	Declare @selectProcedure nvarchar(max) = '';
 	DECLARE @br char(1) = CHAR(10)
 	DECLARE @tab char(1) = CHAR(9)
 
@@ -223,9 +257,10 @@ as
 	DECLARE @a_desc varchar(5000);
 	
 	Declare @OutputTable Table(
-	TableName varchar(200),
-	Class nvarchar(max),
-	Repository nvarchar(max)
+		TableName varchar(200),
+		Class nvarchar(max),
+		Repository nvarchar(max),
+		SelectProcedure nvarchar(max)
 	);
 
 	DECLARE @keyVersion int;
@@ -238,6 +273,7 @@ begin
 		if(@name != '') begin
 			exec dbo.AddClassHeader @p_tableName = @name, @a_out = @out output;
 			set @repo = @repo + dbo.AddClassRepositories(@name);
+			set @selectProcedure = dbo.GetSelectProcedure(@name);
 			end
 
 		DECLARE c_attr CURSOR LOCAL FOR (SELECT sc.name, sc.system_type_id, sc.is_nullable, convert(varchar(5000), sep.value) FROM 
@@ -275,9 +311,10 @@ begin
 		deallocate c_attr
 		set @out = @out + @br + @tab + '}';
 		set @out = @out + @br + '}';
-		insert into @OutputTable values (@name, @out, @repo);
+		insert into @OutputTable values (@name, @out, @repo, @selectProcedure);
 		set @repo = '';
 		set @out = '';--@out + '#endclass' + @br;
+		set @selectProcedure = '';
 		FETCH NEXT FROM c_tables INTO @name
 	END
 	close c_tables;

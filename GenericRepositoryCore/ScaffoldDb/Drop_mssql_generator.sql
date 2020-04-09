@@ -11,6 +11,8 @@ Drop Procedure GenerateComment;
 GO
 Drop Function IsPrimaryKey;
 GO
+Drop Function GetSelectProcedure;
+GO
 Drop Procedure PrintDtoForDatabase;
 
 
