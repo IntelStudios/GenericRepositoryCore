@@ -208,6 +208,8 @@ returns nvarchar(max)
 as
 BEGIN
 	declare @StatementCols nvarchar(max) = ''
+	declare @Where nvarchar(max) = ''
+
 	select
         @StatementCols = @StatementCols + iif(@StatementCols != '', ', ' + char(13) + char(10), '') + '			' + c.COLUMN_NAME 
 	from INFORMATION_SCHEMA.COLUMNS as c
@@ -215,18 +217,52 @@ BEGIN
 	order by c.ORDINAL_POSITION
  
 	declare @Statement nvarchar(max) = ''
- 
+	
+	select
+		@where = @where + iif(@where != '', ' and ', '') + tc.name + ' = ' + 'JSON_VALUE(@jsonId, ''$[' + CAST(ic.index_column_id - 1 as varchar(10)) + ']'')'
+	from 
+		sys.schemas s 
+		inner join sys.tables t   on s.schema_id=t.schema_id
+		inner join sys.indexes i  on t.object_id=i.object_id
+		inner join sys.index_columns ic on i.object_id=ic.object_id 
+										and i.index_id=ic.index_id
+		inner join sys.columns tc on ic.object_id=tc.object_id 
+									and ic.column_id=tc.column_id
+	where t.name = @p_table and i.is_primary_key = 1 and s.name = 'dbo'
+	order by t.name;
+
 	set @Statement = 'create procedure [dbo].[sp' + @p_table + 'Select]
 (
+	@jsonId nvarchar(max) = null,
 	@jsonOutput nvarchar(max) OUTPUT
 )
-as 
-set @jsonOutput = (
-	select	
-'+ @StatementCols + '
-	from [dbo].[' + @p_table + ']
-	for json path
-)
+as
+-- ====================================
+-- based on primary key
+-- ====================================
+if @jsonId is not null
+begin
+	set @jsonOutput = (
+		select	
+	'+ @StatementCols + '
+		from [dbo].[' + @p_table + ']
+		where
+		' + @Where + '
+		for json path
+	)
+end
+-- ====================================
+-- all records
+-- ====================================
+else
+begin
+	set @jsonOutput = (
+		select	
+	'+ @StatementCols + '
+		from [dbo].[' + @p_table + ']
+		for json path
+	)
+end
 '
 	return @Statement;
 END
