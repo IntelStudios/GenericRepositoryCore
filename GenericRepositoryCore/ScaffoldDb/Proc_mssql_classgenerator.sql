@@ -227,7 +227,7 @@ begin
 			end,
 		@StatementCols = 
 			case
-			when (i.is_primary_key is null) 
+			when (i.is_primary_key is null or i.is_primary_key = 0) 
 				then @StatementCols + iif(@StatementCols != '', ', ' + char(13) + char(10), '') + '			[' + c.name + ']'
 				else @StatementCols
 			end
@@ -401,7 +401,7 @@ begin
 			end,
 		@SetStatements = 
 			case
-			when (i.is_primary_key is null) 
+			when (i.is_primary_key is null or i.is_primary_key = 0) 
 				then @SetStatements + iif(@SetStatements != '', ', ' + char(13) + char(10), '') + '			[' + c.name + '] = ' + 'JSON_VALUE(@jsonInput, ''$.' + c.name + ''')'
 				else @SetStatements
 			end
