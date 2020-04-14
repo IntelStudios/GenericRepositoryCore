@@ -88,10 +88,15 @@ namespace GenericRepositoryCore.ScaffoldDb
             foreach (DbTable item in orm)
             {
                 File.WriteAllText(Path.Combine(entitiesDir.FullName, item.TableName + ".cs"), item.Class);
-                File.WriteAllText(Path.Combine(scriptsDir.FullName, $"sp{item.TableName}Select.sql"), item.SelectProcedure);
+
+                if (!string.IsNullOrEmpty(item.SelectProcedure))
+                {
+                    File.WriteAllText(Path.Combine(scriptsDir.FullName, $"sp{item.TableName}Select.sql"), item.SelectProcedure);
+                }                
                 //File.WriteAllText(Path.Combine(Repositories.FullName, item.TableName + ".cs"), item.Repository);
             }
         }
+
         private static List<DbTable> GetDto(SqlConnection conn, string databaseName)
         {
             List<DbTable> dto = new List<DbTable>();
@@ -109,7 +114,7 @@ namespace GenericRepositoryCore.ScaffoldDb
                         tmp.TableName = reader.GetString(++i);
                         tmp.Class = reader.IsDBNull(++i) ? "non implemented" : reader.GetString(i);
                         tmp.Repository = reader.IsDBNull(++i) ? "non implemented" : reader.GetString(i);
-                        tmp.SelectProcedure = reader.IsDBNull(++i) ? "non implemented" : reader.GetString(i);
+                        tmp.SelectProcedure = reader.IsDBNull(++i) ? null : reader.GetString(i);
                         dto.Add(tmp);
                     }
                 }

@@ -207,19 +207,27 @@ Create function GetSelectProcedure(@p_table varchar(1000))
 returns nvarchar(max)
 as
 BEGIN
-	declare @StatementCols nvarchar(max) = ''
-	declare @Where nvarchar(max) = ''
+	declare @StatementCols nvarchar(max) = '';
+	declare @Where nvarchar(max) = '';
+	declare @HasPrimaryKey bit = 0;
 
 	select
-        @StatementCols = @StatementCols + iif(@StatementCols != '', ', ' + char(13) + char(10), '') + '			' + c.COLUMN_NAME 
+        @StatementCols = @StatementCols + iif(@StatementCols != '', ', ' + char(13) + char(10), '') + '			[' + c.COLUMN_NAME + ']'
 	from INFORMATION_SCHEMA.COLUMNS as c
 	where c.TABLE_NAME = @p_table
-	order by c.ORDINAL_POSITION
+	order by c.ORDINAL_POSITION;
  
-	declare @Statement nvarchar(max) = ''
+	declare @Statement nvarchar(max) = '';
 	
+	select @HasPrimaryKey = count(*) 
+	from 
+		sys.schemas s 
+		inner join sys.tables t on s.schema_id=t.schema_id
+		inner join sys.indexes i on t.object_id=i.object_id
+	where t.name = @p_table and i.is_primary_key = 1 and s.name = 'dbo';
+
 	select
-		@where = @where + iif(@where != '', ' and ', '') + tc.name + ' = ' + 'JSON_VALUE(@jsonId, ''$.' + tc.name + ''')'
+		@where = @where + iif(@where != '', ' and ', '') + '[' + tc.name + '] = ' + 'JSON_VALUE(@jsonId, ''$.' + tc.name + ''')'
 		--@where = @where + iif(@where != '', ' and ', '') + tc.name + ' = ' + 'JSON_VALUE(@jsonId, ''$[' + CAST(ic.index_column_id - 1 as varchar(10)) + ']'')'
 	from 
 		sys.schemas s 
@@ -238,7 +246,11 @@ BEGIN
 	@jsonOutput nvarchar(max) OUTPUT
 )
 as
--- ====================================
+'
+	if @HasPrimaryKey = 1
+	begin
+		set @Statement = @Statement + 
+'-- ====================================
 -- based on primary key
 -- ====================================
 if @jsonId is not null
@@ -249,14 +261,26 @@ begin
 		from [dbo].[' + @p_table + ']
 		where
 		' + @Where + '
-		for json path
+		for json path, without_array_wrapper
 	)
 end
--- ====================================
+'
+	end
+
+	set @Statement = @Statement + 
+'-- ====================================
 -- all records
 -- ====================================
-else
-begin
+'
+	if @HasPrimaryKey = 1
+	begin
+		set @Statement = @Statement + 'else
+'
+	end
+
+
+	set @Statement = @Statement + 
+'begin
 	set @jsonOutput = (
 		select	
 '+ @StatementCols + '
