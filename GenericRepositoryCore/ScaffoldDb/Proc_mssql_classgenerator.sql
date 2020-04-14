@@ -219,7 +219,8 @@ BEGIN
 	declare @Statement nvarchar(max) = ''
 	
 	select
-		@where = @where + iif(@where != '', ' and ', '') + tc.name + ' = ' + 'JSON_VALUE(@jsonId, ''$[' + CAST(ic.index_column_id - 1 as varchar(10)) + ']'')'
+		@where = @where + iif(@where != '', ' and ', '') + tc.name + ' = ' + 'JSON_VALUE(@jsonId, ''$.' + tc.name + ''')'
+		--@where = @where + iif(@where != '', ' and ', '') + tc.name + ' = ' + 'JSON_VALUE(@jsonId, ''$[' + CAST(ic.index_column_id - 1 as varchar(10)) + ']'')'
 	from 
 		sys.schemas s 
 		inner join sys.tables t   on s.schema_id=t.schema_id
@@ -244,7 +245,7 @@ if @jsonId is not null
 begin
 	set @jsonOutput = (
 		select	
-	'+ @StatementCols + '
+'+ @StatementCols + '
 		from [dbo].[' + @p_table + ']
 		where
 		' + @Where + '
@@ -258,7 +259,7 @@ else
 begin
 	set @jsonOutput = (
 		select	
-	'+ @StatementCols + '
+'+ @StatementCols + '
 		from [dbo].[' + @p_table + ']
 		for json path
 	)
