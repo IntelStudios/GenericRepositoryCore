@@ -225,12 +225,7 @@ begin
 				then @where + iif(@where != '', ' and ', '') + '[' + c.name + '] = ' + 'JSON_VALUE(@jsonId, ''$.' + c.name + ''')'
 				else @Where
 			end,
-		@StatementCols = 
-			case
-			when (i.is_primary_key is null or i.is_primary_key = 0) 
-				then @StatementCols + iif(@StatementCols != '', ', ' + char(13) + char(10), '') + '			[' + c.name + ']'
-				else @StatementCols
-			end
+		@StatementCols = @StatementCols + iif(@StatementCols != '', ', ' + char(13) + char(10), '') + '			[' + c.name + ']'
 	from
 	sys.schemas s 
 		join sys.tables t   on s.schema_id=t.schema_id
@@ -415,7 +410,7 @@ begin
 								and i.index_id = ic.index_id
 	where t.name=@p_table and s.name = 'dbo';
 
-	if @HasPrimaryKey = 0
+	if @HasPrimaryKey = 0 or @SetStatements = ''
 	begin
 		return null;
 	end;
@@ -459,7 +454,7 @@ begin catch
     set @ErrorSeverity = ERROR_SEVERITY()
     set @ErrorState = ERROR_STATE()
 
-    RAISERROR (@ErrorMessage, 
+    raiserror (@ErrorMessage, 
                @ErrorSeverity, 
                @ErrorState)
 end catch
