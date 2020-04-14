@@ -200,45 +200,46 @@ END
 GO
 
 IF object_id(N'GetSelectProcedure', N'FN') IS NOT NULL
-    DROP FUNCTION GetSelectProcedure
+    drop function GetSelectProcedure
 GO
 
 Create function GetSelectProcedure(@p_table varchar(1000))
 returns nvarchar(max)
 as
-BEGIN
+begin
 	declare @StatementCols nvarchar(max) = '';
 	declare @Where nvarchar(max) = '';
-	declare @HasPrimaryKey bit = 0;
-
-	select
-        @StatementCols = @StatementCols + iif(@StatementCols != '', ', ' + char(13) + char(10), '') + '			[' + c.COLUMN_NAME + ']'
-	from INFORMATION_SCHEMA.COLUMNS as c
-	where c.TABLE_NAME = @p_table
-	order by c.ORDINAL_POSITION;
- 
+	declare @HasPrimaryKey bit = 0;	 
 	declare @Statement nvarchar(max) = '';
 	
-	select @HasPrimaryKey = count(*) 
-	from 
-		sys.schemas s 
-		inner join sys.tables t on s.schema_id=t.schema_id
-		inner join sys.indexes i on t.object_id=i.object_id
-	where t.name = @p_table and i.is_primary_key = 1 and s.name = 'dbo';
-
 	select
-		@where = @where + iif(@where != '', ' and ', '') + '[' + tc.name + '] = ' + 'JSON_VALUE(@jsonId, ''$.' + tc.name + ''')'
-		--@where = @where + iif(@where != '', ' and ', '') + tc.name + ' = ' + 'JSON_VALUE(@jsonId, ''$[' + CAST(ic.index_column_id - 1 as varchar(10)) + ']'')'
-	from 
-		sys.schemas s 
-		inner join sys.tables t   on s.schema_id=t.schema_id
-		inner join sys.indexes i  on t.object_id=i.object_id
-		inner join sys.index_columns ic on i.object_id=ic.object_id 
-										and i.index_id=ic.index_id
-		inner join sys.columns tc on ic.object_id=tc.object_id 
-									and ic.column_id=tc.column_id
-	where t.name = @p_table and i.is_primary_key = 1 and s.name = 'dbo'
-	order by t.name;
+		@HasPrimaryKey = 
+			case
+			when (i.is_primary_key = 1) 
+				then 1
+				else @HasPrimaryKey
+			end,
+		@Where = 
+			case 
+			when (i.is_primary_key = 1) 
+				then @where + iif(@where != '', ' and ', '') + '[' + c.name + '] = ' + 'JSON_VALUE(@jsonId, ''$.' + c.name + ''')'
+				else @Where
+			end,
+		@StatementCols = 
+			case
+			when (i.is_primary_key is null) 
+				then @StatementCols + iif(@StatementCols != '', ', ' + char(13) + char(10), '') + '			[' + c.name + ']'
+				else @StatementCols
+			end
+	from
+	sys.schemas s 
+		join sys.tables t   on s.schema_id=t.schema_id
+		join sys.columns c on t.object_id=c.object_id
+		full outer join sys.index_columns ic on c.object_id=ic.object_id
+								and c.column_id = ic.column_id
+		full outer join sys.indexes i on c.object_id=i.object_id
+								and i.index_id = ic.index_id
+	where t.name=@p_table and s.name = 'dbo'
 
 	set @Statement = 'create procedure [dbo].[sp' + @p_table + 'Select]
 (
@@ -290,7 +291,185 @@ end
 end
 '
 	return @Statement;
-END
+end
+GO
+
+IF object_id(N'GetInsertProcedure', N'FN') IS NOT NULL
+    drop function GetInsertProcedure
+GO
+
+Create function GetInsertProcedure(@p_table varchar(1000))
+returns nvarchar(max)
+as
+begin
+	declare @StatementCols nvarchar(max) = '';
+	declare @StatementJsonCols nvarchar(max) = '';
+
+	--SELECT sc.name, sc.system_type_id, sc.is_nullable, sc.is_identity FROM 
+	select 
+		@StatementCols = @StatementCols + iif(@StatementCols != '', ', ' + char(13) + char(10), '') + '			[' + sc.name + ']',
+		@StatementJsonCols = @StatementJsonCols + iif(@StatementJsonCols != '', ', ' + char(13) + char(10), '') + '			json_value(a.Value, ''$.' + sc.name + ''')'
+	from 
+		sys.schemas s 
+		inner join sys.tables t on s.schema_id = t.schema_id
+		inner join sys.columns sc on sc.object_id = t.object_id
+	where t.name=@p_table and s.name = 'dbo' and sc.is_identity = 0
+
+	declare @Statement nvarchar(max);
+	set @Statement = 'create procedure [dbo].[sp' + @p_table + 'Insert]
+(
+	@jsonInput nvarchar(max),
+	@identity nvarchar(max) OUTPUT
+)
+as
+set nocount on
+set transaction isolation level read committed
+begin transaction
+begin try
+	if @jsonInput not like ''[[]%]''
+		set @jsonInput = ''['' + @jsonInput + '']''
+
+	if isjson(@jsonInput) = 1
+	begin';
+
+	set @Statement = @Statement + '
+		insert into [dbo].[' + @p_table + '](
+'+ @StatementCols + '
+		)
+		select
+' + @StatementJsonCols + '
+		from openjson(@jsonInput) as a
+		set @identity = (select SCOPE_IDENTITY());
+	end
+	else
+	begin	
+		-- ====================================
+		-- invalid JSON
+		-- ====================================
+		raiserror (''Invalid JSON format.'', 16, 1)
+	end
+end try
+begin catch
+	if @@TRANCOUNT > 0
+		rollback transaction;
+
+	declare @ErrorMessage nvarchar(4000)
+    declare @ErrorSeverity int
+    declare @ErrorState int
+
+    set @ErrorMessage = error_message()
+    set @ErrorSeverity = error_severity()
+    set @ErrorState = error_state()
+
+    raiserror (@ErrorMessage, 
+               @ErrorSeverity, 
+               @ErrorState)
+end catch
+
+if @@TRANCOUNT > 0
+begin
+	commit transaction
+end';
+	return @Statement;
+end
+GO
+
+IF object_id(N'GetUpdateProcedure', N'FN') IS NOT NULL
+    drop function GetUpdateProcedure
+GO
+
+Create function GetUpdateProcedure(@p_table varchar(1000))
+returns nvarchar(max)
+as
+begin
+	declare @SetStatements nvarchar(max) = '';
+	declare @Where nvarchar(max) = '';
+	declare @HasPrimaryKey bit = 0;
+	
+	select
+		@HasPrimaryKey = 
+			case
+			when (i.is_primary_key = 1) 
+				then 1
+				else @HasPrimaryKey
+			end,
+		@Where = 
+			case 
+			when (i.is_primary_key = 1) 
+				then @where + iif(@where != '', ' and ', '') + '[' + c.name + '] = ' + 'JSON_VALUE(@jsonInput, ''$.' + c.name + ''')'
+				else @Where
+			end,
+		@SetStatements = 
+			case
+			when (i.is_primary_key is null) 
+				then @SetStatements + iif(@SetStatements != '', ', ' + char(13) + char(10), '') + '			[' + c.name + '] = ' + 'JSON_VALUE(@jsonInput, ''$.' + c.name + ''')'
+				else @SetStatements
+			end
+	from
+	sys.schemas s 
+		join sys.tables t   on s.schema_id=t.schema_id
+		join sys.columns c on t.object_id=c.object_id
+		full outer join sys.index_columns ic on c.object_id=ic.object_id
+								and c.column_id = ic.column_id
+		full outer join sys.indexes i on c.object_id=i.object_id
+								and i.index_id = ic.index_id
+	where t.name=@p_table and s.name = 'dbo';
+
+	if @HasPrimaryKey = 0
+	begin
+		return null;
+	end;
+	
+	declare @Statement nvarchar(max);
+	set @Statement = 'create procedure [dbo].[sp' + @p_table + 'Update]
+(
+	@jsonInput nvarchar(max)
+)
+as
+set nocount on
+set transaction isolation level read committed
+begin transaction
+begin try
+	if @jsonInput not like ''[[]%]''
+		set @jsonInput = ''['' + @jsonInput + '']''
+
+	if isjson(@jsonInput) = 1
+	begin
+		update [dbo].[' + @p_table + '] set 
+'+ @SetStatements + '
+		where ' + @Where + ';
+	end
+	else
+	begin	
+		-- ====================================
+		-- invalid JSON
+		-- ====================================
+		raiserror (''Invalid JSON format.'', 16, 1)
+	end
+end try
+begin catch
+	if @@TRANCOUNT > 0
+		rollback transaction;
+
+	declare @ErrorMessage nvarchar(4000)
+    declare @ErrorSeverity int
+    declare @ErrorState int
+
+    set @ErrorMessage = ERROR_MESSAGE()
+    set @ErrorSeverity = ERROR_SEVERITY()
+    set @ErrorState = ERROR_STATE()
+
+    RAISERROR (@ErrorMessage, 
+               @ErrorSeverity, 
+               @ErrorState)
+end catch
+
+if @@TRANCOUNT > 0
+begin
+	commit transaction
+end';
+	return @Statement;
+end
 GO
 
 IF object_id(N'PrintDtoForDatabase', N'P') IS NOT NULL
@@ -307,6 +486,8 @@ as
 	DECLARE @out nvarchar(max) = '';
 	Declare @repo nvarchar(max) = '';
 	Declare @selectProcedure nvarchar(max) = '';
+	Declare @insertProcedure nvarchar(max) = '';
+	Declare @updateProcedure nvarchar(max) = '';
 	DECLARE @br char(1) = CHAR(10)
 	DECLARE @tab char(1) = CHAR(9)
 
@@ -321,7 +502,9 @@ as
 		TableName varchar(200),
 		Class nvarchar(max),
 		Repository nvarchar(max),
-		SelectProcedure nvarchar(max)
+		SelectProcedure nvarchar(max),
+		InsertProcedure nvarchar(max),
+		UpdateProcedure nvarchar(max)
 	);
 
 	DECLARE @keyVersion int;
@@ -335,6 +518,8 @@ begin
 			exec dbo.AddClassHeader @p_tableName = @name, @a_out = @out output;
 			set @repo = @repo + dbo.AddClassRepositories(@name);
 			set @selectProcedure = dbo.GetSelectProcedure(@name);
+			set @insertProcedure = dbo.GetInsertProcedure(@name);
+			set @updateProcedure = dbo.GetUpdateProcedure(@name);
 			end
 
 		DECLARE c_attr CURSOR LOCAL FOR (SELECT sc.name, sc.system_type_id, sc.is_nullable, convert(varchar(5000), sep.value) FROM 
@@ -372,10 +557,12 @@ begin
 		deallocate c_attr
 		set @out = @out + @br + @tab + '}';
 		set @out = @out + @br + '}';
-		insert into @OutputTable values (@name, @out, @repo, @selectProcedure);
+		insert into @OutputTable values (@name, @out, @repo, @selectProcedure, @insertProcedure, @updateProcedure);
 		set @repo = '';
 		set @out = '';--@out + '#endclass' + @br;
 		set @selectProcedure = '';
+		set @insertProcedure = '';
+		set @updateProcedure = '';
 		FETCH NEXT FROM c_tables INTO @name
 	END
 	close c_tables;

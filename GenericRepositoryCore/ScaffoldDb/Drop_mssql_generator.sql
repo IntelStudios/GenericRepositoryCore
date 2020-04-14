@@ -13,6 +13,10 @@ Drop Function IsPrimaryKey;
 GO
 Drop Function GetSelectProcedure;
 GO
+Drop Function GetInsertProcedure;
+GO
+Drop Function GetUpdateProcedure;
+GO
 Drop Procedure PrintDtoForDatabase;
 
 

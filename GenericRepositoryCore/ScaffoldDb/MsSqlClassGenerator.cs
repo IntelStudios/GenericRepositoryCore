@@ -92,7 +92,17 @@ namespace GenericRepositoryCore.ScaffoldDb
                 if (!string.IsNullOrEmpty(item.SelectProcedure))
                 {
                     File.WriteAllText(Path.Combine(scriptsDir.FullName, $"sp{item.TableName}Select.sql"), item.SelectProcedure);
-                }                
+                }
+
+                if (!string.IsNullOrEmpty(item.InsertProcedure))
+                {
+                    File.WriteAllText(Path.Combine(scriptsDir.FullName, $"sp{item.TableName}Insert.sql"), item.InsertProcedure);
+                }
+
+                if (!string.IsNullOrEmpty(item.UpdateProcedure))
+                {
+                    File.WriteAllText(Path.Combine(scriptsDir.FullName, $"sp{item.TableName}Update.sql"), item.UpdateProcedure);
+                }
                 //File.WriteAllText(Path.Combine(Repositories.FullName, item.TableName + ".cs"), item.Repository);
             }
         }
@@ -115,6 +125,8 @@ namespace GenericRepositoryCore.ScaffoldDb
                         tmp.Class = reader.IsDBNull(++i) ? "non implemented" : reader.GetString(i);
                         tmp.Repository = reader.IsDBNull(++i) ? "non implemented" : reader.GetString(i);
                         tmp.SelectProcedure = reader.IsDBNull(++i) ? null : reader.GetString(i);
+                        tmp.InsertProcedure = reader.IsDBNull(++i) ? null : reader.GetString(i);
+                        tmp.UpdateProcedure = reader.IsDBNull(++i) ? null : reader.GetString(i);
                         dto.Add(tmp);
                     }
                 }
