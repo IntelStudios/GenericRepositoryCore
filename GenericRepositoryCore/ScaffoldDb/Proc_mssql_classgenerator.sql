@@ -215,26 +215,34 @@ begin
 	select
 		@HasPrimaryKey = 
 			case
-			when (i.is_primary_key = 1) 
+			when (c.IsPrimaryKey = 1) 
 				then 1
 				else @HasPrimaryKey
 			end,
 		@Where = 
 			case 
-			when (i.is_primary_key = 1) 
-				then @where + iif(@where != '', ' and ', '') + '[' + c.name + '] = ' + 'JSON_VALUE(@jsonId, ''$.' + c.name + ''')'
+			when (c.IsPrimaryKey = 1) 
+				then @where + iif(@where != '', ' and ', '') + '[' + c.Name + '] = ' + 'JSON_VALUE(@jsonId, ''$.' + c.Name + ''')'
 				else @Where
 			end,
-		@StatementCols = @StatementCols + iif(@StatementCols != '', ', ' + char(13) + char(10), '') + '			[' + c.name + ']'
+		@StatementCols = @StatementCols + iif(@StatementCols != '', ', ' + char(13) + char(10), '') + '			[' + c.Name + ']'
 	from
-	sys.schemas s 
-		join sys.tables t   on s.schema_id=t.schema_id
-		join sys.columns c on t.object_id=c.object_id
-		full outer join sys.index_columns ic on c.object_id=ic.object_id
-								and c.column_id = ic.column_id
-		full outer join sys.indexes i on c.object_id=i.object_id
-								and i.index_id = ic.index_id
-	where t.name=@p_table and s.name = 'dbo'
+	(select c.name as Name, c.is_identity as IsIdentity, 
+		(select count(ii.is_primary_key) from 
+			sys.schemas ss 
+			inner join sys.tables tt   on ss.schema_id=tt.schema_id
+			inner join sys.columns cc on tt.object_id=cc.object_id 
+										 and cc.column_id = c.column_id
+			inner join sys.index_columns icc on cc.object_id=icc.object_id
+										 and cc.column_id = icc.column_id
+			inner join sys.indexes ii on cc.object_id=ii.object_id
+										 and ii.index_id = icc.index_id
+			where tt.name=@p_table and ss.name = 'dbo' and ii.is_primary_key = 1) as IsPrimaryKey
+	from
+		sys.schemas s 
+		inner join sys.tables t   on s.schema_id=t.schema_id
+		inner join sys.columns c on t.object_id=c.object_id
+	where t.name=@p_table and s.name = 'dbo') as c
 
 	set @Statement = 'create procedure [dbo].[sp' + @p_table + 'Select]
 (
@@ -384,31 +392,39 @@ begin
 	select
 		@HasPrimaryKey = 
 			case
-			when (i.is_primary_key = 1) 
+			when (c.IsPrimaryKey = 1) 
 				then 1
 				else @HasPrimaryKey
 			end,
 		@Where = 
 			case 
-			when (i.is_primary_key = 1) 
-				then @where + iif(@where != '', ' and ', '') + '[' + c.name + '] = ' + 'JSON_VALUE(@jsonInput, ''$.' + c.name + ''')'
+			when (c.IsPrimaryKey = 1) 
+				then @where + iif(@where != '', ' and ', '') + '[' + c.Name + '] = ' + 'JSON_VALUE(@jsonInput, ''$.' + c.Name + ''')'
 				else @Where
 			end,
 		@SetStatements = 
 			case
-			when (i.is_primary_key is null or i.is_primary_key = 0) 
-				then @SetStatements + iif(@SetStatements != '', ', ' + char(13) + char(10), '') + '			[' + c.name + '] = ' + 'JSON_VALUE(@jsonInput, ''$.' + c.name + ''')'
+			when (c.IsPrimaryKey is null or c.IsPrimaryKey = 0) 
+				then @SetStatements + iif(@SetStatements != '', ', ' + char(13) + char(10), '') + '			[' + c.Name + '] = ' + 'JSON_VALUE(@jsonInput, ''$.' + c.Name + ''')'
 				else @SetStatements
 			end
 	from
-	sys.schemas s 
-		join sys.tables t   on s.schema_id=t.schema_id
-		join sys.columns c on t.object_id=c.object_id
-		full outer join sys.index_columns ic on c.object_id=ic.object_id
-								and c.column_id = ic.column_id
-		full outer join sys.indexes i on c.object_id=i.object_id
-								and i.index_id = ic.index_id
-	where t.name=@p_table and s.name = 'dbo';
+	(select c.name as Name, c.is_identity as IsIdentity, 
+		(select count(ii.is_primary_key) from 
+			sys.schemas ss 
+			inner join sys.tables tt   on ss.schema_id=tt.schema_id
+			inner join sys.columns cc on tt.object_id=cc.object_id 
+										 and cc.column_id = c.column_id
+			inner join sys.index_columns icc on cc.object_id=icc.object_id
+										 and cc.column_id = icc.column_id
+			inner join sys.indexes ii on cc.object_id=ii.object_id
+										 and ii.index_id = icc.index_id
+			where tt.name=@p_table and ss.name = 'dbo' and ii.is_primary_key = 1) as IsPrimaryKey
+	from
+		sys.schemas s 
+		inner join sys.tables t   on s.schema_id=t.schema_id
+		inner join sys.columns c on t.object_id=c.object_id
+	where t.name=@p_table and s.name = 'dbo') as c
 
 	if @HasPrimaryKey = 0 or @SetStatements = ''
 	begin
