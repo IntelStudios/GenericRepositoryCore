@@ -316,7 +316,7 @@ begin
 		sys.schemas s 
 		inner join sys.tables t on s.schema_id = t.schema_id
 		inner join sys.columns sc on sc.object_id = t.object_id
-	where t.name=@p_table and s.name = 'dbo' and sc.is_identity = 0
+	where t.name=@p_table and s.name = 'dbo' and sc.is_identity = 0 and sc.is_computed = 0
 
 	declare @Statement nvarchar(max);
 	set @Statement = 'create procedure [dbo].[sp' + @p_table + 'Insert]
@@ -419,12 +419,12 @@ begin
 										 and cc.column_id = icc.column_id
 			inner join sys.indexes ii on cc.object_id=ii.object_id
 										 and ii.index_id = icc.index_id
-			where tt.name=@p_table and ss.name = 'dbo' and ii.is_primary_key = 1) as IsPrimaryKey
+			where tt.name=@p_table and ss.name = 'dbo' and ii.is_primary_key = 1 and cc.is_computed = 0) as IsPrimaryKey
 	from
 		sys.schemas s 
 		inner join sys.tables t   on s.schema_id=t.schema_id
 		inner join sys.columns c on t.object_id=c.object_id
-	where t.name=@p_table and s.name = 'dbo') as c
+	where t.name=@p_table and s.name = 'dbo' and c.is_computed = 0) as c
 
 	if @HasPrimaryKey = 0 or @SetStatements = ''
 	begin
