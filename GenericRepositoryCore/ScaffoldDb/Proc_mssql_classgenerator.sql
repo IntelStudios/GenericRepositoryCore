@@ -308,15 +308,15 @@ begin
 	declare @StatementCols nvarchar(max) = '';
 	declare @StatementJsonCols nvarchar(max) = '';
 
-	--SELECT sc.name, sc.system_type_id, sc.is_nullable, sc.is_identity FROM 
+	--SELECT c.name, c.system_type_id, c.is_nullable, c.is_identity FROM 
 	select 
-		@StatementCols = @StatementCols + iif(@StatementCols != '', ', ' + char(13) + char(10), '') + '			[' + sc.name + ']',
-		@StatementJsonCols = @StatementJsonCols + iif(@StatementJsonCols != '', ', ' + char(13) + char(10), '') + '			json_value(a.Value, ''$.' + sc.name + ''')'
+		@StatementCols = @StatementCols + iif(@StatementCols != '', ', ' + char(13) + char(10), '') + '			[' + c.name + ']',
+		@StatementJsonCols = @StatementJsonCols + iif(@StatementJsonCols != '', ', ' + char(13) + char(10), '') + '			' + iif(c.system_type_id = 61, 'cast(', '') + 'json_value(a.Value, ''$.' + c.name + ''')' + iif(c.system_type_id = 61, ' as datetime2)', '')
 	from 
 		sys.schemas s 
 		inner join sys.tables t on s.schema_id = t.schema_id
-		inner join sys.columns sc on sc.object_id = t.object_id
-	where t.name=@p_table and s.name = 'dbo' and sc.is_identity = 0 and sc.is_computed = 0
+		inner join sys.columns c on c.object_id = t.object_id
+	where t.name=@p_table and s.name = 'dbo' and c.is_identity = 0 and c.is_computed = 0
 
 	declare @Statement nvarchar(max);
 	set @Statement = 'create procedure [dbo].[sp' + @p_table + 'Insert]
@@ -404,12 +404,12 @@ begin
 			end,
 		@SetStatements = 
 			case
-			when (c.IsPrimaryKey is null or c.IsPrimaryKey = 0) 
-				then @SetStatements + iif(@SetStatements != '', ', ' + char(13) + char(10), '') + '			[' + c.Name + '] = ' + 'JSON_VALUE(@jsonInput, ''$.' + c.Name + ''')'
+			when (c.IsPrimaryKey is null or c.IsPrimaryKey = 0)
+				then @SetStatements + iif(@SetStatements != '', ', ' + char(13) + char(10), '') + '			[' + c.Name + '] = ' + iif(SystemTypeId = 61, 'cast(', '') + 'JSON_VALUE(@jsonInput, ''$.' + c.Name + ''')' + iif(SystemTypeId = 61, ' as datetime2)', '')
 				else @SetStatements
 			end
 	from
-	(select c.name as Name, c.is_identity as IsIdentity, 
+	(select c.name as Name, c.is_identity as IsIdentity, c.system_type_id as SystemTypeId,
 		(select count(ii.is_primary_key) from 
 			sys.schemas ss 
 			inner join sys.tables tt   on ss.schema_id=tt.schema_id
