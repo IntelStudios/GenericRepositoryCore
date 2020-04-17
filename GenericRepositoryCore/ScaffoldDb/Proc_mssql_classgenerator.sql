@@ -329,9 +329,6 @@ set nocount on
 set transaction isolation level read committed
 begin transaction
 begin try
-	if @jsonInput not like ''[[]%]''
-		set @jsonInput = ''['' + @jsonInput + '']''
-
 	if isjson(@jsonInput) = 1
 	begin';
 
@@ -441,9 +438,6 @@ set nocount on
 set transaction isolation level read committed
 begin transaction
 begin try
-	if @jsonInput not like ''[[]%]''
-		set @jsonInput = ''['' + @jsonInput + '']''
-
 	if isjson(@jsonInput) = 1
 	begin
 		update [dbo].[' + @p_table + '] set 
