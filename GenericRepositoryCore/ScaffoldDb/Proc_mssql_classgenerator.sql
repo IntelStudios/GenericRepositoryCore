@@ -311,7 +311,7 @@ begin
 	--SELECT c.name, c.system_type_id, c.is_nullable, c.is_identity FROM 
 	select 
 		@StatementCols = @StatementCols + iif(@StatementCols != '', ', ' + char(13) + char(10), '') + '			[' + c.name + ']',
-		@StatementJsonCols = @StatementJsonCols + iif(@StatementJsonCols != '', ', ' + char(13) + char(10), '') + '			' + iif(c.system_type_id = 61, 'cast(', '') + 'json_value(a.Value, ''$.' + c.name + ''')' + iif(c.system_type_id = 61, ' as datetime2)', '')
+		@StatementJsonCols = @StatementJsonCols + iif(@StatementJsonCols != '', ', ' + char(13) + char(10), '') + '			' + iif(c.system_type_id = 61, 'cast(', '') + 'json_value(@jsonInput, ''$.' + c.name + ''')' + iif(c.system_type_id = 61, ' as datetime2)', '')
 	from 
 		sys.schemas s 
 		inner join sys.tables t on s.schema_id = t.schema_id
@@ -338,7 +338,7 @@ begin try
 		)
 		select
 ' + @StatementJsonCols + '
-		from openjson(@jsonInput) as a
+
 		set @identity = (select SCOPE_IDENTITY());
 	end
 	else
