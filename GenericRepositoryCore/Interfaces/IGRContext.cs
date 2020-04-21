@@ -37,6 +37,11 @@ namespace GenericRepository.Interfaces
         DataSet GetDataSetFromCommand(string commandString, int timeout);
         GRDataSet GetDataSetFromCommand(string commandString, bool returnMessage);
         GRDataSet GetDataSetFromCommand(string commandString, bool returnMessage, int timeout);
+
+        GRDataSet GetDataSetFromCommand(string commandString, List<SqlParameter> parameters);
+        GRDataSet GetDataSetFromCommand(string commandString, List<SqlParameter> parameters, int timeout);
+        GRDataSet GetDataSetFromCommand(string commandString, List<SqlParameter> parameters, bool returnMessage);
+        GRDataSet GetDataSetFromCommand(string commandString, List<SqlParameter> parameters, bool returnMessage, int timeout);
         #endregion
 
         #region Update/insert methods

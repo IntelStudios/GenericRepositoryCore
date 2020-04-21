@@ -186,14 +186,32 @@ namespace GenericRepository.Contexts
         }
         public virtual DataSet GetDataSetFromCommand(string commandString, int timeout)
         {
-            GRDataSet dataSet = GetDataSetFromCommand(commandString, false, timeout);
+            GRDataSet dataSet = GetDataSetFromCommand(commandString, null, false, timeout);
             return dataSet.DataSet;
         }
         public virtual GRDataSet GetDataSetFromCommand(string commandString, bool returnMessage)
         {
-            return GetDataSetFromCommand(commandString, returnMessage, defaultTimeout);
+            return GetDataSetFromCommand(commandString, null, returnMessage, defaultTimeout);
         }
-        public abstract GRDataSet GetDataSetFromCommand(string commandString, bool returnMessage, int timeout);
+        public virtual GRDataSet GetDataSetFromCommand(string commandString, bool returnMessage, int timeout)
+        {
+            return GetDataSetFromCommand(commandString, null, returnMessage, timeout);
+        }
+
+        public virtual GRDataSet GetDataSetFromCommand(string commandString, List<SqlParameter> parameters)
+        {
+            return GetDataSetFromCommand(commandString, parameters, false, defaultTimeout);
+        }
+        public virtual GRDataSet GetDataSetFromCommand(string commandString, List<SqlParameter> parameters, int timeout)
+        {
+            return GetDataSetFromCommand(commandString, parameters, false, timeout);
+        }
+        public virtual GRDataSet GetDataSetFromCommand(string commandString, List<SqlParameter> parameters, bool returnMessage)
+        {
+            return GetDataSetFromCommand(commandString, parameters, returnMessage, defaultTimeout);
+        }
+
+        public abstract GRDataSet GetDataSetFromCommand(string commandString, List<SqlParameter> parameters, bool returnMessage, int timeout);
         #endregion
     }
 }

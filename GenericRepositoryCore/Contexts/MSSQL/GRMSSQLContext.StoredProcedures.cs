@@ -522,7 +522,7 @@ namespace GenericRepository.Contexts
         }
         
         #region Data sets and tables
-        public override GRDataSet GetDataSetFromCommand(string commandString, bool returnMessage, int timeout)
+        public override GRDataSet GetDataSetFromCommand(string commandString, List<SqlParameter> parameters, bool returnMessage, int timeout)
         {
             GRDataSet ret = new GRDataSet()
             {
@@ -550,6 +550,11 @@ namespace GenericRepository.Contexts
                 using (SqlCommand command = new SqlCommand(commandString))
                 {
                     command.Connection = connection;
+
+                    if (parameters != null)
+                    {
+                        command.Parameters.AddRange(parameters.ToArray());
+                    }
 
                     using (SqlDataAdapter da = new SqlDataAdapter(command))
                     {
