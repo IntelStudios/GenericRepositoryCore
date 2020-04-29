@@ -40,15 +40,15 @@ namespace GenericRepository.Contexts
 
             try
             {
-                sqlTransaction.Commit();
-
+                sqlTransaction.Commit();                
+            }
+            finally
+            {
                 // dispose resources
                 sqlConnection.Dispose();
                 sqlTransaction = null;
                 sqlConnection = null;
-            }
-            finally
-            {
+
                 semaphoreConnection.Release();
             }
         }
@@ -59,15 +59,15 @@ namespace GenericRepository.Contexts
 
             try
             {
-                sqlTransaction.Rollback();
-
+                sqlTransaction.Rollback();                
+            }
+            finally
+            {
                 // dispose resources
                 sqlConnection.Dispose();
                 sqlTransaction = null;
                 sqlConnection = null;
-            }
-            finally
-            {
+
                 semaphoreConnection.Release();
             }
         }
