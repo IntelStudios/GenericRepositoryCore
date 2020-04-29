@@ -157,7 +157,7 @@ namespace GenericRepository.Contexts
         #endregion
 
         #region Transactions
-        public abstract void BeginTransaction();
+        public abstract void BeginTransaction(IsolationLevel isolationLevel = IsolationLevel.ReadUncommitted);
         public abstract void CommitTransaction();
         public abstract void RollbackTransaction();
 

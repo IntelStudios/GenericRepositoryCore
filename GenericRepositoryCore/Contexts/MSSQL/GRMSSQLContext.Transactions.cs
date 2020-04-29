@@ -2,6 +2,7 @@
 using GenericRepository.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
@@ -11,7 +12,7 @@ namespace GenericRepository.Contexts
 {
     public partial class GRMSSQLContext : GRContext, IGRContext, IDisposable
     {
-        public override void BeginTransaction()
+        public override void BeginTransaction(IsolationLevel isolationLevel = IsolationLevel.ReadUncommitted)
         {
             if (sqlTransaction != null)
             {
@@ -25,7 +26,7 @@ namespace GenericRepository.Contexts
                 // make new shared connection
                 sqlConnection = new SqlConnection(connectionString);
                 sqlConnection.Open();
-                sqlTransaction = sqlConnection.BeginTransaction(System.Data.IsolationLevel.ReadUncommitted);
+                sqlTransaction = sqlConnection.BeginTransaction(isolationLevel);
             }
             finally
             {

@@ -99,7 +99,7 @@ namespace GenericRepository.Interfaces
         #endregion
 
         #region Transactions
-        void BeginTransaction();
+        void BeginTransaction(IsolationLevel isolationLevel = IsolationLevel.ReadUncommitted);
         void CommitTransaction();
         void RollbackTransaction();
         #endregion
