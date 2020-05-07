@@ -61,7 +61,7 @@ as
 BEGIN
 	Declare @tmp varchar(max)= '';
 
-	DECLARE @tableComment varchar(30);
+	DECLARE @tableComment varchar(5000);
 	SELECT @tableComment = convert(varchar(5000), sep.value) 
 	FROM 
 		sys.schemas s 
