@@ -307,16 +307,34 @@ as
 begin
 	declare @StatementCols nvarchar(max) = '';
 	declare @StatementJsonCols nvarchar(max) = '';
+	declare @Idt varchar(50) = null;
 
-	--SELECT c.name, c.system_type_id, c.is_nullable, c.is_identity FROM 
 	select 
-		@StatementCols = @StatementCols + iif(@StatementCols != '', ', ' + char(13) + char(10), '') + '			[' + c.name + ']',
-		@StatementJsonCols = @StatementJsonCols + iif(@StatementJsonCols != '', ', ' + char(13) + char(10), '') + '			' + iif(c.system_type_id = 61, 'cast(', '') + 'json_value(@jsonInput, ''$.' + c.name + ''')' + iif(c.system_type_id = 61, ' as datetime2)', '')
-	from 
-		sys.schemas s 
-		inner join sys.tables t on s.schema_id = t.schema_id
-		inner join sys.columns c on c.object_id = t.object_id
-	where t.name=@p_table and s.name = 'dbo' and c.is_identity = 0 and c.is_computed = 0
+		@Idt =
+			case
+			when (c.Name = @p_table + 'IDt')
+				then c.Name
+				else @Idt
+			end,
+		@StatementCols =
+			case
+			when (c.IsIdentity = 0 and c.IsComputed = 0)
+				then @StatementCols + iif(@StatementCols != '', ', ' + char(13) + char(10), '') + '				[' + c.name + ']'
+				else @StatementCols
+			end,
+		@StatementJsonCols = 
+			case
+			when (c.IsIdentity = 0 and c.IsComputed = 0)
+				then @StatementJsonCols + iif(@StatementJsonCols != '', ', ' + char(13) + char(10), '') + '				' + iif(c.SystemTypeId = 61, 'cast(', '') + 'json_value(@jsonInput, ''$.' + c.name + ''')' + iif(c.SystemTypeId = 61, ' as datetime2)', '')
+				else @StatementJsonCols
+			end
+	from
+		(select c.name as Name, c.is_identity as IsIdentity, c.system_type_id as SystemTypeId, c.is_computed as IsComputed from
+			sys.schemas s 
+			inner join sys.tables t on s.schema_id = t.schema_id
+			inner join sys.columns c on c.object_id = t.object_id
+			where t.name=@p_table and s.name = 'dbo'
+		) as c
 
 	declare @Statement nvarchar(max);
 	set @Statement = 'create procedure [dbo].[sp' + @p_table + 'Insert]
@@ -325,50 +343,64 @@ begin
 	@identity nvarchar(max) OUTPUT
 )
 as
-set nocount on
-set transaction isolation level read committed
-begin transaction
-begin try
-	if isjson(@jsonInput) = 1
-	begin';
-
-	set @Statement = @Statement + '
-		insert into [dbo].[' + @p_table + '](
-'+ @StatementCols + '
-		)
-		select
-' + @StatementJsonCols + '
-
-		set @identity = (select SCOPE_IDENTITY());
-	end
-	else
-	begin	
-		-- ====================================
-		-- invalid JSON
-		-- ====================================
-		raiserror (''Invalid JSON format.'', 16, 1)
-	end
-end try
-begin catch
-	if @@TRANCOUNT > 0
-		rollback transaction;
-
-	declare @ErrorMessage nvarchar(4000)
-    declare @ErrorSeverity int
-    declare @ErrorState int
-
-    set @ErrorMessage = error_message()
-    set @ErrorSeverity = error_severity()
-    set @ErrorState = error_state()
-
-    raiserror (@ErrorMessage, 
-               @ErrorSeverity, 
-               @ErrorState)
-end catch
-
-if @@TRANCOUNT > 0
 begin
-	commit transaction
+	begin try
+		if isjson(@jsonInput) = 1
+		begin';
+
+		if @Idt is not null
+		begin
+			set @Statement = @Statement + '
+			declare @id varchar(50);
+			declare @table table (id varchar(50));
+			'
+		end
+
+		set @Statement = @Statement + '
+			insert into [dbo].[' + @p_table + '](
+'+ @StatementCols + '
+			)';
+
+		if @Idt is not null
+		begin
+			set @Statement = @Statement + '
+			output inserted.' + @Idt + ' into @table'
+		end
+
+
+		set @Statement = @Statement + '
+			select
+' + @StatementJsonCols;
+		
+		if @Idt is not null
+		begin
+			set @Statement = @Statement + '
+			select @identity = id from @table;'
+		end
+
+		set @Statement = @Statement + '
+		end
+		else
+		begin	
+			-- ====================================
+			-- invalid JSON
+			-- ====================================
+			raiserror (''Invalid JSON format.'', 16, 1)
+		end
+	end try
+	begin catch
+		declare @ErrorMessage nvarchar(4000)
+		declare @ErrorSeverity int
+		declare @ErrorState int
+
+		set @ErrorMessage = error_message()
+		set @ErrorSeverity = error_severity()
+		set @ErrorState = error_state()
+
+		raiserror (@ErrorMessage, 
+				   @ErrorSeverity, 
+				   @ErrorState)
+	end catch
 end';
 	return @Statement;
 end
@@ -385,8 +417,15 @@ begin
 	declare @SetStatements nvarchar(max) = '';
 	declare @Where nvarchar(max) = '';
 	declare @HasPrimaryKey bit = 0;
+	declare @HasRecordVersion bit = 0;
 	
 	select
+		@HasRecordVersion =
+			case
+			when (c.Name = 'RecVrsn')
+				then 1
+				else @HasRecordVersion
+			end,
 		@HasPrimaryKey = 
 			case
 			when (c.IsPrimaryKey = 1) 
@@ -401,12 +440,14 @@ begin
 			end,
 		@SetStatements = 
 			case
-			when (c.IsPrimaryKey is null or c.IsPrimaryKey = 0)
+			when (c.Name = 'RecVrsn')
+				then @SetStatements + iif(@SetStatements != '', ', ' + char(13) + char(10), '') + '			[' + c.Name + '] = ' + iif(SystemTypeId = 61, 'cast(', '') + 'JSON_VALUE(@jsonInput, ''$.' + c.Name + ''') + 1' + iif(SystemTypeId = 61, ' as datetime2)', '')
+			when ((c.IsPrimaryKey is null or c.IsPrimaryKey = 0) and c.IsComputed = 0 and c.IsIdentity = 0 and c.Name != 'AutoIDExt')
 				then @SetStatements + iif(@SetStatements != '', ', ' + char(13) + char(10), '') + '			[' + c.Name + '] = ' + iif(SystemTypeId = 61, 'cast(', '') + 'JSON_VALUE(@jsonInput, ''$.' + c.Name + ''')' + iif(SystemTypeId = 61, ' as datetime2)', '')
 				else @SetStatements
 			end
 	from
-	(select c.name as Name, c.is_identity as IsIdentity, c.system_type_id as SystemTypeId,
+	(select c.name as Name, c.is_identity as IsIdentity, c.system_type_id as SystemTypeId, c.is_computed as IsComputed,
 		(select count(ii.is_primary_key) from 
 			sys.schemas ss 
 			inner join sys.tables tt   on ss.schema_id=tt.schema_id
@@ -416,12 +457,12 @@ begin
 										 and cc.column_id = icc.column_id
 			inner join sys.indexes ii on cc.object_id=ii.object_id
 										 and ii.index_id = icc.index_id
-			where tt.name=@p_table and ss.name = 'dbo' and ii.is_primary_key = 1 and cc.is_computed = 0) as IsPrimaryKey
+			where tt.name=@p_table and ss.name = 'dbo' and ii.is_primary_key = 1) as IsPrimaryKey
 	from
 		sys.schemas s 
 		inner join sys.tables t   on s.schema_id=t.schema_id
 		inner join sys.columns c on t.object_id=c.object_id
-	where t.name=@p_table and s.name = 'dbo' and c.is_computed = 0) as c
+	where t.name=@p_table and s.name = 'dbo') as c
 
 	if @HasPrimaryKey = 0 or @SetStatements = ''
 	begin
@@ -434,15 +475,25 @@ begin
 	@jsonInput nvarchar(max)
 )
 as
-set nocount on
-set transaction isolation level read committed
-begin transaction
 begin try
 	if isjson(@jsonInput) = 1
 	begin
 		update [dbo].[' + @p_table + '] set 
 '+ @SetStatements + '
-		where ' + @Where + ';
+		where ' + @Where;
+		
+		if @HasRecordVersion = 1
+		begin
+			set @Statement = @Statement + ' and [RecVrsn] = JSON_VALUE(@jsonInput, ''$.RecVrsn'');
+		if @@ROWCOUNT = 0
+			raiserror(''No records updated'', 18, 1);'
+		end
+		else
+		begin
+			set @Statement = @Statement + ';'
+		end
+
+		set @Statement = @Statement + '
 	end
 	else
 	begin	
@@ -453,9 +504,6 @@ begin try
 	end
 end try
 begin catch
-	if @@TRANCOUNT > 0
-		rollback transaction;
-
 	declare @ErrorMessage nvarchar(4000)
     declare @ErrorSeverity int
     declare @ErrorState int
@@ -467,12 +515,7 @@ begin catch
     raiserror (@ErrorMessage, 
                @ErrorSeverity, 
                @ErrorState)
-end catch
-
-if @@TRANCOUNT > 0
-begin
-	commit transaction
-end';
+end catch';
 	return @Statement;
 end
 GO
