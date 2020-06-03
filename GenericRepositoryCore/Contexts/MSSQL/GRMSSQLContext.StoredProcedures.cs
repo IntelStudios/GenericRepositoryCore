@@ -527,6 +527,8 @@ namespace GenericRepository.Contexts
         #region Data sets and tables
         public override GRDataSet GetDataSetFromCommand(string commandString, List<SqlParameter> parameters, bool returnMessage, int timeout)
         {
+            string spCommandStatementReadable = string.Empty;
+
             GRDataSet ret = new GRDataSet()
             {
                 DataSet = new DataSet()
@@ -559,6 +561,8 @@ namespace GenericRepository.Contexts
                         command.Parameters.AddRange(parameters.ToArray());
                     }
 
+                    spCommandStatementReadable = GetCommandStatement(command);
+
                     using (SqlDataAdapter da = new SqlDataAdapter(command))
                     {
                         da.SelectCommand.CommandTimeout = timeout < 0 ? connection.ConnectionTimeout : timeout;
@@ -566,7 +570,7 @@ namespace GenericRepository.Contexts
                     }
                 }
 
-                stats = ParseFnSpStatistics(connection, commandString);
+                stats = ParseFnSpStatistics(connection, spCommandStatementReadable);
 
                 LogSuccessfulQueryStats(stats);
 
@@ -923,6 +927,21 @@ namespace GenericRepository.Contexts
             }
 
             return ret;
+        }
+
+        private string GetCommandStatement(SqlCommand command)
+        {
+            StringBuilder builder = new StringBuilder(command.CommandText);
+
+            if (command.Parameters != null)
+            {
+                foreach (SqlParameter param in command.Parameters)
+                {
+                    builder.Replace(param.ParameterName, GRDataTypeHelper.GetValueString(param.Value != DBNull.Value ? param.Value : null));
+                }
+            }
+
+            return builder.ToString();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

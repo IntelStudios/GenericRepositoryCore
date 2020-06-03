@@ -90,6 +90,10 @@ namespace GenericRepository.Contexts
                 {
                     numberOfRows = jContainer.Count;
                 }
+                else
+                {
+                    numberOfRows = 0;
+                }
             }
 
             return new GRExecutionStatistics(numberOfRows, statement, executionTime);
