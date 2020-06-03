@@ -510,9 +510,12 @@ namespace GenericRepository.Contexts
             }
             finally
             {
-                if (infoMessageHandler != null)
+                if (connection != null)
                 {
-                    connection.InfoMessage -= infoMessageHandler;
+                    if (infoMessageHandler != null)
+                    {
+                        connection.InfoMessage -= infoMessageHandler;
+                    }
                 }
 
                 DisposeConnection(connection);
