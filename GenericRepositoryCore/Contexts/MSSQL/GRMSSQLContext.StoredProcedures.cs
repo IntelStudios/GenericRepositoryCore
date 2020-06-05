@@ -2,8 +2,11 @@
 using GenericRepository.Helpers;
 using GenericRepository.Interfaces;
 using GenericRepository.Models;
+
 using Ionic.Zip;
+
 using Newtonsoft.Json;
+
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -491,7 +494,7 @@ namespace GenericRepository.Contexts
                         }
                     }
                 }
-                
+
 
                 LogSuccessfulQueryStats(stats);
             }
@@ -523,7 +526,7 @@ namespace GenericRepository.Contexts
 
             return ret;
         }
-        
+
         #region Data sets and tables
         public override GRDataSet GetDataSetFromCommand(string commandString, List<SqlParameter> parameters, bool returnMessage, int timeout)
         {
@@ -935,9 +938,11 @@ namespace GenericRepository.Contexts
 
             if (command.Parameters != null)
             {
+                builder.Append(Environment.NewLine);
                 foreach (SqlParameter param in command.Parameters)
                 {
-                    builder.Replace(param.ParameterName, GRDataTypeHelper.GetValueString(param.Value != DBNull.Value ? param.Value : null));
+                    builder.Append(Environment.NewLine);
+                    builder.Append($"{param.ParameterName}={GRDataTypeHelper.GetValueString(param.Value != DBNull.Value ? param.Value : null)}");
                 }
             }
 
