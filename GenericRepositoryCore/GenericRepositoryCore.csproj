@@ -6,23 +6,13 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Copyright>Copyright ©  2018</Copyright>
     <Title>GenericRepositoryCore</Title>
-    <Version>2.9.3</Version>
+    <Version>3.0.0</Version>
     
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageVersion>2.9.3</PackageVersion>
+    <PackageVersion>3.0.0</PackageVersion>
     <Authors>IntelStudios</Authors>
     <PackageId>GenericRepositoryCore</PackageId>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="ScaffoldDb\Drop_mssql_generator.sql" />
-    <None Remove="ScaffoldDb\Proc_mssql_classgenerator.sql" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="ScaffoldDb\Drop_mssql_generator.sql" />
-    <EmbeddedResource Include="ScaffoldDb\Proc_mssql_classgenerator.sql" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="DotNetZip" Version="1.13.5" />
