@@ -36,6 +36,11 @@ namespace GenericRepository.Contexts
 
         public override void CommitTransaction()
         {
+            if (sqlTransaction is null)
+            {
+                throw new GRInvalidOperationException("Cannot commit, no transaction is in progress.");
+            }
+
             semaphoreConnection.Wait();
 
             try
@@ -55,6 +60,11 @@ namespace GenericRepository.Contexts
 
         public override void RollbackTransaction()
         {
+            if (sqlTransaction is null)
+            {
+                throw new GRInvalidOperationException("Cannot rollback, no transaction is in progress.");
+            }
+
             semaphoreConnection.Wait();
 
             try
