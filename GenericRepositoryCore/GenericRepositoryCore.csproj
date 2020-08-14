@@ -6,10 +6,10 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Copyright>Copyright ©  2018</Copyright>
     <Title>GenericRepositoryCore</Title>
-    <Version>3.0.1</Version>
+    <Version>3.0.2</Version>
     
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageVersion>3.0.1</PackageVersion>
+    <PackageVersion>3.0.2</PackageVersion>
     <Authors>IntelStudios</Authors>
     <PackageId>GenericRepositoryCore</PackageId>
   </PropertyGroup>
