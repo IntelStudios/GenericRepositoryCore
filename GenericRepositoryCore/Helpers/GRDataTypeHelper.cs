@@ -4,6 +4,7 @@ using GenericRepository.Models;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -434,6 +435,11 @@ namespace GenericRepository.Helpers
             if (value is byte[])
             {
                 return string.Format("<Byte array of {0} B>", (value as byte[]).Length);
+            }
+
+            if (value.GetType() == typeof(DataTable))
+            {
+                return string.Format("<Data table with {0} records>", ((DataTable)value).Rows.Count);
             }
 
             throw new GRUnsuportedDataTypeException(value.GetType());
