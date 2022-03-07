@@ -39,7 +39,7 @@ del "%WORKSPACE%\build\TestsResults\GenericRepository.trx"
 dotnet test -r "%WORKSPACE%\build\TestsResults"
 
 echo ********* Publishing NuGet package from %WORKSPACE%\build\GenericRepository\*.nupkg **********
-dotnet nuget push %WORKSPACE%\build\GenericRepository\*.nupkg -s "GenericRepositoryFeed" --api-key 3i4uktw3lsnvw43afksoqxiegn7yo52sorlsolhnqn7akhdao4ga
+dotnet nuget push %WORKSPACE%\build\GenericRepository\*.nupkg -s "GenericRepositoryFeed" --api-key 34v4urq5hmpyljr5mbpo25cexmx7cbrljzjd3ujhlvwcbzwrt6gq
 
 endlocal
 exit /b 0
